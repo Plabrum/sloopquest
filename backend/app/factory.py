@@ -44,7 +44,14 @@ discover_and_import(["deps.py"], base_path="app")
 __all__ = ["BaseDBModel", "create_app"]
 
 
-def create_app(config: Config) -> Litestar:
+def create_app(
+    config: Config,
+    *,
+    dependencies_overrides: dict[str, Any] | None = None,
+    plugins_overrides: list[Any] | None = None,
+    stores_overrides: dict[str, Store] | None = None,
+    retrieve_user_handler_override: Any = None,
+) -> Litestar:
     """Create and configure the Litestar application."""
 
     cors_config = CORSConfig(
@@ -106,9 +113,11 @@ def create_app(config: Config) -> Litestar:
             return await get_user_by_id(db, user_id)
 
     stores: dict[str, Store] = {"sessions": RedisStore.with_client(url=config.REDIS_URL)}
+    if stores_overrides:
+        stores.update(stores_overrides)
 
     session_auth = SessionAuth[User, Any](
-        retrieve_user_handler=retrieve_user_handler,
+        retrieve_user_handler=retrieve_user_handler_override or retrieve_user_handler,
         session_backend_config=ServerSideSessionConfig(
             store="sessions",
             samesite="lax",
@@ -125,7 +134,14 @@ def create_app(config: Config) -> Litestar:
         ],
     )
 
-    plugins: list[Any] = [sqlalchemy_plugin, saq_plugin, channels_plugin, SqidSchemaPlugin()]
+    default_plugins: list[Any] = [sqlalchemy_plugin, saq_plugin, channels_plugin, SqidSchemaPlugin()]
+    plugins = plugins_overrides if plugins_overrides is not None else default_plugins
+
+    deps = {**get_dependencies(), **(dependencies_overrides or {})}
+
+    on_startup: list[Any] = []
+    if plugins_overrides is None:
+        on_startup.append(_setup_task_queues)
 
     return Litestar(
         route_handlers=[
@@ -144,8 +160,8 @@ def create_app(config: Config) -> Litestar:
         stores=stores,
         cors_config=cors_config,
         template_config=template_config,
-        dependencies=get_dependencies(),
-        on_startup=[_setup_task_queues],
+        dependencies=deps,
+        on_startup=on_startup,
         type_encoders={Sqid: sqid_enc_hook},
         type_decoders=[(sqid_type_predicate, sqid_dec_hook)],
         debug=config.IS_DEV,

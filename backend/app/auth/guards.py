@@ -28,8 +28,8 @@ def requires_role(allowed_roles: list[Role], connection: ASGIConnection) -> None
 
 
 def requires_local(connection: ASGIConnection, _: BaseRouteHandler) -> None:
-    """Guard: only allows requests when running in development mode."""
-    if not config.IS_DEV:
+    """Guard: only allows requests when running in development or test mode."""
+    if not config.IS_DEV and config.ENV != "testing":
         raise NotAuthorizedException("This endpoint is only available in development mode")
 
 

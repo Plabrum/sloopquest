@@ -85,7 +85,31 @@ class Config:
         return self._build_db_url()
 
 
+@dataclass
+class TestConfig(Config):
+    """Test environment — points at the test database on port 5435."""
+
+    __test__ = False  # Prevent pytest from collecting this as a test class
+
+    ENV: str = "testing"
+
+    @property
+    def ASYNC_DATABASE_URL(self) -> str:
+        if url := os.getenv("TEST_ASYNC_DATABASE_URL") or os.getenv("ASYNC_DATABASE_URL"):
+            return url
+        return self._build_db_url(driver="+psycopg", port="5435")
+
+    @property
+    def ADMIN_DB_URL(self) -> str:
+        if url := os.getenv("TEST_ADMIN_DB_URL") or os.getenv("ADMIN_DB_URL"):
+            return url
+        return self._build_db_url(port="5435")
+
+
 def get_config() -> Config:
+    env = os.getenv("ENV", "development")
+    if env == "testing":
+        return TestConfig()
     return Config()
 
 

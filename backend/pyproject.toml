@@ -36,6 +36,7 @@ dev = [
   "ruff>=0.9",
   "basedpyright>=1.23",
   "polyfactory>=3.3.0",
+  "faker>=30.0",
   "aiosqlite>=0.20",
 ]
 
