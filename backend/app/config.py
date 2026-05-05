@@ -29,8 +29,21 @@ class Config:
     # ─── AWS ──────────────────────────────────────────────────────────────────
     AWS_REGION: str = os.getenv("AWS_REGION", "us-east-1")
 
+    # ─── Webhooks ─────────────────────────────────────────────────────────────
+    WEBHOOK_SECRET: str = os.getenv("WEBHOOK_SECRET", "dev-webhook-secret")
+
+    # ─── S3 ───────────────────────────────────────────────────────────────────
+    S3_INBOUND_EMAIL_BUCKET: str = os.getenv("S3_INBOUND_EMAIL_BUCKET", "")
+
     # ─── Email templates ──────────────────────────────────────────────────────
     EMAIL_TEMPLATES_DIR: str = "templates/emails-react"
+
+    # ─── SES ──────────────────────────────────────────────────────────────────
+    SES_REGION: str = os.getenv("SES_REGION", os.getenv("AWS_REGION", "us-east-1"))
+    SES_CONFIGURATION_SET: str = os.getenv("SES_CONFIGURATION_SET", "")
+    SES_FROM_EMAIL: str = os.getenv("SES_FROM_EMAIL", "no-reply@sloopquest.local")
+    SES_FROM_NAME: str = os.getenv("SES_FROM_NAME", "Sloopquest")
+    SES_REPLY_TO_EMAIL: str = os.getenv("SES_REPLY_TO_EMAIL", "")
 
     # ─── LLM ──────────────────────────────────────────────────────────────────
     ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")

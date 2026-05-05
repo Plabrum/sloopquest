@@ -14,6 +14,8 @@ from saq.types import Context, ReceivesContext
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
+from app.clients.s3 import LocalS3Client, S3Client
+from app.comms.clients.email import LocalEmailClient, SESEmailClient
 from app.config import config
 from app.queue.enums import TaskStatus
 from app.queue.models import Task
@@ -45,7 +47,9 @@ async def queue_startup(ctx: AppContext) -> None:  # type: ignore[override]
     ctx["db_sessionmaker"] = async_sessionmaker(engine, expire_on_commit=False)
     ctx["config"] = config
     ctx["queue"] = ctx["worker"].queue
-    logger.info("Queue worker started — DB sessionmaker injected into context")
+    ctx["email_client"] = LocalEmailClient() if config.IS_DEV else SESEmailClient(config)
+    ctx["s3_client"] = LocalS3Client() if config.IS_DEV else S3Client(config.AWS_REGION)
+    logger.info("Queue worker started — DB sessionmaker, email & S3 clients injected into context")
 
 
 async def queue_shutdown(ctx: AppContext) -> None:  # type: ignore[override]
