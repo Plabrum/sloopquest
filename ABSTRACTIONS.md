@@ -18,4 +18,4 @@ Tracks reusable infrastructure abstractions ported from Cuida and arive into slo
 
 - Threads + WebSocket channels
 - File upload primitive
-- Events framework
+- ~~Events framework~~ ✓

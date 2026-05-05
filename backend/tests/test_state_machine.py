@@ -2,7 +2,7 @@
 
 from enum import StrEnum, auto
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -69,7 +69,9 @@ class FakeUser:
 
 @pytest.fixture
 def session() -> MagicMock:
-    return MagicMock()
+    s = MagicMock()
+    s.flush = AsyncMock()
+    return s
 
 
 @pytest.fixture
@@ -84,9 +86,9 @@ async def test_valid_transition_logs_and_advances(service: StateMachineService, 
     await service.transition(doc_machine, doc, DocStatus.ACTIVE, actor=actor, context={"reason": "ready"})
 
     assert doc.state == DocStatus.ACTIVE
-    session.add.assert_called_once()
-    log = session.add.call_args.args[0]
-    assert isinstance(log, StateTransitionLog)
+    logs = [c.args[0] for c in session.add.call_args_list if isinstance(c.args[0], StateTransitionLog)]
+    assert len(logs) == 1
+    log = logs[0]
     assert log.object_type == "fake_docs"
     assert log.object_id == 1
     assert log.from_state == DocStatus.DRAFT.value
@@ -129,8 +131,9 @@ async def test_system_transition_takes_system_edge(service: StateMachineService,
     await service.system_transition(doc_machine, doc, DocStatus.ARCHIVED)
 
     assert doc.state == DocStatus.ARCHIVED
-    session.add.assert_called_once()
-    log = session.add.call_args.args[0]
+    logs = [c.args[0] for c in session.add.call_args_list if isinstance(c.args[0], StateTransitionLog)]
+    assert len(logs) == 1
+    log = logs[0]
     assert log.from_state == DocStatus.ACTIVE.value
     assert log.to_state == DocStatus.ARCHIVED.value
 

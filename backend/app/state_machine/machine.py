@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, Any, ClassVar
@@ -9,9 +10,14 @@ from typing import TYPE_CHECKING, Any, ClassVar
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.base.models import BaseDBModel
+from app.events.enums import EventType
+from app.events.schemas import FieldChange, StateChangedEventData
+from app.events.service import emit_event
 from app.state_machine.exceptions import InvalidTransitionError
 from app.state_machine.models import StateTransitionLog
 from app.users.roles import Role
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from app.users.models import User
@@ -192,7 +198,7 @@ class StateMachineService:
         actor_id: int,
         context: dict[str, Any] | None,
     ) -> None:
-        """Shared execution: on_exit -> set state -> log -> on_enter."""
+        """Shared execution: on_exit -> set state -> log -> on_enter -> emit event."""
         from_state = obj.state
 
         # 1. on_exit
@@ -202,11 +208,13 @@ class StateMachineService:
         obj.state = to
 
         # 3. Write audit log (stores .value for human readability)
+        from_value = from_state.value if hasattr(from_state, "value") else str(from_state)
+        to_value = to.value if hasattr(to, "value") else str(to)
         log = StateTransitionLog(
             object_type=obj.__tablename__,
             object_id=obj.id,
-            from_state=from_state.value if hasattr(from_state, "value") else str(from_state),
-            to_state=to.value if hasattr(to, "value") else str(to),
+            from_state=from_value,
+            to_state=to_value,
             actor_id=actor_id,
             context=context,
         )
@@ -215,3 +223,29 @@ class StateMachineService:
         # 4. on_enter
         target_state = machine.states[to]()
         await target_state.on_enter(self, obj, from_state, context)
+
+        # 5. Emit STATE_CHANGED event (best-effort — don't break the transition).
+        await self._emit_state_changed(obj, actor_id, from_value, to_value, context)
+
+    async def _emit_state_changed(
+        self,
+        obj: Any,
+        actor_id: int,
+        from_value: str,
+        to_value: str,
+        context: dict[str, Any] | None,
+    ) -> None:
+        try:
+            await emit_event(
+                session=self.db_session,
+                event_type=EventType.STATE_CHANGED,
+                obj=obj,
+                user_id=actor_id if actor_id != SYSTEM_USER_ID else None,
+                org_id=getattr(obj, "organization_id", None),
+                event_data=StateChangedEventData(
+                    state=FieldChange(old=from_value, new=to_value),
+                    metadata=context,
+                ),
+            )
+        except Exception:
+            logger.exception("Failed to emit STATE_CHANGED event for %s#%s", obj.__tablename__, obj.id)

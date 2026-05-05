@@ -7,6 +7,7 @@ class TaskName(StrEnum):
     PROCESS_INBOUND_EMAIL = auto()
     HANDLE_SURVEYS_EMAIL = auto()
     HANDLE_SUPPORT_EMAIL = auto()
+    RUN_EVENT_CONSUMER = auto()
 
 
 class TaskRoleType(StrEnum):
