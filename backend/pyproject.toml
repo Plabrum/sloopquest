@@ -22,6 +22,7 @@ dependencies = [
   "jinja2",
   "msgspec",
   "pydantic",
+  "sqids>=0.5.0",
 ]
 
 [dependency-groups]
@@ -32,6 +33,7 @@ dev = [
   "ruff>=0.9",
   "basedpyright>=1.23",
   "polyfactory>=3.3.0",
+  "aiosqlite>=0.20",
 ]
 
 [tool.ruff]
