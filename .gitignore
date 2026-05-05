@@ -1,2 +1,10 @@
 local
 .env
+
+# Terraform
+infra/**/.terraform/
+infra/**/*.tfstate
+infra/**/*.tfstate.*
+infra/**/tfplan
+infra/**/plan_output.txt
+infra/lambda/*.zip
