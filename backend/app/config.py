@@ -23,6 +23,9 @@ class Config:
     # ─── Redis ────────────────────────────────────────────────────────────────
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379")
 
+    # ─── Queue ────────────────────────────────────────────────────────────────
+    QUEUE_SYNC: bool = os.getenv("QUEUE_SYNC", "").lower() in {"1", "true", "yes"}
+
     # ─── AWS ──────────────────────────────────────────────────────────────────
     AWS_REGION: str = os.getenv("AWS_REGION", "us-east-1")
 

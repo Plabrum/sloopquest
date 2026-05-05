@@ -11,10 +11,11 @@ from litestar.channels.backends.memory import MemoryChannelsBackend
 from litestar.config.cors import CORSConfig
 from litestar.contrib.jinja import JinjaTemplateEngine
 from litestar.template.config import TemplateConfig
-from litestar_saq import QueueConfig, SAQConfig, SAQPlugin
+from litestar_saq import SAQConfig, SAQPlugin
 
 from app.base.models import BaseDBModel
 from app.config import Config
+from app.queue.config import queue_config
 
 __all__ = ["BaseDBModel", "create_app"]
 
@@ -43,13 +44,15 @@ def create_app(config: Config) -> Litestar:
         engine=JinjaTemplateEngine,
     )
 
-    saq_plugin = SAQPlugin(
-        config=SAQConfig(
-            queue_configs=[QueueConfig(name="default", dsn=config.REDIS_URL)],
-            web_enabled=config.IS_DEV,
-            use_server_lifespan=True,
-        )
+    saq_config = SAQConfig(
+        queue_configs=queue_config,
+        web_enabled=config.IS_DEV,
+        use_server_lifespan=True,
     )
+    saq_plugin = SAQPlugin(config=saq_config)
+
+    async def _setup_task_queues(app: Litestar) -> None:
+        app.state.task_queues = saq_config.get_queues()
 
     channels_plugin = ChannelsPlugin(
         backend=MemoryChannelsBackend(),
@@ -63,5 +66,6 @@ def create_app(config: Config) -> Litestar:
         plugins=plugins,
         cors_config=cors_config,
         template_config=template_config,
+        on_startup=[_setup_task_queues],
         debug=config.IS_DEV,
     )

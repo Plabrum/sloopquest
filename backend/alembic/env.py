@@ -15,6 +15,9 @@ from app.base.models import BaseDBModel
 from app.base.rls_comparator import compare_rls
 from app.base.rls_mixins import RLS_POLICY_REGISTRY
 from app.config import config as app_config
+from app.utils.discovery import discover_and_import
+
+discover_and_import(["models.py", "models/**/*.py"])
 
 config = context.config
 
