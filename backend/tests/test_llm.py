@@ -8,9 +8,10 @@ from unittest.mock import AsyncMock
 
 import pytest
 
+from app.llm.base import registry
 from app.llm.client import AnthropicLLMClient, LocalLLMClient
 from app.llm.enums import MessageRole
-from app.llm.tools import ECHO_TOOL, echo_executor
+from app.llm.tools import EchoTool  # noqa: F401 — ensures EchoTool is registered
 
 
 async def test_local_client_returns_stub_without_calling_api() -> None:
@@ -53,8 +54,8 @@ async def test_anthropic_agentic_loop_executes_tool_and_returns_text() -> None:
 
     out = await client.chat(
         [{"role": "user", "content": "say ahoy"}],
-        tools=[ECHO_TOOL],
-        tool_executor=echo_executor,
+        tools=registry.definitions,
+        tool_executor=registry.execute,
         persist_tool_message=persist,
     )
 
@@ -97,13 +98,13 @@ async def test_anthropic_loop_bails_after_max_iterations() -> None:
 
     out = await client.chat(
         [{"role": "user", "content": "go"}],
-        tools=[ECHO_TOOL],
-        tool_executor=echo_executor,
+        tools=registry.definitions,
+        tool_executor=registry.execute,
     )
     assert "wasn't able to complete" in out
 
 
 @pytest.mark.parametrize("name,expected", [("echo", "ahoy"), ("unknown", "Unknown tool: unknown")])
-async def test_echo_executor(name: str, expected: str) -> None:
-    out = await echo_executor(name, {"message": "ahoy"})
+async def test_registry_execute(name: str, expected: str) -> None:
+    out = await registry.execute(name, {"message": "ahoy"})
     assert out == expected

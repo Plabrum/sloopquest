@@ -40,6 +40,8 @@ from app.utils.sqids import Sqid, sqid_dec_hook, sqid_enc_hook, sqid_type_predic
 
 # Trigger @dep registration across all deps.py files
 discover_and_import(["deps.py"], base_path="app")
+# Trigger Tool.__init_subclass__ registration across all domain tools.py files
+discover_and_import(["tools.py"], base_path="app")
 
 __all__ = ["BaseDBModel", "create_app"]
 

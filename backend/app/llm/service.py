@@ -6,11 +6,11 @@ import logging
 from litestar.exceptions import NotFoundException
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.llm.base import registry
 from app.llm.client import BaseLLMClient
 from app.llm.enums import MessageRole
 from app.llm.models import LLMMessage, LLMThread
 from app.llm.queries import create_message, create_thread, get_messages_by_thread, get_thread_by_id
-from app.llm.schemas import ToolDefinition
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,6 @@ class LLMService:
         self.llm_client = llm_client
 
     def _build_llm_messages(self, history: list[LLMMessage]) -> list[dict]:
-        """Reconstruct the LLM message list from stored messages, including tool interactions."""
         llm_messages: list[dict] = []
         for msg in history:
             if msg.role == MessageRole.ASSISTANT_TOOL:
@@ -40,10 +39,7 @@ class LLMService:
         threadable_type: str | None = None,
         threadable_id: int | None = None,
         system: str | None = None,
-        tools: list[ToolDefinition] | None = None,
-        tool_executor=None,
     ) -> tuple[LLMThread, LLMMessage, LLMMessage]:
-        """Create a new thread, send the first message, persist the assistant reply."""
         thread = await create_thread(
             self.transaction,
             user_id=user_id,
@@ -55,11 +51,12 @@ class LLMService:
         async def persist_tool_message(role: MessageRole, json_content: str) -> None:
             await create_message(self.transaction, thread_id=thread.id, role=role, content=json_content)
 
+        tools = registry.definitions or None
         response_text = await self.llm_client.chat(
             [{"role": "user", "content": content}],
             system=system,
             tools=tools,
-            tool_executor=tool_executor,
+            tool_executor=registry.execute,
             persist_tool_message=persist_tool_message,
         )
 
@@ -74,10 +71,7 @@ class LLMService:
         content: str,
         *,
         system: str | None = None,
-        tools: list[ToolDefinition] | None = None,
-        tool_executor=None,
     ) -> LLMMessage:
-        """Append a user message to an existing thread and return the assistant reply."""
         thread = await get_thread_by_id(self.transaction, thread_id)
         if thread is None:
             raise NotFoundException("Thread not found")
@@ -90,11 +84,12 @@ class LLMService:
         async def persist_tool_message(role: MessageRole, json_content: str) -> None:
             await create_message(self.transaction, thread_id=thread_id, role=role, content=json_content)
 
+        tools = registry.definitions or None
         response_text = await self.llm_client.chat(
             llm_messages,
             system=system,
             tools=tools,
-            tool_executor=tool_executor,
+            tool_executor=registry.execute,
             persist_tool_message=persist_tool_message,
         )
 
