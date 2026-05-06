@@ -177,3 +177,5 @@ export function LoadingOrb({
     </>
   );
 }
+
+export const GloriaOrb = LoadingOrb;
