@@ -64,7 +64,7 @@ def upgrade() -> None:
     # NOTE: users / organizations / magic_link_tokens are intentionally NOT under RLS:
     # other tables' policies subquery `users` to evaluate role/org membership,
     # and the magic-link request flow writes to all three before any user
-    # session exists (no `app.user_id` is set). Cuida follows the same pattern.
+    # session exists (no `app.user_id` is set).
 
 
 def downgrade() -> None:

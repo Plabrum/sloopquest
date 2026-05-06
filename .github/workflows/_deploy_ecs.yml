@@ -1,4 +1,4 @@
-name: Deploy Application (Reusable)
+name: Deploy to ECS (Reusable)
 
 on:
   workflow_call:

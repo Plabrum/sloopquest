@@ -2,6 +2,29 @@
 
 Auto-loaded when editing infra/terraform/workflow files.
 
+## Dev environment (current)
+
+During initial development, the app runs on a single t3.small EC2 instance via docker-compose.
+Terraform for this lives in `infra/dev/` (separate state from the production ECS stack).
+
+```bash
+cd infra/dev
+cp terraform.tfvars.example terraform.tfvars  # fill in db_password
+terraform init \
+  -backend-config="bucket=tf-state-sloopquest-us-east-1" \
+  -backend-config="key=sloopquest/dev/terraform.tfstate" \
+  -backend-config="region=us-east-1" \
+  -backend-config="encrypt=true"
+terraform apply
+```
+
+After first apply:
+1. Update the Secrets Manager secret (`sloopquest-dev-app-secrets`) with real values (SECRET_KEY, etc.)
+2. Push an image to ECR — CI does this automatically on push to main
+3. CI deploys via SSM (`_deploy_ec2.yml`); or manually: `terraform output deploy_command`
+
+**OIDC role prerequisite**: The GitHub Actions OIDC role needs `ssm:SendCommand` + `ssm:GetCommandInvocation` added to its policy for EC2 deploys to work.
+
 ## CI/CD (`.github/workflows/`)
 
 GitHub Actions with change detection — only deploys when backend or infra changes. Uses AWS OIDC (no long-lived credentials). Pipeline: detect changes → test → build Docker image → Terraform → ECS deploy.

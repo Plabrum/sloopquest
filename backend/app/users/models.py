@@ -9,8 +9,7 @@ from app.users.roles import Role
 # NOTE: User and Organization deliberately do NOT use OrgRootMixin / OrgScopedMixin
 # (and so are not under RLS). Other tables' RLS policies subquery `users` to
 # evaluate role/org membership, and the magic-link request flow writes to both
-# tables before any user session exists. Keeping them outside RLS matches the
-# pattern used in Cuida.
+# tables before any user session exists.
 
 
 class Organization(BaseDBModel):

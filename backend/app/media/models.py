@@ -9,7 +9,6 @@ from app.media.enums import MediaStates
 from app.state_machine.models import StateMachineMixin
 
 # TODO: apply sloopquest scope (org/vessel/survey) once domain is decided.
-# Arive scoped this with RLSMixin(scope_with_campaign_id=True).
 
 
 class Media(

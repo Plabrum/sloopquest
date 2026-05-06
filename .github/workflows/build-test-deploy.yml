@@ -1,5 +1,9 @@
 name: Build · Test · Deploy
 
+# Deploy target is controlled by var.deploy_target in infra/variables.tf.
+# Default: ec2 (docker-compose on a single t3.small).
+# To switch to production: change the default to "ecs" and open a PR.
+
 on:
   push:
     branches: [main]
@@ -33,13 +37,9 @@ jobs:
             echo "infrastructure=${{ github.event.inputs.deploy_infrastructure }}" >> $GITHUB_OUTPUT
             echo "backend=${{ github.event.inputs.deploy_application }}" >> $GITHUB_OUTPUT
           else
-            # Compare all new commits since the previous push to main.
-            # github.event.before is the SHA main pointed at before this push,
-            # so this catches every commit in a rebase-merge, not just the tip.
             BASE="${{ github.event.before }}"
             CHANGED_FILES=$(git diff --name-only "$BASE" HEAD)
 
-            # Workflow file changes → redeploy everything
             if echo "$CHANGED_FILES" | grep -qE '^\.github/workflows/'; then
               echo "infrastructure=true" >> $GITHUB_OUTPUT
               echo "backend=true" >> $GITHUB_OUTPUT
@@ -74,7 +74,10 @@ jobs:
 
   infrastructure:
     needs: [detect-changes, test, build-image]
-    if: always() && (needs.detect-changes.outputs.infrastructure_changed == 'true' || needs.build-image.result == 'success') && (needs.test.result == 'success' || needs.test.result == 'skipped')
+    if: |
+      always() &&
+      (needs.detect-changes.outputs.infrastructure_changed == 'true' || needs.build-image.result == 'success') &&
+      (needs.test.result == 'success' || needs.test.result == 'skipped')
     permissions:
       id-token: write
       contents: read
@@ -84,13 +87,24 @@ jobs:
       terraform_action: "apply"
     secrets: inherit
 
-  deploy:
-    needs: [detect-changes, test, build-image, infrastructure]
-    if: always() && needs.build-image.result == 'success' && needs.infrastructure.result == 'success'
+  deploy-ec2:
+    needs: [build-image, infrastructure]
+    if: always() && needs.infrastructure.outputs.deploy_target != 'ecs' && needs.build-image.result == 'success' && needs.infrastructure.result == 'success'
     permissions:
       id-token: write
       contents: read
-    uses: ./.github/workflows/_deploy.yml
+    uses: ./.github/workflows/_deploy_ec2.yml
+    with:
+      instance_id: ${{ needs.infrastructure.outputs.instance_id }}
+    secrets: inherit
+
+  deploy-ecs:
+    needs: [build-image, infrastructure]
+    if: always() && needs.infrastructure.outputs.deploy_target == 'ecs' && needs.build-image.result == 'success' && needs.infrastructure.result == 'success'
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/_deploy_ecs.yml
     with:
       ecr_repository_url: ${{ needs.infrastructure.outputs.ecr_repository_url }}
       ecs_cluster_name: ${{ needs.infrastructure.outputs.ecs_cluster_name }}

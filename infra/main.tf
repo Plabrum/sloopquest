@@ -52,130 +52,203 @@ resource "logtail_source" "api" {
   platform = "open_telemetry"
 }
 
-# ── Infrastructure module ──────────────────────────────────────────────────────
+# ── EC2 stack (deploy_target = "ec2") ─────────────────────────────────────────
 
-module "infrastructure" {
-  source = "./aws"
+module "ec2" {
+  count  = var.deploy_target == "ec2" ? 1 : 0
+  source = "./modules/ec2_stack"
 
   project_name = var.project_name
   environment  = var.environment
   aws_region   = var.aws_region
   domain       = var.domain
 
-  vpc_cidr             = var.vpc_cidr
-  private_subnet_cidrs = var.private_subnet_cidrs
-  public_subnet_cidrs  = var.public_subnet_cidrs
+  hosted_zone_id     = aws_route53_zone.main.zone_id
+  ecr_repository_url = aws_ecr_repository.app.repository_url
 
-  ecr_repository = var.ecr_repository
-  image_tag      = var.image_tag
+  image_tag    = var.image_tag
+  db_password  = var.db_password
+  extra_env    = var.extra_env
 
-  db_name               = var.db_name
-  db_username           = var.db_username
-  db_password           = var.db_password
-  db_min_acu            = var.db_min_acu
-  db_max_acu            = var.db_max_acu
-  db_auto_pause_seconds = var.db_auto_pause_seconds
-
-  redis_node_type = var.redis_node_type
-
-  ecs_cpu              = var.ecs_cpu
-  ecs_memory           = var.ecs_memory
-  ecs_desired_count    = var.ecs_desired_count
-  ecs_min_capacity     = var.ecs_min_capacity
-  ecs_max_capacity     = var.ecs_max_capacity
-  worker_cpu           = var.worker_cpu
-  worker_memory        = var.worker_memory
-  worker_desired_count = var.worker_desired_count
-
-  extra_env = var.extra_env
+  instance_type     = var.instance_type
+  key_pair_name     = var.key_pair_name
+  ssh_allowed_cidrs = var.ssh_allowed_cidrs
 
   betterstack_otlp_ingesting_host = logtail_source.api.ingesting_host
   betterstack_otlp_source_token   = logtail_source.api.token
 }
 
-# ── Vercel module ──────────────────────────────────────────────────────────────
+# ── ECS stack (deploy_target = "ecs") ─────────────────────────────────────────
 
-module "vercel" {
-  source = "./vercel"
+module "ecs" {
+  count  = var.deploy_target == "ecs" ? 1 : 0
+  source = "./modules/app_stack"
 
-  project_name      = var.project_name
-  domain            = var.domain
+  project_name = var.project_name
+  environment  = var.environment
+  aws_region   = var.aws_region
+  domain       = var.domain
+
+  hosted_zone_id     = aws_route53_zone.main.zone_id
+  ecr_repository_url = aws_ecr_repository.app.repository_url
+
+  image_tag   = var.image_tag
+  db_password = var.db_password
+  extra_env   = var.extra_env
+
+  betterstack_otlp_ingesting_host = logtail_source.api.ingesting_host
+  betterstack_otlp_source_token   = logtail_source.api.token
+}
+
+# ── Vercel DNS (Route53 side — points domains at Vercel's edge) ───────────────
+
+resource "aws_route53_record" "root" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = var.domain
+  type    = "A"
+  ttl     = 300
+  records = ["76.76.21.21"] # Vercel anycast IP
+}
+
+resource "aws_route53_record" "www" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "www.${var.domain}"
+  type    = "CNAME"
+  ttl     = 300
+  records = ["cname.vercel-dns.com"]
+}
+
+resource "aws_route53_record" "app" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "app.${var.domain}"
+  type    = "CNAME"
+  ttl     = 300
+  records = ["cname.vercel-dns.com"]
+}
+
+# ── Vercel projects ───────────────────────────────────────────────────────────
+
+module "vercel_landing" {
+  source = "./modules/vercel_project"
+
+  name              = "${var.project_name}-landing"
+  framework         = "nextjs"
+  root_directory    = "landing"
   github_repo       = var.github_repo
   production_branch = var.production_branch
-  vercel_team_id    = var.vercel_team_id
+  team_id           = var.vercel_team_id
+
+  domains = [var.domain, "www.${var.domain}"]
+
+  environment_variables = [
+    {
+      key    = "NEXT_PUBLIC_API_URL"
+      value  = "https://api.${var.domain}"
+      target = ["production"]
+    },
+  ]
 }
 
-# ── Outputs ────────────────────────────────────────────────────────────────────
+module "vercel_web" {
+  source = "./modules/vercel_project"
 
+  name              = "${var.project_name}-web"
+  framework         = "vite"
+  root_directory    = "web"
+  github_repo       = var.github_repo
+  production_branch = var.production_branch
+  team_id           = var.vercel_team_id
+
+  domains = ["app.${var.domain}"]
+
+  environment_variables = [
+    {
+      key    = "VITE_API_URL"
+      value  = "https://api.${var.domain}"
+      target = ["production"]
+    },
+  ]
+}
+
+# ── Outputs ───────────────────────────────────────────────────────────────────
+
+output "deploy_target" {
+  description = "Active deploy target"
+  value       = var.deploy_target
+}
+
+# EC2 outputs (empty when deploy_target = "ecs")
+output "instance_id" {
+  description = "EC2 instance ID (ec2 only)"
+  value       = try(module.ec2[0].instance_id, "")
+}
+
+output "public_ip" {
+  description = "EC2 public IP (ec2 only)"
+  value       = try(module.ec2[0].public_ip, "")
+}
+
+# ECS outputs (empty when deploy_target = "ec2")
 output "alb_dns_name" {
-  description = "ALB DNS name (use this to verify the load balancer is up)"
-  value       = module.infrastructure.alb_dns_name
-}
-
-output "api_url" {
-  description = "API base URL"
-  value       = "https://api.${var.domain}"
-}
-
-output "ecr_repository_url" {
-  description = "ECR repository URL — used in CI to push Docker images"
-  value       = module.infrastructure.ecr_repository_url
+  description = "ALB DNS name (ecs only)"
+  value       = try(module.ecs[0].alb_dns_name, "")
 }
 
 output "ecs_cluster_name" {
-  description = "ECS cluster name"
-  value       = module.infrastructure.ecs_cluster_name
+  description = "ECS cluster name (ecs only)"
+  value       = try(module.ecs[0].ecs_cluster_name, "")
 }
 
 output "ecs_service_name" {
-  description = "ECS API service name"
-  value       = module.infrastructure.ecs_service_name
+  description = "ECS API service name (ecs only)"
+  value       = try(module.ecs[0].ecs_service_name, "")
 }
 
 output "worker_service_name" {
-  description = "ECS worker service name"
-  value       = module.infrastructure.worker_service_name
+  description = "ECS worker service name (ecs only)"
+  value       = try(module.ecs[0].worker_service_name, "")
+}
+
+# Shared outputs
+output "ecr_repository_url" {
+  description = "ECR repository URL"
+  value       = aws_ecr_repository.app.repository_url
+}
+
+output "app_secrets_arn" {
+  description = "Secrets Manager ARN"
+  value       = try(module.ec2[0].app_secrets_arn, try(module.ecs[0].app_secrets_arn, ""))
+  sensitive   = true
+}
+
+output "s3_media_bucket" {
+  description = "S3 media bucket name"
+  value       = try(module.ec2[0].s3_media_bucket, try(module.ecs[0].s3_media_bucket, ""))
 }
 
 output "database_endpoint" {
-  description = "Aurora write endpoint"
-  value       = module.infrastructure.database_endpoint
+  description = "Aurora write endpoint (ecs only)"
+  value       = try(module.ecs[0].database_endpoint, "")
   sensitive   = true
 }
 
 output "redis_endpoint" {
-  description = "ElastiCache Redis endpoint"
-  value       = module.infrastructure.redis_endpoint
-  sensitive   = true
-}
-
-output "s3_audio_bucket" {
-  description = "S3 bucket for call recordings"
-  value       = module.infrastructure.s3_audio_bucket
-}
-
-output "s3_transcripts_bucket" {
-  description = "S3 bucket for STT transcripts"
-  value       = module.infrastructure.s3_transcripts_bucket
-}
-
-output "app_secrets_arn" {
-  description = "Secrets Manager ARN — set APP_SECRETS_ARN in ECS task"
-  value       = module.infrastructure.app_secrets_arn
+  description = "ElastiCache Redis endpoint (ecs only)"
+  value       = try(module.ecs[0].redis_endpoint, "")
   sensitive   = true
 }
 
 output "route53_nameservers" {
   description = "Nameservers to configure at your domain registrar"
-  value       = module.infrastructure.route53_nameservers
+  value       = aws_route53_zone.main.name_servers
 }
 
 output "vercel_landing_project_id" {
   description = "Vercel project ID for the landing page"
-  value       = module.vercel.landing_project_id
+  value       = module.vercel_landing.project_id
 }
 
 output "vercel_web_project_id" {
   description = "Vercel project ID for the web app"
-  value       = module.vercel.web_project_id
+  value       = module.vercel_web.project_id
 }

@@ -3,6 +3,7 @@ local
 
 # Terraform
 infra/**/.terraform/
+infra/**/terraform.tfvars
 infra/**/*.tfstate
 infra/**/*.tfstate.*
 infra/**/tfplan

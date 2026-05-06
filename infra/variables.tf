@@ -15,6 +15,37 @@ variable "environment" {
   }
 }
 
+variable "deploy_target" {
+  description = "Deploy target: ec2 (single instance + docker-compose) or ecs (Fargate + Aurora + Redis)"
+  type        = string
+  default     = "ec2"
+
+  validation {
+    condition     = contains(["ec2", "ecs"], var.deploy_target)
+    error_message = "Must be ec2 or ecs."
+  }
+}
+
+# ── EC2-specific (deploy_target = "ec2") ──────────────────────────────────────
+
+variable "instance_type" {
+  description = "EC2 instance type"
+  type        = string
+  default     = "t3.small"
+}
+
+variable "key_pair_name" {
+  description = "EC2 key pair for SSH. Leave blank to use SSM Session Manager only."
+  type        = string
+  default     = ""
+}
+
+variable "ssh_allowed_cidrs" {
+  description = "CIDRs permitted on port 22. Use [] to disable SSH entirely."
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
 variable "aws_region" {
   description = "AWS region for all resources"
   type        = string
@@ -26,28 +57,6 @@ variable "domain" {
   type        = string
   default     = "sloopquest.app"
 }
-
-# ── Networking ─────────────────────────────────────────────────────────────────
-
-variable "vpc_cidr" {
-  description = "VPC CIDR block"
-  type        = string
-  default     = "10.10.0.0/16"
-}
-
-variable "private_subnet_cidrs" {
-  description = "Private subnet CIDRs (database only)"
-  type        = list(string)
-  default     = ["10.10.1.0/24", "10.10.2.0/24"]
-}
-
-variable "public_subnet_cidrs" {
-  description = "Public subnet CIDRs (ALB + ECS tasks)"
-  type        = list(string)
-  default     = ["10.10.100.0/24", "10.10.101.0/24"]
-}
-
-# ── ECR / image ────────────────────────────────────────────────────────────────
 
 variable "ecr_repository" {
   description = "ECR repository name"
@@ -61,103 +70,16 @@ variable "image_tag" {
   default     = "latest"
 }
 
-# ── Database (Aurora Serverless v2) ────────────────────────────────────────────
-
-variable "db_name" {
-  description = "PostgreSQL database name"
-  type        = string
-  default     = "sloopquest"
-}
-
-variable "db_username" {
-  description = "PostgreSQL master username"
-  type        = string
-  default     = "postgres"
-}
-
 variable "db_password" {
   description = "PostgreSQL master password — rotate via Secrets Manager after first deploy"
   type        = string
-  default     = "postgres"
   sensitive   = true
 }
 
-variable "db_min_acu" {
-  description = "Aurora Serverless v2 minimum capacity (0 = auto-pause when idle)"
-  type        = number
-  default     = 0
-}
-
-variable "db_max_acu" {
-  description = "Aurora Serverless v2 maximum capacity"
-  type        = number
-  default     = 4.0
-}
-
-variable "db_auto_pause_seconds" {
-  description = "Seconds of inactivity before Aurora pauses (minimum 300)"
-  type        = number
-  default     = 300
-}
-
-# ── Redis ──────────────────────────────────────────────────────────────────────
-
-variable "redis_node_type" {
-  description = "ElastiCache Redis node type"
-  type        = string
-  default     = "cache.t4g.micro"
-}
-
-# ── ECS — API ──────────────────────────────────────────────────────────────────
-
-variable "ecs_cpu" {
-  description = "API task CPU units (256 = 0.25 vCPU)"
-  type        = number
-  default     = 256
-}
-
-variable "ecs_memory" {
-  description = "API task memory in MB"
-  type        = number
-  default     = 512
-}
-
-variable "ecs_desired_count" {
-  description = "Number of running API task replicas"
-  type        = number
-  default     = 1
-}
-
-variable "ecs_min_capacity" {
-  description = "Auto-scaling minimum API tasks"
-  type        = number
-  default     = 1
-}
-
-variable "ecs_max_capacity" {
-  description = "Auto-scaling maximum API tasks"
-  type        = number
-  default     = 4
-}
-
-# ── ECS — Worker ───────────────────────────────────────────────────────────────
-
-variable "worker_cpu" {
-  description = "Worker task CPU units"
-  type        = number
-  default     = 256
-}
-
-variable "worker_memory" {
-  description = "Worker task memory in MB"
-  type        = number
-  default     = 512
-}
-
-variable "worker_desired_count" {
-  description = "Number of running worker task replicas"
-  type        = number
-  default     = 1
+variable "extra_env" {
+  description = "Additional environment variables injected into ECS task definitions"
+  type        = map(string)
+  default     = {}
 }
 
 # ── Vercel ─────────────────────────────────────────────────────────────────────
@@ -189,15 +111,7 @@ variable "production_branch" {
 # ── BetterStack ────────────────────────────────────────────────────────────────
 
 variable "logtail_api_token" {
-  description = "BetterStack personal API token — from account settings, used by the logtail Terraform provider"
+  description = "BetterStack personal API token — from account settings"
   type        = string
   sensitive   = true
-}
-
-# ── Misc ───────────────────────────────────────────────────────────────────────
-
-variable "extra_env" {
-  description = "Additional environment variables injected into ECS task definitions"
-  type        = map(string)
-  default     = {}
 }
