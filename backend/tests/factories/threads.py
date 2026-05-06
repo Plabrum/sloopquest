@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 
 from polyfactory import Use
 
-from app.threads.models import Message, Thread
+from app.platform.threads.models import Message, Thread
 
 from .base import BaseFactory
 

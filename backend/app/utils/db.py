@@ -8,11 +8,11 @@ from typing import Any
 from msgspec import structs
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.base.models import BaseDBModel
-from app.base.schemas import BaseSchema
-from app.events.enums import EventType
-from app.events.schemas import CreatedEventData, UpdatedEventData, make_field_changes
-from app.events.service import emit_event
+from app.platform.base.models import BaseDBModel
+from app.platform.base.schemas import BaseSchema
+from app.platform.events.enums import EventType
+from app.platform.events.schemas import CreatedEventData, UpdatedEventData, make_field_changes
+from app.platform.events.service import emit_event
 
 logger = logging.getLogger(__name__)
 

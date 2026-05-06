@@ -8,9 +8,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from app.events.enums import EventType
-from app.events.models import Event
-from app.events.registry import (
+from app.platform.events.enums import EventType
+from app.platform.events.models import Event
+from app.platform.events.registry import (
     EventConsumerRegistry,
     async_event_consumer,
     consumer_key,
@@ -18,13 +18,13 @@ from app.events.registry import (
     get_registry_singleton,
     trigger_consumers,
 )
-from app.events.schemas import (
+from app.platform.events.schemas import (
     CreatedEventData,
     FieldChange,
     UpdatedEventData,
     make_field_changes,
 )
-from app.events.service import emit_event
+from app.platform.events.service import emit_event
 
 
 @pytest.fixture(autouse=True)

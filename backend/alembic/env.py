@@ -9,12 +9,12 @@ from sqlalchemy import create_engine, inspect
 from sqlalchemy.engine import Connection
 
 # Import RLS operations so custom ops are registered with Alembic
-import app.base.rls_operations  # noqa: F401
+import app.platform.base.rls_operations  # noqa: F401
 from alembic import context
-from app.base.models import BaseDBModel
-from app.base.rls_comparator import compare_rls
-from app.base.rls_mixins import RLS_POLICY_REGISTRY
 from app.config import config as app_config
+from app.platform.base.models import BaseDBModel
+from app.platform.base.rls_comparator import compare_rls
+from app.platform.base.rls_mixins import RLS_POLICY_REGISTRY
 from app.utils.discovery import discover_and_import
 
 discover_and_import(["models.py", "models/**/*.py"])

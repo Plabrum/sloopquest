@@ -6,7 +6,7 @@ from faker import Faker
 from polyfactory.factories.sqlalchemy_factory import SQLAlchemyFactory
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.base.models import BaseDBModel
+from app.platform.base.models import BaseDBModel
 
 
 class BaseFactory[T: BaseDBModel](SQLAlchemyFactory[T]):

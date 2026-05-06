@@ -5,8 +5,8 @@ from uuid import uuid4
 
 from polyfactory import Use
 
-from app.queue.enums import TaskStatus
-from app.queue.models import Task
+from app.platform.queue.enums import TaskStatus
+from app.platform.queue.models import Task
 
 from .base import BaseFactory
 

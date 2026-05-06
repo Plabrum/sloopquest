@@ -42,7 +42,7 @@ class Config:
     MAX_DOCUMENT_SIZE: int = int(os.getenv("MAX_DOCUMENT_SIZE", str(100 * 1024 * 1024)))  # 100 MB
 
     # ─── Email templates ──────────────────────────────────────────────────────
-    EMAIL_TEMPLATES_DIR: str = "templates/emails-react"
+    EMAIL_TEMPLATES_DIR: str = "email_templates/out/emails-react"
 
     # ─── SES ──────────────────────────────────────────────────────────────────
     SES_REGION: str = os.getenv("SES_REGION", os.getenv("AWS_REGION", "us-east-1"))

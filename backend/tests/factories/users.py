@@ -6,8 +6,8 @@ from uuid import uuid4
 from faker import Faker
 from polyfactory import Use
 
-from app.users.models import Organization, User
-from app.users.roles import Role
+from app.domain.users.models import Organization, User
+from app.domain.users.roles import Role
 
 from .base import BaseFactory
 

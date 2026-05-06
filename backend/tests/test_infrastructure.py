@@ -10,8 +10,8 @@ Exercises:
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.queue.registry import task
-from app.users.models import User
+from app.domain.users.models import User
+from app.platform.queue.registry import task
 from tests.factories.users import UserFactory
 from tests.fixtures.app import make_ctx
 

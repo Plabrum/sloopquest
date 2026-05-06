@@ -15,13 +15,13 @@ from litestar_saq import TaskQueues
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from app.clients.s3 import LocalS3Client
-from app.comms.clients.email import LocalEmailClient
 from app.config import TestConfig
+from app.domain.users.models import User
+from app.domain.users.queries import get_user_by_id
 from app.factory import create_app
-from app.llm.client import LocalLLMClient
-from app.users.models import User
-from app.users.queries import get_user_by_id
+from app.platform.clients.s3 import LocalS3Client
+from app.platform.comms.clients.email import LocalEmailClient
+from app.platform.llm.client import LocalLLMClient
 from app.utils.sqids import SqidSchemaPlugin
 
 

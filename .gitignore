@@ -9,3 +9,5 @@ infra/**/*.tfstate.*
 infra/**/tfplan
 infra/**/plan_output.txt
 infra/lambda/*.zip
+.vscode/settings.json
+.vscode/settings.json

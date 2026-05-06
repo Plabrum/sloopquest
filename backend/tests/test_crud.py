@@ -13,14 +13,14 @@ from msgspec import Struct
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.actions.registry import ActionRegistry
-from app.base.crud import CRUDConfig, _crud_metadata, make_crud_controller
-from app.base.filters import TextFilter, apply_filter
-from app.base.models import BaseDBModel
-from app.base.schema_routes import schema_router
-from app.base.search import SearchMixin
-from app.users.models import User
-from app.users.roles import Role
+from app.domain.users.models import User
+from app.domain.users.roles import Role
+from app.platform.actions.registry import ActionRegistry
+from app.platform.base.crud import CRUDConfig, _crud_metadata, make_crud_controller
+from app.platform.base.filters import TextFilter, apply_filter
+from app.platform.base.models import BaseDBModel
+from app.platform.base.schema_routes import schema_router
+from app.platform.base.search import SearchMixin
 
 
 class _Vessel(BaseDBModel, SearchMixin):

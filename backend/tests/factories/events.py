@@ -4,8 +4,8 @@ from datetime import UTC, datetime
 
 from polyfactory import Use
 
-from app.events.enums import EventType
-from app.events.models import Event
+from app.platform.events.enums import EventType
+from app.platform.events.models import Event
 
 from .base import BaseFactory
 

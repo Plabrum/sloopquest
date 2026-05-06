@@ -6,16 +6,16 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from app.state_machine.exceptions import InvalidTransitionError
-from app.state_machine.machine import (
+from app.domain.users.models import User
+from app.domain.users.roles import Role
+from app.platform.state_machine.exceptions import InvalidTransitionError
+from app.platform.state_machine.machine import (
     State,
     StateMachine,
     StateMachineService,
     Transition,
 )
-from app.state_machine.models import StateTransitionLog
-from app.users.models import User
-from app.users.roles import Role
+from app.platform.state_machine.models import StateTransitionLog
 
 
 class DocStatus(StrEnum):

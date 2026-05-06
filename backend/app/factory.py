@@ -22,18 +22,18 @@ from litestar.template.config import TemplateConfig
 from litestar_saq import SAQConfig, SAQPlugin
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from app.actions.routes import action_router
-from app.auth.routes import auth_router
-from app.base.models import BaseDBModel
-from app.base.schema_routes import schema_router
-from app.comms.webhook_routes import comms_webhook_router
 from app.config import Config
-from app.documents import document_router
-from app.media import local_files_router, media_router
-from app.queue.config import queue_config
-from app.threads import thread_handler, thread_router
-from app.users.models import User
-from app.users.queries import get_user_by_id
+from app.domain.users.models import User
+from app.domain.users.queries import get_user_by_id
+from app.platform.actions.routes import action_router
+from app.platform.auth.routes import auth_router
+from app.platform.base.models import BaseDBModel
+from app.platform.base.schema_routes import schema_router
+from app.platform.comms.webhook_routes import comms_webhook_router
+from app.platform.documents import document_router
+from app.platform.media import local_files_router, media_router
+from app.platform.queue.config import queue_config
+from app.platform.threads import thread_handler, thread_router
 from app.utils.deps import get_dependencies
 from app.utils.discovery import discover_and_import
 from app.utils.sqids import Sqid, SqidSchemaPlugin, sqid_dec_hook, sqid_enc_hook, sqid_type_predicate

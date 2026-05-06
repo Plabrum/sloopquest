@@ -8,10 +8,10 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from app.llm.base import registry
-from app.llm.client import AnthropicLLMClient, LocalLLMClient
-from app.llm.enums import MessageRole
-from app.llm.tools import EchoTool  # noqa: F401 — ensures EchoTool is registered
+from app.platform.llm.base import registry
+from app.platform.llm.client import AnthropicLLMClient, LocalLLMClient
+from app.platform.llm.enums import MessageRole
+from app.platform.llm.tools import EchoTool  # noqa: F401 — ensures EchoTool is registered
 
 
 async def test_local_client_returns_stub_without_calling_api() -> None:

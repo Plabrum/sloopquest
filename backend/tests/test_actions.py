@@ -6,15 +6,15 @@ import pytest
 from litestar.exceptions import PermissionDeniedException
 from msgspec import Struct
 
-from app.actions.base import (
+from app.platform.actions.base import (
     ActionGroup,
     BaseAction,
     BaseObjectAction,
 )
-from app.actions.deps import ActionDeps
-from app.actions.enums import ActionGroupType
-from app.actions.registry import ActionRegistry
-from app.actions.schemas import (
+from app.platform.actions.deps import ActionDeps
+from app.platform.actions.enums import ActionGroupType
+from app.platform.actions.registry import ActionRegistry
+from app.platform.actions.schemas import (
     ActionExecutionResponse,
     build_action_metadata,
     build_action_union,
