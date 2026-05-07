@@ -58,6 +58,16 @@ class AcceptTosData(BaseSchema):
     user_agent: str
 
 
+class AttachExternalAccountData(BaseSchema):
+    token: str
+
+
+class ExternalAccountResponse(BaseSchema):
+    last4: str
+    bank_name: str | None
+    routing_number: str | None
+
+
 class ConnectAccountRequirementsBlock(BaseSchema):
     currently_due: list[str]
     eventually_due: list[str]

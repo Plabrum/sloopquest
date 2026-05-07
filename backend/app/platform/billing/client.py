@@ -52,6 +52,10 @@ class BaseBillingClient(ABC):
         """Record Stripe Terms of Service acceptance for a Connect account."""
 
     @abstractmethod
+    async def attach_external_account(self, account_id: str, token: str) -> dict:
+        """Attach a bank account or debit card token to a Connect account. Returns the external account dict."""
+
+    @abstractmethod
     async def create_payment_link(
         self, amount_cents: int, currency: str, connected_account_id: str, invoice_id: str
     ) -> str:
@@ -116,6 +120,17 @@ class LocalBillingClient(BaseBillingClient):
 
     async def accept_tos(self, account_id: str, ip: str, user_agent: str) -> None:
         logger.info("LOCAL BILLING: accept_tos account=%s ip=%s user_agent=%r", account_id, ip, user_agent)
+
+    async def attach_external_account(self, account_id: str, token: str) -> dict:
+        ba_id = f"ba_local_{uuid.uuid4().hex[:16]}"
+        logger.info("LOCAL BILLING: attach_external_account account=%s token=%s → %s", account_id, token, ba_id)
+        return {
+            "id": ba_id,
+            "object": "bank_account",
+            "last4": "6789",
+            "bank_name": "Local Test Bank",
+            "routing_number": "110000000",
+        }
 
     async def create_payment_link(
         self, amount_cents: int, currency: str, connected_account_id: str, invoice_id: str
@@ -206,6 +221,13 @@ class StripeBillingClient(BaseBillingClient):
             account_id,
             tos_acceptance={"date": now_unix, "ip": ip, "user_agent": user_agent},
         )
+
+    async def attach_external_account(self, account_id: str, token: str) -> dict:
+        external_account = await stripe.Account.create_external_account_async(
+            account_id,
+            external_account=token,
+        )
+        return external_account.to_dict()
 
     async def create_payment_link(
         self, amount_cents: int, currency: str, connected_account_id: str, invoice_id: str

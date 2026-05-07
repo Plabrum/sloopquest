@@ -55,6 +55,10 @@ class BillingService:
         """Record TOS acceptance for a Connect account."""
         await self._client.accept_tos(account_id=account_id, ip=ip, user_agent=user_agent)
 
+    async def attach_external_account(self, account_id: str, token: str) -> dict:
+        """Attach a bank account or debit card to a Connect account for payouts."""
+        return await self._client.attach_external_account(account_id=account_id, token=token)
+
     async def create_payment_link(
         self, amount_cents: int, currency: str, connected_account_id: str, invoice_id: str
     ) -> str:

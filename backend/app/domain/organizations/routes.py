@@ -8,8 +8,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.organizations.schemas import (
     AcceptTosData,
+    AttachExternalAccountData,
     ConnectAccountRequirementsResponse,
     ConnectAccountResponse,
+    ExternalAccountResponse,
     UpdateConnectAccountData,
 )
 from app.domain.users.models import Organization, User
@@ -99,6 +101,25 @@ async def accept_connect_account_tos(
     return ConnectAccountResponse(stripe_account_id=org.stripe_account_id)
 
 
+@post("/account/external-accounts", guards=[requires_session])
+async def attach_external_account(
+    data: AttachExternalAccountData,
+    user: User,
+    transaction: AsyncSession,
+    billing_service: BillingService,
+) -> ExternalAccountResponse:
+    org = await _get_user_org(transaction, user)
+    if not org.stripe_account_id:
+        raise NotFoundException("Connect account has not been created for this organization")
+
+    external = await billing_service.attach_external_account(account_id=org.stripe_account_id, token=data.token)
+    return ExternalAccountResponse(
+        last4=str(external.get("last4") or ""),
+        bank_name=external.get("bank_name"),
+        routing_number=external.get("routing_number"),
+    )
+
+
 organization_router = Router(
     path="/organizations/me/connect",
     route_handlers=[
@@ -106,6 +127,7 @@ organization_router = Router(
         update_connect_account,
         get_connect_account_requirements,
         accept_connect_account_tos,
+        attach_external_account,
     ],
     tags=["organizations"],
 )
