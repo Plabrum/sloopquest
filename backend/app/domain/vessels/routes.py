@@ -70,6 +70,7 @@ _config = CRUDConfig(
     detail_load_options=[selectinload(Vessel.engines)],
     filterable_columns={"name", "vessel_type", "propulsion_type", "hull_material", "year_built", "created_at"},
     sortable_columns={"name", "year_built", "created_at"},
+    label_field="name",
 )
 
 _controller = make_crud_controller("/vessels", _config)

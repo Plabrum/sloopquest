@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from enum import StrEnum, auto
 
 from litestar.exceptions import NotFoundException
@@ -16,10 +17,13 @@ from app.domain.invoices.schemas import (
     UpdateLineItemData,
 )
 from app.domain.invoices.state_machine import invoice_state_machine
+from app.domain.users.models import Organization
 from app.platform.actions.base import BaseObjectAction, BaseTopLevelAction, EmptyActionData, action_group_factory
 from app.platform.actions.deps import ActionDeps
 from app.platform.actions.enums import ActionGroupType, ActionIcon
 from app.platform.actions.schemas import ActionExecutionResponse
+
+logger = logging.getLogger(__name__)
 
 
 class InvoiceActionKey(StrEnum):
@@ -55,6 +59,10 @@ class CreateInvoice(BaseTopLevelAction[CreateInvoiceData]):
     label = "Create Invoice"
     icon = ActionIcon.ADD
     priority = 10
+    form_entity_fields = {
+        "survey_id": {"model": "Survey", "create_action": None},
+        "client_id": {"model": "Client", "create_action": None},
+    }
 
     @classmethod
     async def execute(
@@ -79,6 +87,9 @@ class UpdateInvoice(BaseObjectAction[Invoice, UpdateInvoiceData]):
     label = "Edit Invoice"
     icon = ActionIcon.EDIT
     priority = 20
+    form_entity_fields = {
+        "client_id": {"model": "Client", "create_action": None},
+    }
 
     @classmethod
     async def execute(
@@ -132,6 +143,21 @@ class SendInvoice(BaseObjectAction[Invoice, EmptyActionData]):
         cls, obj: Invoice, data: EmptyActionData, transaction: AsyncSession, deps: ActionDeps
     ) -> ActionExecutionResponse:
         await deps.sm_service.transition(invoice_state_machine, obj, InvoiceState.sent, actor=deps.user)
+
+        if obj.total_cents > 0:
+            result = await transaction.execute(select(Organization).where(Organization.id == obj.organization_id))
+            org = result.scalar_one_or_none()
+            if org is not None and org.stripe_account_id:
+                try:
+                    obj.payment_link_url = await deps.billing.create_payment_link(
+                        amount_cents=obj.total_cents,
+                        currency=obj.currency,
+                        connected_account_id=org.stripe_account_id,
+                        invoice_id=str(obj.id),
+                    )
+                except Exception:
+                    logger.exception("Failed to create payment link for invoice %s", obj.id)
+
         return ActionExecutionResponse(message="Invoice sent")
 
 

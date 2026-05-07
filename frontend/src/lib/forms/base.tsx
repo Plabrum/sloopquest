@@ -40,6 +40,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { EntityCombobox } from "@/lib/forms/entity-combobox";
 import { cn } from "@/lib/utils";
 
 type BaseFieldProps<
@@ -592,6 +593,50 @@ export function createTypedForm<TFieldValues extends FieldValues>() {
     );
   }
 
+  function FormEntityCombobox<N extends Name<Path<TFieldValues>>>(
+    props: BaseFieldProps<TFieldValues, N> & {
+      modelName: string;
+      createAction?: string;
+    },
+  ) {
+    const { name, label, placeholder, required, className, description, modelName } = props;
+    const { control, formState } = useFormContext<TFieldValues>();
+    const htmlId = props.id ?? String(name);
+
+    // If a default value is already set for this field, it's provided from context — hide
+    const defaultValues = formState.defaultValues as Record<string, unknown> | undefined;
+    if (defaultValues?.[String(name)]) return null;
+
+    return (
+      <div className={className}>
+        {label && (
+          <Label htmlFor={htmlId}>
+            {label} {required ? "*" : null}
+          </Label>
+        )}
+        <Controller
+          name={name}
+          control={control}
+          rules={{ required: requiredMessage(required) }}
+          render={({ field }) => (
+            <div className="mt-1">
+              <EntityCombobox
+                modelName={modelName}
+                value={(field.value as string) ?? ""}
+                onChange={field.onChange}
+                placeholder={placeholder}
+              />
+            </div>
+          )}
+        />
+        {description ? (
+          <p className="text-muted-foreground mt-1 text-xs">{description}</p>
+        ) : null}
+        <FieldError name={String(name)} />
+      </div>
+    );
+  }
+
   function FormCombobox<N extends Name<Path<TFieldValues>>>(
     props: BaseFieldProps<TFieldValues, N> & {
       /** Async function called on mount to load options. */
@@ -733,6 +778,7 @@ export function createTypedForm<TFieldValues extends FieldValues>() {
     FormTime,
     FormCheckbox,
     FormCombobox,
+    FormEntityCombobox,
     FormCustom,
     FormModal,
   };

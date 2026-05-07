@@ -27,6 +27,7 @@ class Organization(BaseDBModel):
     sams_member_number: Mapped[str | None] = mapped_column(sa.Text)
     signature_block: Mapped[str | None] = mapped_column(sa.Text)
     report_footer: Mapped[str | None] = mapped_column(sa.Text)
+    stripe_account_id: Mapped[str | None] = mapped_column(sa.Text)
 
 
 class User(BaseDBModel):

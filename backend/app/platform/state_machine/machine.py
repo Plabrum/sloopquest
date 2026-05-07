@@ -36,17 +36,16 @@ class Transition[E: Enum]:
     """One outbound edge from a state.
 
     roles semantics:
-        None            -> SYSTEM only — only system_transition() can use this edge
-        set()/frozenset() -> any authenticated role
-        {Role.X, ...}   -> specific roles only
+        set()/{Role.X,...} -> specific roles; use {Role.SYSTEM} for system-only edges
+        empty set          -> any authenticated role (not recommended — be explicit)
     """
 
     to: E
-    roles: frozenset[Role] | None
+    roles: frozenset[Role]
 
-    def __init__(self, to: E, *, roles: set[Role] | frozenset[Role] | None) -> None:
+    def __init__(self, to: E, *, roles: set[Role] | frozenset[Role]) -> None:
         object.__setattr__(self, "to", to)
-        object.__setattr__(self, "roles", frozenset(roles) if roles is not None else None)
+        object.__setattr__(self, "roles", frozenset(roles))
 
 
 class State[E: Enum, M: BaseDBModel]:
@@ -73,17 +72,16 @@ class State[E: Enum, M: BaseDBModel]:
     ) -> None:
         """Called before obj.state is changed. Side effects only."""
 
-    def allowed_for(self, user_role: Role | None) -> list[E]:
-        """Return target states reachable from this state for the given caller.
+    def allowed_for(self, user_role: Role) -> list[E]:
+        """Return target states reachable from this state for the given caller role."""
+        return [t.to for t in self.transitions if not t.roles or user_role in t.roles]
 
-        user_role=None means system caller — only SYSTEM edges are returned.
-        """
-        if user_role is None:
-            return [t.to for t in self.transitions if t.roles is None]
-        return [t.to for t in self.transitions if t.roles is not None and (not t.roles or user_role in t.roles)]
-
-    def get_transition(self, to: E) -> Transition[E] | None:
-        return next((t for t in self.transitions if t.to == to), None)
+    def get_transition(self, to: E, caller_role: Role) -> Transition[E] | None:
+        """Return the first transition to the target state accessible by caller_role."""
+        return next(
+            (t for t in self.transitions if t.to == to and (not t.roles or caller_role in t.roles)),
+            None,
+        )
 
 
 STATE_MACHINE_REGISTRY: dict[type[Enum], StateMachine[Any, Any]] = {}
@@ -131,7 +129,7 @@ class StateMachineService:
     ) -> None:
         """Human-initiated transition. Validates topology and roles."""
         state = machine.get_state(obj)
-        transition = state.get_transition(to)
+        transition = state.get_transition(to, actor.role_enum)
 
         from_label = _humanize(obj.state)
         to_label = _humanize(to)
@@ -139,17 +137,6 @@ class StateMachineService:
         if transition is None:
             raise InvalidTransitionError(
                 detail=f"This item cannot be moved from {from_label} to {to_label}.",
-            )
-
-        if transition.roles is None:
-            raise InvalidTransitionError(
-                detail=f"Moving from {from_label} to {to_label} can only be done by the system.",
-            )
-
-        if transition.roles and actor.role_enum not in transition.roles:
-            allowed = ", ".join(_humanize(r.value) for r in sorted(transition.roles, key=lambda r: r.value))
-            raise InvalidTransitionError(
-                detail=f"Your role does not have permission to do this. Only {allowed} users can perform this action.",
             )
 
         await self._execute_transition(machine, obj, state, to, actor_id=actor.id, context=context)
@@ -162,18 +149,13 @@ class StateMachineService:
         *,
         context: dict[str, Any] | None = None,
     ) -> None:
-        """System/cron transition. Only SYSTEM edges allowed. actor_id = SYSTEM_USER_ID."""
+        """System transition — only edges that include Role.SYSTEM are permitted."""
         state = machine.get_state(obj)
-        transition = state.get_transition(to)
+        transition = state.get_transition(to, Role.SYSTEM)
 
         if transition is None:
             raise InvalidTransitionError(
-                detail=f"No transition from {obj.state!r} to {to!r}",
-            )
-
-        if transition.roles is not None:
-            raise InvalidTransitionError(
-                detail=f"Transition {obj.state!r} -> {to!r} is not a system edge",
+                detail=f"No system transition from {obj.state!r} to {to!r}",
             )
 
         await self._execute_transition(machine, obj, state, to, actor_id=SYSTEM_USER_ID, context=context)

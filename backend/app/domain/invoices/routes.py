@@ -61,6 +61,7 @@ _config = CRUDConfig(
     detail_load_options=[selectinload(Invoice.line_items)],
     filterable_columns={"state", "survey_id", "client_id", "issued_at", "due_at", "created_at"},
     sortable_columns={"invoice_number", "issued_at", "due_at", "total_cents", "created_at"},
+    label_field="invoice_number",
 )
 
 _controller = make_crud_controller("/invoices", _config)

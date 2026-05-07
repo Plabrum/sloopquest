@@ -89,6 +89,7 @@ _survey_config = CRUDConfig(
     ],
     filterable_columns={"survey_type", "state", "vessel_id", "assigned_surveyor_id", "scheduled_for", "created_at"},
     sortable_columns={"scheduled_for", "created_at"},
+    label_field="survey_type",
 )
 
 _survey_controller = make_crud_controller("/surveys", _survey_config)
@@ -122,6 +123,7 @@ _template_config = CRUDConfig(
     to_detail=_to_template_detail,
     filterable_columns={"name", "created_at"},
     sortable_columns={"name", "created_at"},
+    label_field="name",
 )
 
 _template_controller = make_crud_controller("/survey-templates", _template_config)

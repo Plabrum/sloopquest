@@ -31,20 +31,8 @@ export type ActionRegistry = Partial<{
   [K in ActionType]: ActionRegistryEntry<ActionDataTypeMap[K]>;
 }>;
 
-import { CreateInvoiceForm } from "./overrides/create-invoice-form";
-
-/**
- * Hand-written forms that take precedence over generated ones.
- */
-const overrides: Record<string, ActionRegistryEntry> = {
-  invoice_actions__create: {
-    render: (params) => <CreateInvoiceForm {...params} />,
-  },
-};
-
 export const actionRegistry: ActionRegistry = {
   ...generatedRegistry,
-  ...overrides,
 } as ActionRegistry;
 
 export function getActionRenderer(

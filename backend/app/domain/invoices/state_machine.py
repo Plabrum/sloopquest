@@ -4,6 +4,7 @@ from app.domain.users.roles import Role
 from app.platform.state_machine.machine import State, StateMachine, Transition
 
 _staff: set[Role] = {Role.ADMIN, Role.SUPERADMIN}
+_system: set[Role] = {Role.SYSTEM}
 
 
 class DraftState(State[InvoiceState, Invoice]):
@@ -18,7 +19,8 @@ class SentState(State[InvoiceState, Invoice]):
     value = InvoiceState.sent
     transitions = [
         Transition(to=InvoiceState.paid, roles=_staff),
-        Transition(to=InvoiceState.overdue, roles=None),
+        Transition(to=InvoiceState.paid, roles=_system),  # Stripe payment_intent.succeeded
+        Transition(to=InvoiceState.overdue, roles=_system),
         Transition(to=InvoiceState.void, roles=_staff),
     ]
 
@@ -27,6 +29,7 @@ class OverdueState(State[InvoiceState, Invoice]):
     value = InvoiceState.overdue
     transitions = [
         Transition(to=InvoiceState.paid, roles=_staff),
+        Transition(to=InvoiceState.paid, roles=_system),  # Stripe payment_intent.succeeded
         Transition(to=InvoiceState.void, roles=_staff),
     ]
 

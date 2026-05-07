@@ -73,6 +73,7 @@ def _make_deps() -> ActionDeps:
         config=MagicMock(),
         task_queues=MagicMock(),
         sm_service=MagicMock(),
+        billing=MagicMock(),
     )
 
 

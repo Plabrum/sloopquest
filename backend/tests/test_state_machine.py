@@ -34,7 +34,7 @@ class DraftState(State[DocStatus, Any]):
 class ActiveState(State[DocStatus, Any]):
     value = DocStatus.ACTIVE
     transitions = [
-        Transition(to=DocStatus.ARCHIVED, roles=None),  # system-only
+        Transition(to=DocStatus.ARCHIVED, roles={Role.SYSTEM}),
     ]
 
 

@@ -51,6 +51,11 @@ class Config:
     SES_FROM_NAME: str = os.getenv("SES_FROM_NAME", "Sloopquest")
     SES_REPLY_TO_EMAIL: str = os.getenv("SES_REPLY_TO_EMAIL", "")
 
+    # ─── Stripe ───────────────────────────────────────────────────────────────
+    STRIPE_SECRET_KEY: str = os.getenv("STRIPE_SECRET_KEY", "")
+    STRIPE_WEBHOOK_SECRET: str = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+    STRIPE_CONNECT_WEBHOOK_SECRET: str = os.getenv("STRIPE_CONNECT_WEBHOOK_SECRET", "")
+
     # ─── LLM ──────────────────────────────────────────────────────────────────
     ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
 

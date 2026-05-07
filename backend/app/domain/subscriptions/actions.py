@@ -4,7 +4,7 @@ from enum import StrEnum, auto
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.subscriptions.enums import SubscriptionStatus
+from app.domain.subscriptions.enums import SubscriptionPlan, SubscriptionStatus
 from app.domain.subscriptions.models import Subscription
 from app.domain.subscriptions.schemas import CreateSubscriptionData, UpdateSubscriptionData
 from app.domain.subscriptions.state_machine import subscription_state_machine
@@ -12,6 +12,12 @@ from app.platform.actions.base import BaseObjectAction, BaseTopLevelAction, Empt
 from app.platform.actions.deps import ActionDeps
 from app.platform.actions.enums import ActionGroupType, ActionIcon
 from app.platform.actions.schemas import ActionExecutionResponse
+
+_PLAN_PRICE_IDS: dict[SubscriptionPlan, str] = {
+    SubscriptionPlan.starter: "price_starter",
+    SubscriptionPlan.professional: "price_professional",
+    SubscriptionPlan.enterprise: "price_enterprise",
+}
 
 
 class SubscriptionActionKey(StrEnum):
@@ -40,9 +46,20 @@ class CreateSubscription(BaseTopLevelAction[CreateSubscriptionData]):
     async def execute(
         cls, data: CreateSubscriptionData, transaction: AsyncSession, deps: ActionDeps
     ) -> ActionExecutionResponse:
+        customer_id = await deps.billing.create_customer(name=deps.user.name, email=deps.user.email)
+
+        price_id = _PLAN_PRICE_IDS.get(data.plan, "")
+        stripe_sub_id, period_start, period_end = await deps.billing.create_subscription(
+            customer_id=customer_id, price_id=price_id
+        )
+
         sub = Subscription(
             organization_id=deps.user.organization_id,
             plan=data.plan,
+            stripe_customer_id=customer_id,
+            stripe_subscription_id=stripe_sub_id,
+            current_period_start=period_start,
+            current_period_end=period_end,
         )
         transaction.add(sub)
         await transaction.flush()
@@ -60,6 +77,9 @@ class UpdateSubscription(BaseObjectAction[Subscription, UpdateSubscriptionData])
     async def execute(
         cls, obj: Subscription, data: UpdateSubscriptionData, transaction: AsyncSession, deps: ActionDeps
     ) -> ActionExecutionResponse:
+        if obj.stripe_subscription_id:
+            price_id = _PLAN_PRICE_IDS.get(data.plan, "")
+            await deps.billing.update_subscription(subscription_id=obj.stripe_subscription_id, price_id=price_id)
         obj.plan = data.plan
         return ActionExecutionResponse(message="Subscription plan updated")
 
@@ -118,5 +138,7 @@ class CancelSubscription(BaseObjectAction[Subscription, EmptyActionData]):
     async def execute(
         cls, obj: Subscription, data: EmptyActionData, transaction: AsyncSession, deps: ActionDeps
     ) -> ActionExecutionResponse:
+        if obj.stripe_subscription_id:
+            await deps.billing.cancel_subscription(subscription_id=obj.stripe_subscription_id)
         await deps.sm_service.transition(subscription_state_machine, obj, SubscriptionStatus.cancelled, actor=deps.user)
         return ActionExecutionResponse(message="Subscription cancelled")

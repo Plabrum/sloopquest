@@ -41,6 +41,7 @@ _config = CRUDConfig(
     to_detail=_to_detail,
     filterable_columns={"state", "survey_id", "created_at"},
     sortable_columns={"title", "created_at"},
+    label_field="title",
 )
 
 _controller = make_crud_controller("/reports", _config)

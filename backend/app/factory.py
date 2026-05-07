@@ -31,11 +31,13 @@ from app.domain.subscriptions.routes import subscription_router
 from app.domain.surveys.routes import survey_router, survey_template_router
 from app.domain.users.models import User
 from app.domain.users.queries import get_user_by_id
+from app.domain.users.routes import user_router
 from app.domain.vessels.routes import vessel_router
 from app.platform.actions.routes import action_router
 from app.platform.auth.routes import auth_router
 from app.platform.base.models import BaseDBModel
 from app.platform.base.schema_routes import schema_router
+from app.platform.billing import billing_webhook_router
 from app.platform.comms.webhook_routes import comms_webhook_router
 from app.platform.documents import document_router
 from app.platform.media import local_files_router, media_router
@@ -166,6 +168,7 @@ def create_app(
             demo_router,
             action_router,
             comms_webhook_router,
+            billing_webhook_router,
             thread_router,
             thread_handler,
             media_router,
@@ -178,6 +181,7 @@ def create_app(
             invoice_router,
             report_router,
             subscription_router,
+            user_router,
         ],
         plugins=plugins,
         on_app_init=[session_auth.on_app_init],

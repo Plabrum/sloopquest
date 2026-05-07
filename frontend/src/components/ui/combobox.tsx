@@ -26,6 +26,12 @@ export interface ComboboxProps {
   /** Input placeholder inside the popover. */
   searchPlaceholder?: string;
   disabled?: boolean;
+  /** Allow committing arbitrary typed text when no suggestion matches. Default true. Set false for entity pickers where only valid IDs are acceptable. */
+  allowFreeform?: boolean;
+  /** Called with the current search input when the user clicks the inline create row. Only shown when input is non-empty and no suggestions match. */
+  onCreateOption?: (value: string) => void;
+  /** Label prefix for the create row. Defaults to "Create". */
+  createLabel?: string;
 }
 
 function humanize(raw: string): string {
@@ -44,6 +50,9 @@ export function Combobox({
   triggerClassName,
   searchPlaceholder = "Type or select…",
   disabled = false,
+  allowFreeform = true,
+  onCreateOption,
+  createLabel = "Create",
 }: ComboboxProps) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
@@ -86,7 +95,7 @@ export function Combobox({
       const target = filtered[highlight];
       if (target) {
         commit(target.value);
-      } else if (input.trim()) {
+      } else if (input.trim() && allowFreeform) {
         commit(input);
       }
     } else if (e.key === "Escape") {
@@ -175,7 +184,7 @@ export function Combobox({
                   </button>
                 </li>
               ))}
-              {filtered.length === 0 && input.trim() && (
+              {filtered.length === 0 && input.trim() && allowFreeform && (
                 <li>
                   <button
                     type="button"
@@ -183,6 +192,18 @@ export function Combobox({
                     className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] text-foreground hover:bg-primary/10"
                   >
                     <span className="text-muted-foreground">Use</span>
+                    <span className="truncate font-medium">{input.trim()}</span>
+                  </button>
+                </li>
+              )}
+              {filtered.length === 0 && input.trim() && onCreateOption && (
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => { onCreateOption(input.trim()); setOpen(false); setInput(""); }}
+                    className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] text-foreground hover:bg-primary/10"
+                  >
+                    <span className="text-muted-foreground">{createLabel}</span>
                     <span className="truncate font-medium">{input.trim()}</span>
                   </button>
                 </li>

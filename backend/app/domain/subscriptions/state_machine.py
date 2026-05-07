@@ -4,12 +4,13 @@ from app.domain.users.roles import Role
 from app.platform.state_machine.machine import State, StateMachine, Transition
 
 _staff: set[Role] = {Role.ADMIN, Role.SUPERADMIN}
+_system: set[Role] = {Role.SYSTEM}
 
 
 class TrialingState(State[SubscriptionStatus, Subscription]):
     value = SubscriptionStatus.trialing
     transitions = [
-        Transition(to=SubscriptionStatus.active, roles=None),  # system only
+        Transition(to=SubscriptionStatus.active, roles=_system),
         Transition(to=SubscriptionStatus.cancelled, roles=_staff),
     ]
 
@@ -17,7 +18,7 @@ class TrialingState(State[SubscriptionStatus, Subscription]):
 class ActiveState(State[SubscriptionStatus, Subscription]):
     value = SubscriptionStatus.active
     transitions = [
-        Transition(to=SubscriptionStatus.past_due, roles=None),  # system only
+        Transition(to=SubscriptionStatus.past_due, roles=_system),
         Transition(to=SubscriptionStatus.paused, roles=_staff),
         Transition(to=SubscriptionStatus.cancelled, roles=_staff),
     ]
@@ -26,7 +27,7 @@ class ActiveState(State[SubscriptionStatus, Subscription]):
 class PastDueState(State[SubscriptionStatus, Subscription]):
     value = SubscriptionStatus.past_due
     transitions = [
-        Transition(to=SubscriptionStatus.active, roles=None),  # system only
+        Transition(to=SubscriptionStatus.active, roles=_system),
         Transition(to=SubscriptionStatus.cancelled, roles=_staff),
     ]
 

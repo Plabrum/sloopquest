@@ -47,6 +47,7 @@ _config = CRUDConfig(
     to_detail=_to_detail,
     filterable_columns={"client_type", "display_name", "email", "created_at"},
     sortable_columns={"display_name", "email", "created_at"},
+    label_field="display_name",
 )
 
 _controller = make_crud_controller("/clients", _config)

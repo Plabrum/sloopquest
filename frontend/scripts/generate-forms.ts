@@ -41,12 +41,15 @@ interface SchemaObject {
 type RefOrSchema = SchemaObject & { $ref?: string };
 
 interface ActionFieldMeta {
-  type: string; // string, boolean, number, date, datetime, enum, id
+  type: string; // string, boolean, number, date, datetime, enum, id, entity_ref
   required: boolean;
   order: number;
   label?: string;
   placeholder?: string;
   is_id_field?: boolean;
+  // entity_ref fields
+  model?: string;
+  create_action?: string | null;
 }
 
 interface ActionMeta {
@@ -61,12 +64,14 @@ type ActionMetadata = Record<string, ActionMeta>;
 
 interface FormFieldInfo {
   name: string;
-  component: string; // FormString, FormEmail, FormNumber, FormText, FormSelect, FormDatetime, FormCheckbox
+  component: string; // FormString, FormEmail, FormNumber, FormText, FormSelect, FormDatetime, FormCheckbox, FormEntityCombobox
   label: string;
   required: boolean;
   placeholder?: string;
   enumRef?: string; // TypeScript const name for enum values
   extraProps?: string; // additional JSX props
+  modelName?: string; // for FormEntityCombobox
+  createAction?: string; // for FormEntityCombobox
 }
 
 // ---------------------------------------------------------------------------
@@ -120,6 +125,19 @@ function inferFormField(
   const label = fieldMeta?.label ?? humanizeLabel(key);
   const placeholder = fieldMeta?.placeholder;
   const required = isRequired;
+
+  // Entity ref: model-backed combobox
+  if (fieldMeta?.type === "entity_ref" && fieldMeta.model) {
+    return {
+      name: key,
+      component: "FormEntityCombobox",
+      label,
+      required,
+      placeholder,
+      modelName: fieldMeta.model,
+      createAction: fieldMeta.create_action ?? undefined,
+    };
+  }
 
   // Enum: $ref to a schema with enum values
   if (schema.$ref) {
@@ -255,6 +273,11 @@ function generateFormComponent(
       props.push(
         `options={(Object.values(${f.enumRef}) as string[]).map(v => ({ value: v, label: v.replace(/_/g, " ").replace(/\\b\\w/g, c => c.toUpperCase()) }))}`,
       );
+    }
+
+    if (f.component === "FormEntityCombobox" && f.modelName) {
+      props.push(`modelName="${f.modelName}"`);
+      if (f.createAction) props.push(`createAction="${f.createAction}"`);
     }
 
     return `      <${varPrefix}.${f.component} ${props.join(" ")} />`;

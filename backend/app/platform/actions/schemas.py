@@ -9,6 +9,7 @@ from typing import (
     Annotated,
     Any,
     TypeAliasType,
+    Union,
     get_args,
     get_origin,
     get_type_hints,
@@ -133,25 +134,60 @@ def build_action_metadata(action_registry: "ActionRegistry") -> dict[str, dict]:
         fields_info = msgspec.structs.fields(tp)
         schema_name = tp.__name__
 
-        # Check if ALL fields are Sqid-only (entity-linking action, no user form)
         id_fields_from_class: set[str] = getattr(action_cls, "form_id_fields", set())
+        entity_fields: dict[str, dict] = getattr(action_cls, "form_entity_fields", {})
         field_order: list[str] = getattr(action_cls, "form_field_order", [])
         field_labels: dict[str, str] = getattr(action_cls, "form_field_labels", {})
         field_placeholders: dict[str, str] = getattr(action_cls, "form_field_placeholders", {})
 
-        # Auto-detect Sqid-only fields as id_fields
-        all_sqid = True
+        fields_by_name = {fi.name: fi for fi in fields_info}
+        all_sqid = not entity_fields  # entity_ref fields are never plain Sqid
         field_meta: dict[str, dict] = {}
+
+        # Entity ref fields: declared on the action class, no type introspection needed
+        for field_name, spec in entity_fields.items():
+            fi = fields_by_name.get(field_name)
+            idx = list(fields_by_name).index(field_name) if field_name in fields_by_name else 999
+            order = field_order.index(field_name) if field_name in field_order else (len(field_order) + idx)
+            entry: dict[str, Any] = {
+                "required": fi.required if fi else False,
+                "order": order,
+                "type": "entity_ref",
+                "model": spec["model"],
+                "create_action": spec.get("create_action"),
+                "is_id_field": False,
+            }
+            if field_name in field_labels:
+                entry["label"] = field_labels[field_name]
+            if field_name in field_placeholders:
+                entry["placeholder"] = field_placeholders[field_name]
+            field_meta[field_name] = entry
+
+        # Remaining struct fields: detect type from annotation
         for idx, fi in enumerate(fields_info):
+            if fi.name in entity_fields:
+                continue
+
             raw_type = fi.type
             origin = get_origin(raw_type)
             type_args = get_args(raw_type) if origin else ()
 
-            # Unwrap X | None → X
+            # Unwrap X | None → X (handles both types.UnionType and typing.Union/Optional)
             base = raw_type
-            if origin is types.UnionType:
+            if origin is types.UnionType or origin is Union:
                 non_none = [a for a in type_args if a is not type(None)]
                 base = non_none[0] if len(non_none) == 1 else raw_type
+
+            order = field_order.index(fi.name) if fi.name in field_order else (len(field_order) + idx)
+
+            entry = {
+                "required": fi.required,
+                "order": order,
+            }
+            if fi.name in field_labels:
+                entry["label"] = field_labels[fi.name]
+            if fi.name in field_placeholders:
+                entry["placeholder"] = field_placeholders[fi.name]
 
             is_sqid = base is Sqid
             if not is_sqid:
@@ -173,17 +209,7 @@ def build_action_metadata(action_registry: "ActionRegistry") -> dict[str, dict]:
             elif is_sqid:
                 field_type = "id"
 
-            order = field_order.index(fi.name) if fi.name in field_order else (len(field_order) + idx)
-
-            entry: dict[str, Any] = {
-                "type": field_type,
-                "required": fi.required,
-                "order": order,
-            }
-            if fi.name in field_labels:
-                entry["label"] = field_labels[fi.name]
-            if fi.name in field_placeholders:
-                entry["placeholder"] = field_placeholders[fi.name]
+            entry["type"] = field_type
             if is_id_field:
                 entry["is_id_field"] = True
 

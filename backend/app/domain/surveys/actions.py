@@ -82,6 +82,11 @@ class CreateSurvey(BaseTopLevelAction[CreateSurveyData]):
     label = "Create Survey"
     icon = ActionIcon.ADD
     priority = 10
+    form_entity_fields = {
+        "vessel_id": {"model": "Vessel", "create_action": "vessel_actions__create"},
+        "assigned_surveyor_id": {"model": "User", "create_action": None},
+        "template_id": {"model": "SurveyTemplate", "create_action": "survey_template_actions__create"},
+    }
 
     @classmethod
     async def execute(
@@ -114,6 +119,10 @@ class UpdateSurvey(BaseObjectAction[Survey, UpdateSurveyData]):
     label = "Edit Survey"
     icon = ActionIcon.EDIT
     priority = 20
+    form_entity_fields = {
+        "assigned_surveyor_id": {"model": "User", "create_action": None},
+        "template_id": {"model": "SurveyTemplate", "create_action": "survey_template_actions__create"},
+    }
 
     @classmethod
     async def execute(
@@ -329,6 +338,9 @@ class AddSurveyParty(BaseObjectAction[Survey, AddSurveyPartyData]):
     label = "Add Party"
     icon = ActionIcon.ADD
     priority = 40
+    form_entity_fields = {
+        "client_id": {"model": "Client", "create_action": None},
+    }
 
     @classmethod
     async def execute(

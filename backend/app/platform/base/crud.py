@@ -13,12 +13,23 @@ from app.platform.actions.registry import ActionRegistry
 from app.platform.auth.guards import requires_session
 from app.platform.base.filters import apply_filter, apply_sorts
 from app.platform.base.models import BaseDBModel
+from app.platform.base.registry import BaseRegistry
 from app.platform.base.schemas import ListRequest, PagedResponse
 from app.platform.base.search import SearchMixin
 from app.utils.sqids import Sqid
 
 # Populated by make_crud_controller — exposed via GET /schema/crud-metadata for codegen.
 _crud_metadata: dict[str, dict] = {}
+
+
+@dataclass
+class CRUDEntry:
+    path: str
+    config: "CRUDConfig"
+
+
+class CRUDRegistry(BaseRegistry[type, CRUDEntry]):
+    pass
 
 
 @dataclass
@@ -36,6 +47,9 @@ class CRUDConfig[ModelT: BaseDBModel, ListT: Struct, DetailT: Struct]:
     filterable_columns: set[str] | None = None
     sortable_columns: set[str] | None = None
     default_sort: str | None = None  # e.g. "activity_date" — defaults to "created_at" desc
+
+    # Label field used by entity combobox codegen
+    label_field: str | None = None
 
     # Codegen metadata hints
     column_types: dict[str, str] = field(default_factory=dict)
@@ -73,7 +87,7 @@ def make_crud_controller[ModelT: BaseDBModel, ListT: Struct, DetailT: Struct](
 
     # Resolve mixin columns at factory time so we get clean errors if missing
     org_id_col = getattr(model, "organization_id")
-    deleted_at_col = getattr(model, "deleted_at")
+    deleted_at_col = getattr(model, "deleted_at", None)
     default_sort_col = getattr(model, config.default_sort or "created_at")
 
     # Infer concrete return types from callable annotations for OpenAPI generation.
@@ -95,11 +109,11 @@ def make_crud_controller[ModelT: BaseDBModel, ListT: Struct, DetailT: Struct](
         limit = max(1, min(data.limit, 200))
         offset = max(0, data.offset)
 
-        # Base query: org-scoped + soft-delete
-        base = select(model).where(
-            org_id_col == user.organization_id,
-            deleted_at_col.is_(None),
-        )
+        # Base query: org-scoped, soft-delete if supported
+        conditions = [org_id_col == user.organization_id]
+        if deleted_at_col is not None:
+            conditions.append(deleted_at_col.is_(None))
+        base = select(model).where(*conditions)
 
         # Role-based query scoping
         if config.base_query_modifier is not None:
@@ -157,11 +171,10 @@ def make_crud_controller[ModelT: BaseDBModel, ListT: Struct, DetailT: Struct](
         transaction: AsyncSession,
         action_registry: ActionRegistry,
     ) -> Struct:
-        query = select(model).where(
-            model.id == id,
-            org_id_col == user.organization_id,
-            deleted_at_col.is_(None),
-        )
+        detail_conditions = [model.id == id, org_id_col == user.organization_id]
+        if deleted_at_col is not None:
+            detail_conditions.append(deleted_at_col.is_(None))
+        query = select(model).where(*detail_conditions)
         if config.base_query_modifier is not None:
             query = config.base_query_modifier(query, user)
         for opt in config.detail_load_options:
@@ -199,5 +212,7 @@ def make_crud_controller[ModelT: BaseDBModel, ListT: Struct, DetailT: Struct](
     if config.column_labels:
         metadata["column_labels"] = config.column_labels
     _crud_metadata[f"list_{model_name}"] = metadata
+
+    CRUDRegistry().register(model, CRUDEntry(path=path, config=config))
 
     return controller_cls

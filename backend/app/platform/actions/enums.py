@@ -12,6 +12,7 @@ class ActionGroupType(StrEnum):
     INVOICE_ACTIONS = auto()
     REPORT_ACTIONS = auto()
     SUBSCRIPTION_ACTIONS = auto()
+    ORGANIZATION_ACTIONS = auto()
 
 
 class ActionResultType(StrEnum):

@@ -38,6 +38,7 @@ class Invoice(
     tax_cents: Mapped[int] = mapped_column(sa.Integer, default=0, server_default="0")
     total_cents: Mapped[int] = mapped_column(sa.Integer, default=0, server_default="0")
     notes: Mapped[str | None] = mapped_column(sa.Text)
+    payment_link_url: Mapped[str | None] = mapped_column(sa.Text)
 
     line_items: Mapped[list[InvoiceLineItem]] = relationship(
         "InvoiceLineItem",

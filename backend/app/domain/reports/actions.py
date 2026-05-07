@@ -36,6 +36,9 @@ class CreateReport(BaseTopLevelAction[CreateReportData]):
     label = "Create Report"
     icon = ActionIcon.ADD
     priority = 10
+    form_entity_fields = {
+        "survey_id": {"model": "Survey", "create_action": None},
+    }
 
     @classmethod
     async def execute(

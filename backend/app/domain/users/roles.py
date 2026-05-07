@@ -5,3 +5,4 @@ class Role(StrEnum):
     SUPERADMIN = auto()
     ADMIN = auto()
     MEMBER = auto()
+    SYSTEM = auto()
