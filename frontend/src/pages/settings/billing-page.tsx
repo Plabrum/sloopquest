@@ -13,8 +13,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
+import { ConnectRequirements } from "@/components/connect-requirements";
 import {
-  describeRequirement,
   useConnectRequirements,
   type ConnectAccountRequirements,
 } from "@/lib/connect";
@@ -148,56 +148,42 @@ function NoConnectAccountCard() {
   );
 }
 
-function IncompleteConnectCard({
+function ConnectAccountCard({
   requirements,
 }: {
   requirements: ConnectAccountRequirements;
 }) {
-  const outstanding = [
-    ...requirements.currently_due,
-    ...requirements.pending_verification,
-  ];
-  const labels = Array.from(new Set(outstanding.map(describeRequirement)));
+  const isActive =
+    requirements.charges_enabled && requirements.payouts_enabled;
+  const hasActionRequired = requirements.currently_due.length > 0;
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Landmark className="size-4 text-muted-foreground" />
-          Payouts — setup incomplete
+          {isActive ? (
+            <CheckCircle2 className="size-4 text-[var(--status-success)]" />
+          ) : (
+            <Landmark className="size-4 text-muted-foreground" />
+          )}
+          {isActive ? "Payouts active" : "Payouts — setup incomplete"}
         </CardTitle>
         <CardDescription>
-          Finish onboarding to start accepting payments.
+          {isActive
+            ? "Your account can accept charges and receive payouts."
+            : "Finish onboarding to start accepting payments."}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {labels.length > 0 && (
-          <ul className="space-y-1 text-sm text-muted-foreground">
-            {labels.map((label) => (
-              <li key={label}>• {label}</li>
-            ))}
-          </ul>
+        <ConnectRequirements requirements={requirements} />
+        {hasActionRequired && (
+          <Button asChild>
+            <Link to="/settings/billing/connect/onboarding">
+              Continue setup
+            </Link>
+          </Button>
         )}
-        <Button asChild>
-          <Link to="/settings/billing/connect/onboarding">Continue setup</Link>
-        </Button>
       </CardContent>
-    </Card>
-  );
-}
-
-function ActiveConnectCard() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <CheckCircle2 className="size-4 text-[var(--status-success)]" />
-          Account active
-        </CardTitle>
-        <CardDescription>
-          Payouts are enabled. Bank account on file ending in ••••.
-        </CardDescription>
-      </CardHeader>
     </Card>
   );
 }
@@ -209,11 +195,7 @@ function ConnectStatusSection() {
     return <NoConnectAccountCard />;
   }
 
-  if (requirements.charges_enabled && requirements.payouts_enabled) {
-    return <ActiveConnectCard />;
-  }
-
-  return <IncompleteConnectCard requirements={requirements} />;
+  return <ConnectAccountCard requirements={requirements} />;
 }
 
 export function BillingPage() {

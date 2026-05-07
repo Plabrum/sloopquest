@@ -39,10 +39,18 @@ async function fetchConnectRequirements(
   }
 }
 
+export const CONNECT_REQUIREMENTS_POLL_MS = 30_000;
+
 export function useConnectRequirements() {
   return useSuspenseQuery({
     queryKey: connectRequirementsQueryKey,
     queryFn: ({ signal }) => fetchConnectRequirements(signal),
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (!data) return false;
+      if (data.charges_enabled && data.payouts_enabled) return false;
+      return CONNECT_REQUIREMENTS_POLL_MS;
+    },
   });
 }
 
@@ -161,19 +169,46 @@ export function useAttachExternalAccount() {
 }
 
 const REQUIREMENT_LABELS: Record<string, string> = {
-  "external_account": "Bank account required",
-  "individual.verification.document": "Identity document required",
-  "individual.verification.additional_document": "Additional ID document required",
-  "tos_acceptance.date": "Terms of service acceptance pending",
-  "tos_acceptance.ip": "Terms of service acceptance pending",
-  "business_profile.url": "Business website required",
-  "business_profile.mcc": "Business category required",
+  external_account: "Bank account",
+  business_type: "Business type",
+  "business_profile.url": "Business website",
+  "business_profile.mcc": "Business category",
+  "business_profile.product_description": "Product description",
+  "business_profile.name": "Business name",
+  "tos_acceptance.date": "Terms of service acceptance",
+  "tos_acceptance.ip": "Terms of service acceptance",
+  "individual.first_name": "Legal first name",
+  "individual.last_name": "Legal last name",
+  "individual.email": "Email address",
+  "individual.phone": "Phone number",
+  "individual.dob.day": "Date of birth",
+  "individual.dob.month": "Date of birth",
+  "individual.dob.year": "Date of birth",
+  "individual.ssn_last_4": "Last 4 of SSN",
+  "individual.id_number": "Full SSN or tax ID",
+  "individual.address.line1": "Home address",
+  "individual.address.line2": "Home address",
+  "individual.address.city": "Home address",
+  "individual.address.state": "Home address",
+  "individual.address.postal_code": "Home address",
+  "individual.verification.document": "Government-issued ID document",
+  "individual.verification.additional_document":
+    "Additional verification document",
+  "company.name": "Company legal name",
+  "company.tax_id": "Business tax ID",
+  "company.phone": "Company phone number",
+  "company.address.line1": "Business address",
+  "company.address.line2": "Business address",
+  "company.address.city": "Business address",
+  "company.address.state": "Business address",
+  "company.address.postal_code": "Business address",
+  "company.verification.document": "Company verification document",
 };
 
 export function describeRequirement(key: string): string {
   if (REQUIREMENT_LABELS[key]) return REQUIREMENT_LABELS[key];
-  if (key.startsWith("individual.")) return "Identity verification pending";
-  if (key.startsWith("company.")) return "Business details required";
-  if (key.startsWith("business_profile.")) return "Business profile required";
+  if (key.startsWith("individual.")) return "Identity verification";
+  if (key.startsWith("company.")) return "Business details";
+  if (key.startsWith("business_profile.")) return "Business profile";
   return key.replace(/[._]/g, " ");
 }
