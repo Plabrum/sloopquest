@@ -48,6 +48,10 @@ class BaseBillingClient(ABC):
         """Update fields on a Connect account. Returns the updated Stripe account object as a dict."""
 
     @abstractmethod
+    async def accept_tos(self, account_id: str, ip: str, user_agent: str) -> None:
+        """Record Stripe Terms of Service acceptance for a Connect account."""
+
+    @abstractmethod
     async def create_payment_link(
         self, amount_cents: int, currency: str, connected_account_id: str, invoice_id: str
     ) -> str:
@@ -109,6 +113,9 @@ class LocalBillingClient(BaseBillingClient):
     async def update_account(self, account_id: str, fields: dict) -> dict:
         logger.info("LOCAL BILLING: update_account account=%s fields=%r", account_id, fields)
         return {"id": account_id, **fields}
+
+    async def accept_tos(self, account_id: str, ip: str, user_agent: str) -> None:
+        logger.info("LOCAL BILLING: accept_tos account=%s ip=%s user_agent=%r", account_id, ip, user_agent)
 
     async def create_payment_link(
         self, amount_cents: int, currency: str, connected_account_id: str, invoice_id: str
@@ -192,6 +199,13 @@ class StripeBillingClient(BaseBillingClient):
     async def update_account(self, account_id: str, fields: dict) -> dict:
         account = await stripe.Account.modify_async(account_id, **fields)
         return account.to_dict()
+
+    async def accept_tos(self, account_id: str, ip: str, user_agent: str) -> None:
+        now_unix = int(datetime.now(tz=UTC).timestamp())
+        await stripe.Account.modify_async(
+            account_id,
+            tos_acceptance={"date": now_unix, "ip": ip, "user_agent": user_agent},
+        )
 
     async def create_payment_link(
         self, amount_cents: int, currency: str, connected_account_id: str, invoice_id: str

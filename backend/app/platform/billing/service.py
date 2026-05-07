@@ -51,6 +51,10 @@ class BillingService:
         """Update fields on a Connect account. `fields` is passed through to Stripe."""
         return await self._client.update_account(account_id=stripe_account_id, fields=fields)
 
+    async def accept_tos(self, account_id: str, ip: str, user_agent: str) -> None:
+        """Record TOS acceptance for a Connect account."""
+        await self._client.accept_tos(account_id=account_id, ip=ip, user_agent=user_agent)
+
     async def create_payment_link(
         self, amount_cents: int, currency: str, connected_account_id: str, invoice_id: str
     ) -> str:

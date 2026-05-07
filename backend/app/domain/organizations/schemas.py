@@ -53,6 +53,11 @@ class ConnectAccountResponse(BaseSchema):
     stripe_account_id: str
 
 
+class AcceptTosData(BaseSchema):
+    ip: str
+    user_agent: str
+
+
 class ConnectAccountRequirementsBlock(BaseSchema):
     currently_due: list[str]
     eventually_due: list[str]

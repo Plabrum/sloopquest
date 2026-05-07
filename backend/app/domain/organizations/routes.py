@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.organizations.schemas import (
+    AcceptTosData,
     ConnectAccountRequirementsResponse,
     ConnectAccountResponse,
     UpdateConnectAccountData,
@@ -83,8 +84,28 @@ async def get_connect_account_requirements(
     )
 
 
+@post("/account/tos-acceptance", guards=[requires_session])
+async def accept_connect_account_tos(
+    data: AcceptTosData,
+    user: User,
+    transaction: AsyncSession,
+    billing_service: BillingService,
+) -> ConnectAccountResponse:
+    org = await _get_user_org(transaction, user)
+    if not org.stripe_account_id:
+        raise NotFoundException("Connect account has not been created for this organization")
+
+    await billing_service.accept_tos(account_id=org.stripe_account_id, ip=data.ip, user_agent=data.user_agent)
+    return ConnectAccountResponse(stripe_account_id=org.stripe_account_id)
+
+
 organization_router = Router(
     path="/organizations/me/connect",
-    route_handlers=[create_connect_account, update_connect_account, get_connect_account_requirements],
+    route_handlers=[
+        create_connect_account,
+        update_connect_account,
+        get_connect_account_requirements,
+        accept_connect_account_tos,
+    ],
     tags=["organizations"],
 )
