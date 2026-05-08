@@ -17,7 +17,6 @@ from app.domain.invoices.schemas import (
     UpdateLineItemData,
 )
 from app.domain.invoices.state_machine import invoice_state_machine
-from app.domain.users.models import Organization
 from app.platform.actions.base import BaseObjectAction, BaseTopLevelAction, EmptyActionData, action_group_factory
 from app.platform.actions.deps import ActionDeps
 from app.platform.actions.enums import ActionGroupType, ActionIcon
@@ -136,7 +135,7 @@ class SendInvoice(BaseObjectAction[Invoice, EmptyActionData]):
 
     @classmethod
     def is_available(cls, obj: Invoice, deps: ActionDeps) -> bool:
-        return invoice_state_machine.can_transition(obj, InvoiceState.sent, deps.user.role_enum)
+        return invoice_state_machine.can_transition(obj, InvoiceState.sent, deps.user.role)
 
     @classmethod
     async def execute(
@@ -145,9 +144,8 @@ class SendInvoice(BaseObjectAction[Invoice, EmptyActionData]):
         await deps.sm_service.transition(invoice_state_machine, obj, InvoiceState.sent, actor=deps.user)
 
         if obj.total_cents > 0:
-            result = await transaction.execute(select(Organization).where(Organization.id == obj.organization_id))
-            org = result.scalar_one_or_none()
-            if org is not None and org.stripe_account_id:
+            org = deps.organization
+            if org.stripe_account_id:
                 try:
                     obj.payment_link_url = await deps.billing.create_payment_link(
                         amount_cents=obj.total_cents,
@@ -170,7 +168,7 @@ class MarkInvoicePaid(BaseObjectAction[Invoice, EmptyActionData]):
 
     @classmethod
     def is_available(cls, obj: Invoice, deps: ActionDeps) -> bool:
-        return invoice_state_machine.can_transition(obj, InvoiceState.paid, deps.user.role_enum)
+        return invoice_state_machine.can_transition(obj, InvoiceState.paid, deps.user.role)
 
     @classmethod
     async def execute(
@@ -190,7 +188,7 @@ class VoidInvoice(BaseObjectAction[Invoice, EmptyActionData]):
 
     @classmethod
     def is_available(cls, obj: Invoice, deps: ActionDeps) -> bool:
-        return invoice_state_machine.can_transition(obj, InvoiceState.void, deps.user.role_enum)
+        return invoice_state_machine.can_transition(obj, InvoiceState.void, deps.user.role)
 
     @classmethod
     async def execute(

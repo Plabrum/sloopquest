@@ -23,7 +23,7 @@ def requires_role(allowed_roles: list[Role], connection: ASGIConnection) -> None
     """
     if not connection.user:
         raise NotAuthorizedException("Authentication required")
-    if connection.user.role_enum not in allowed_roles:
+    if connection.user.role not in allowed_roles:
         raise PermissionDeniedException(f"Requires one of: {', '.join(allowed_roles)}")
 
 

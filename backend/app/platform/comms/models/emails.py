@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.platform.base.models import BaseDBModel
 from app.platform.comms.enums import EmailMessageStatus
+from app.utils.textenum import TextEnum
 
 
 class EmailMessage(BaseDBModel):
@@ -28,10 +29,7 @@ class EmailMessage(BaseDBModel):
     sent_at: Mapped[datetime | None] = mapped_column(sa.DateTime(timezone=True))
 
     # Attempt outcome
-    status: Mapped[EmailMessageStatus] = mapped_column(
-        sa.Enum(EmailMessageStatus, name="emailmessagestatus"),
-        default=EmailMessageStatus.PENDING,
-    )
+    status: Mapped[EmailMessageStatus] = mapped_column(TextEnum(EmailMessageStatus), default=EmailMessageStatus.PENDING)
     error_message: Mapped[str | None] = mapped_column(sa.Text)
 
     # Thread linkage

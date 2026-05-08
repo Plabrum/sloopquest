@@ -68,6 +68,7 @@ def _make_action_group(model_cls: type, allow: bool = True) -> tuple[ActionGroup
 def _make_deps() -> ActionDeps:
     return ActionDeps(
         user=MagicMock(id=1),
+        organization=MagicMock(),
         request=MagicMock(),
         transaction=AsyncMock(),
         config=MagicMock(),

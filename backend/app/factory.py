@@ -26,7 +26,6 @@ from app.config import Config
 from app.demo.routes import demo_router
 from app.domain.clients.routes import client_router
 from app.domain.invoices.routes import invoice_router
-from app.domain.organizations.routes import organization_router
 from app.domain.reports.routes import report_router
 from app.domain.subscriptions.routes import subscription_router
 from app.domain.surveys.routes import survey_router, survey_template_router
@@ -38,7 +37,7 @@ from app.platform.actions.routes import action_router
 from app.platform.auth.routes import auth_router
 from app.platform.base.models import BaseDBModel
 from app.platform.base.schema_routes import schema_router
-from app.platform.billing import billing_webhook_router
+from app.platform.billing import billing_webhook_router, connect_router
 from app.platform.comms.webhook_routes import comms_webhook_router
 from app.platform.documents import document_router
 from app.platform.media import local_files_router, media_router
@@ -183,7 +182,7 @@ def create_app(
             report_router,
             subscription_router,
             user_router,
-            organization_router,
+            connect_router,
         ],
         plugins=plugins,
         on_app_init=[session_auth.on_app_init],

@@ -129,7 +129,7 @@ class StateMachineService:
     ) -> None:
         """Human-initiated transition. Validates topology and roles."""
         state = machine.get_state(obj)
-        transition = state.get_transition(to, actor.role_enum)
+        transition = state.get_transition(to, actor.role)
 
         from_label = _humanize(obj.state)
         to_label = _humanize(to)
@@ -168,7 +168,7 @@ class StateMachineService:
     ) -> frozenset[Any]:
         """States this user can transition obj to from its current state."""
         state = machine.get_state(obj)
-        return frozenset(state.allowed_for(actor.role_enum))
+        return frozenset(state.allowed_for(actor.role))
 
     async def _execute_transition(
         self,

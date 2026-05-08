@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from enum import StrEnum, auto
 
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.users.models import Organization
@@ -33,8 +32,7 @@ class StartConnectOnboarding(BaseTopLevelAction[EmptyActionData]):
     async def execute(
         cls, data: EmptyActionData, transaction: AsyncSession, deps: ActionDeps
     ) -> ActionExecutionResponse:
-        result = await transaction.execute(select(Organization).where(Organization.id == deps.user.organization_id))
-        org = result.scalar_one()
+        org = deps.organization
 
         if not org.stripe_account_id:
             org.stripe_account_id = await deps.billing.create_connected_account(name=org.name, email=deps.user.email)

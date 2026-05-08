@@ -93,7 +93,7 @@ class PauseSubscription(BaseObjectAction[Subscription, EmptyActionData]):
 
     @classmethod
     def is_available(cls, obj: Subscription, deps: ActionDeps) -> bool:
-        return subscription_state_machine.can_transition(obj, SubscriptionStatus.paused, deps.user.role_enum)
+        return subscription_state_machine.can_transition(obj, SubscriptionStatus.paused, deps.user.role)
 
     @classmethod
     async def execute(
@@ -112,7 +112,7 @@ class ResumeSubscription(BaseObjectAction[Subscription, EmptyActionData]):
 
     @classmethod
     def is_available(cls, obj: Subscription, deps: ActionDeps) -> bool:
-        return subscription_state_machine.can_transition(obj, SubscriptionStatus.active, deps.user.role_enum)
+        return subscription_state_machine.can_transition(obj, SubscriptionStatus.active, deps.user.role)
 
     @classmethod
     async def execute(
@@ -132,7 +132,7 @@ class CancelSubscription(BaseObjectAction[Subscription, EmptyActionData]):
 
     @classmethod
     def is_available(cls, obj: Subscription, deps: ActionDeps) -> bool:
-        return subscription_state_machine.can_transition(obj, SubscriptionStatus.cancelled, deps.user.role_enum)
+        return subscription_state_machine.can_transition(obj, SubscriptionStatus.cancelled, deps.user.role)
 
     @classmethod
     async def execute(

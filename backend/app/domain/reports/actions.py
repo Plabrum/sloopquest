@@ -102,7 +102,7 @@ class SubmitReportForReview(BaseObjectAction[Report, EmptyActionData]):
 
     @classmethod
     def is_available(cls, obj: Report, deps: ActionDeps) -> bool:
-        return report_state_machine.can_transition(obj, ReportState.ready_for_review, deps.user.role_enum)
+        return report_state_machine.can_transition(obj, ReportState.ready_for_review, deps.user.role)
 
     @classmethod
     async def execute(
@@ -121,7 +121,7 @@ class DeliverWatermarked(BaseObjectAction[Report, EmptyActionData]):
 
     @classmethod
     def is_available(cls, obj: Report, deps: ActionDeps) -> bool:
-        return report_state_machine.can_transition(obj, ReportState.watermarked_delivered, deps.user.role_enum)
+        return report_state_machine.can_transition(obj, ReportState.watermarked_delivered, deps.user.role)
 
     @classmethod
     async def execute(
@@ -140,7 +140,7 @@ class ReleaseReport(BaseObjectAction[Report, EmptyActionData]):
 
     @classmethod
     def is_available(cls, obj: Report, deps: ActionDeps) -> bool:
-        return report_state_machine.can_transition(obj, ReportState.released, deps.user.role_enum)
+        return report_state_machine.can_transition(obj, ReportState.released, deps.user.role)
 
     @classmethod
     async def execute(

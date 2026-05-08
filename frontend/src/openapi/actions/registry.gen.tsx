@@ -3,10 +3,7 @@
  */
 import type { ReactElement } from "react";
 import {
-  ClientActionsCreateIndividualForm,
-  ClientActionsCreateInsuranceCompanyForm,
-  ClientActionsCreateLenderForm,
-  ClientActionsCreateBrokerForm,
+  ClientActionsCreateForm,
   ClientActionsUpdateForm,
   VesselActionsCreateForm,
   VesselActionsUpdateForm,
@@ -28,17 +25,8 @@ import {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const generatedRegistry: Record<string, { render: (params: any) => ReactElement }> = {
-  "client_actions__create_individual": {
-    render: (params) => <ClientActionsCreateIndividualForm {...params} />,
-  },
-  "client_actions__create_insurance_company": {
-    render: (params) => <ClientActionsCreateInsuranceCompanyForm {...params} />,
-  },
-  "client_actions__create_lender": {
-    render: (params) => <ClientActionsCreateLenderForm {...params} />,
-  },
-  "client_actions__create_broker": {
-    render: (params) => <ClientActionsCreateBrokerForm {...params} />,
+  "client_actions__create": {
+    render: (params) => <ClientActionsCreateForm {...params} />,
   },
   "client_actions__update": {
     render: (params) => <ClientActionsUpdateForm {...params} />,

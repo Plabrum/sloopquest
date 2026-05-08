@@ -65,7 +65,7 @@ class FakeUser:
     def __init__(self, role: Role) -> None:
         self.id = 42
         self.organization_id = 1
-        self.role_enum = role
+        self.role = role
 
 
 @pytest.fixture

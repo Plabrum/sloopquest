@@ -15,6 +15,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.platform.base.models import BaseDBModel
 from app.platform.llm.enums import MessageRole
+from app.utils.textenum import TextEnum
 
 
 class LLMThread(BaseDBModel):
@@ -41,10 +42,7 @@ class LLMMessage(BaseDBModel):
         nullable=False,
         index=True,
     )
-    role: Mapped[MessageRole] = mapped_column(
-        sa.Enum(MessageRole, values_callable=lambda x: [e.value for e in x], name="llm_message_role"),
-        nullable=False,
-    )
+    role: Mapped[MessageRole] = mapped_column(TextEnum(MessageRole), nullable=False)
     content: Mapped[str] = mapped_column(sa.Text, nullable=False)
 
     thread: Mapped[LLMThread] = relationship("LLMThread", back_populates="messages")

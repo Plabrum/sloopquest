@@ -5,6 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.domain.users.roles import Role
 from app.platform.base.models import BaseDBModel
+from app.utils.textenum import TextEnum
 
 # NOTE: User and Organization deliberately do NOT use OrgRootMixin / OrgScopedMixin
 # (and so are not under RLS). Other tables' RLS policies subquery `users` to
@@ -43,10 +44,6 @@ class User(BaseDBModel):
     email: Mapped[str] = mapped_column(sa.Text)
     email_verified: Mapped[bool] = mapped_column(default=False)
     phone: Mapped[str | None] = mapped_column(sa.Text)
-    role: Mapped[str] = mapped_column(sa.Text, server_default=Role.MEMBER)
+    role: Mapped[Role] = mapped_column(TextEnum(Role), server_default=Role.MEMBER.name)
 
     organization: Mapped[Organization] = relationship("Organization", foreign_keys="User.organization_id", lazy="raise")
-
-    @property
-    def role_enum(self) -> Role:
-        return Role(self.role)

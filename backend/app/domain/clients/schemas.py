@@ -33,29 +33,15 @@ class ClientDetail(BaseSchema):
     updated_at: datetime
 
 
-class CreateIndividualData(BaseSchema):
-    first_name: str
-    last_name: str
-    email: str | None = None
-    phone: str | None = None
-
-
-class CreateInsuranceCompanyData(BaseSchema):
-    company_name: str
+class CreateClientData(BaseSchema):
+    client_type: ClientType
+    first_name: str | None = None
+    last_name: str | None = None
+    company_name: str | None = None
     claim_contact_name: str | None = None
-    email: str | None = None
-    phone: str | None = None
-
-
-class CreateLenderData(BaseSchema):
-    institution_name: str
+    institution_name: str | None = None
     loan_officer_name: str | None = None
-    email: str | None = None
-    phone: str | None = None
-
-
-class CreateBrokerData(BaseSchema):
-    brokerage_name: str
+    brokerage_name: str | None = None
     agent_name: str | None = None
     license_number: str | None = None
     email: str | None = None

@@ -46,12 +46,8 @@ class Survey(
     StateMachineMixin(state_enum=SurveyState, initial_state=SurveyState.inquiry),
 ):
     __tablename__ = "surveys"
-    __mapper_args__ = {
-        "polymorphic_on": "survey_type",
-        "polymorphic_identity": None,
-    }
 
-    survey_type: Mapped[str] = mapped_column(sa.Text, nullable=False, index=True)
+    survey_type: Mapped[SurveyType] = mapped_column(TextEnum(SurveyType), nullable=False, index=True)
 
     organization_id: Mapped[int] = mapped_column(
         sa.ForeignKey("organizations.id", ondelete="RESTRICT"),
@@ -144,22 +140,6 @@ class Survey(
         cascade="all, delete-orphan",
         lazy="noload",
     )
-
-
-class PrePurchaseSurvey(Survey):
-    __mapper_args__ = {"polymorphic_identity": SurveyType.pre_purchase.value}
-
-
-class ConditionAndValuationSurvey(Survey):
-    __mapper_args__ = {"polymorphic_identity": SurveyType.condition_and_valuation.value}
-
-
-class DamageSurvey(Survey):
-    __mapper_args__ = {"polymorphic_identity": SurveyType.damage.value}
-
-
-class AppraisalSurvey(Survey):
-    __mapper_args__ = {"polymorphic_identity": SurveyType.appraisal.value}
 
 
 class SurveyParty(BaseDBModel):

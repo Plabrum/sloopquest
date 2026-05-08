@@ -6,13 +6,9 @@ from litestar.exceptions import NotFoundException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.surveys.enums import SurveyState, SurveyType
+from app.domain.surveys.enums import SurveyState
 from app.domain.surveys.models import (
-    AppraisalSurvey,
-    ConditionAndValuationSurvey,
-    DamageSurvey,
     Finding,
-    PrePurchaseSurvey,
     Recommendation,
     Survey,
     SurveyParty,
@@ -36,14 +32,6 @@ from app.platform.actions.base import BaseObjectAction, BaseTopLevelAction, Empt
 from app.platform.actions.deps import ActionDeps
 from app.platform.actions.enums import ActionGroupType, ActionIcon
 from app.platform.actions.schemas import ActionExecutionResponse
-
-_SURVEY_TYPE_MAP = {
-    SurveyType.pre_purchase: PrePurchaseSurvey,
-    SurveyType.condition_and_valuation: ConditionAndValuationSurvey,
-    SurveyType.damage: DamageSurvey,
-    SurveyType.appraisal: AppraisalSurvey,
-}
-
 
 # ── Survey actions ─────────────────────────────────────────────────────────────
 
@@ -92,8 +80,8 @@ class CreateSurvey(BaseTopLevelAction[CreateSurveyData]):
     async def execute(
         cls, data: CreateSurveyData, transaction: AsyncSession, deps: ActionDeps
     ) -> ActionExecutionResponse:
-        survey_cls = _SURVEY_TYPE_MAP[data.survey_type]
-        survey = survey_cls(
+        survey = Survey(
+            survey_type=data.survey_type,
             organization_id=deps.user.organization_id,
             vessel_id=data.vessel_id,
             assigned_surveyor_id=data.assigned_surveyor_id,
@@ -184,7 +172,7 @@ class ScheduleSurvey(BaseObjectAction[Survey, EmptyActionData]):
 
     @classmethod
     def is_available(cls, obj: Survey, deps: ActionDeps) -> bool:
-        return survey_state_machine.can_transition(obj, SurveyState.scheduled, deps.user.role_enum)
+        return survey_state_machine.can_transition(obj, SurveyState.scheduled, deps.user.role)
 
     @classmethod
     async def execute(
@@ -203,7 +191,7 @@ class StartInspection(BaseObjectAction[Survey, EmptyActionData]):
 
     @classmethod
     def is_available(cls, obj: Survey, deps: ActionDeps) -> bool:
-        return survey_state_machine.can_transition(obj, SurveyState.in_field, deps.user.role_enum)
+        return survey_state_machine.can_transition(obj, SurveyState.in_field, deps.user.role)
 
     @classmethod
     async def execute(
@@ -223,7 +211,7 @@ class CompleteInspection(BaseObjectAction[Survey, EmptyActionData]):
     @classmethod
     def is_available(cls, obj: Survey, deps: ActionDeps) -> bool:
         return obj.state == SurveyState.in_field and survey_state_machine.can_transition(
-            obj, SurveyState.in_draft, deps.user.role_enum
+            obj, SurveyState.in_draft, deps.user.role
         )
 
     @classmethod
@@ -243,7 +231,7 @@ class SubmitForReview(BaseObjectAction[Survey, EmptyActionData]):
 
     @classmethod
     def is_available(cls, obj: Survey, deps: ActionDeps) -> bool:
-        return survey_state_machine.can_transition(obj, SurveyState.in_review, deps.user.role_enum)
+        return survey_state_machine.can_transition(obj, SurveyState.in_review, deps.user.role)
 
     @classmethod
     async def execute(
@@ -263,7 +251,7 @@ class MoveToDraft(BaseObjectAction[Survey, EmptyActionData]):
     @classmethod
     def is_available(cls, obj: Survey, deps: ActionDeps) -> bool:
         return obj.state == SurveyState.in_review and survey_state_machine.can_transition(
-            obj, SurveyState.in_draft, deps.user.role_enum
+            obj, SurveyState.in_draft, deps.user.role
         )
 
     @classmethod
@@ -283,7 +271,7 @@ class DeliverSurvey(BaseObjectAction[Survey, EmptyActionData]):
 
     @classmethod
     def is_available(cls, obj: Survey, deps: ActionDeps) -> bool:
-        return survey_state_machine.can_transition(obj, SurveyState.delivered, deps.user.role_enum)
+        return survey_state_machine.can_transition(obj, SurveyState.delivered, deps.user.role)
 
     @classmethod
     async def execute(
@@ -302,7 +290,7 @@ class MarkPaid(BaseObjectAction[Survey, EmptyActionData]):
 
     @classmethod
     def is_available(cls, obj: Survey, deps: ActionDeps) -> bool:
-        return survey_state_machine.can_transition(obj, SurveyState.paid, deps.user.role_enum)
+        return survey_state_machine.can_transition(obj, SurveyState.paid, deps.user.role)
 
     @classmethod
     async def execute(
@@ -322,7 +310,7 @@ class CancelSurvey(BaseObjectAction[Survey, EmptyActionData]):
 
     @classmethod
     def is_available(cls, obj: Survey, deps: ActionDeps) -> bool:
-        return survey_state_machine.can_transition(obj, SurveyState.cancelled, deps.user.role_enum)
+        return survey_state_machine.can_transition(obj, SurveyState.cancelled, deps.user.role)
 
     @classmethod
     async def execute(

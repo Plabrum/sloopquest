@@ -3,13 +3,14 @@
 import logging
 from typing import Annotated
 
-from litestar import Request, Router, get, post
+from litestar import Router, get, post
 from litestar.channels import ChannelsPlugin
 from litestar.params import Parameter
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
+from app.domain.users.models import User
 from app.platform.auth.guards import requires_session
 from app.platform.threads.enums import ThreadSocketMessageType
 from app.platform.threads.models import Message, Thread
@@ -33,22 +34,16 @@ from app.utils.sqids import Sqid, sqid_encode
 logger = logging.getLogger(__name__)
 
 
-def _user_id(request: Request) -> int:
-    """Extract integer user id from the request's auth context."""
-    user = request.user
-    return int(getattr(user, "id", user))
-
-
 @post("/{threadable_type:str}/{threadable_id:int}/messages")
 async def create_message(
-    request: Request,
+    user: User,
     threadable_type: str,
     threadable_id: int,
     data: MessageCreateSchema,
     transaction: AsyncSession,
     channels: ChannelsPlugin,
 ) -> MessageSchema:
-    user_id = _user_id(request)
+    user_id = user.id
 
     thread = await get_or_create_thread(
         transaction=transaction,
@@ -140,7 +135,7 @@ async def list_messages(
 
 @post("/{threadable_type:str}/{threadable_id:int}/mark-read", status_code=204)
 async def mark_read(
-    request: Request,
+    user: User,
     threadable_type: str,
     threadable_id: int,
     transaction: AsyncSession,
@@ -150,12 +145,12 @@ async def mark_read(
         threadable_type=threadable_type,
         threadable_id=threadable_id,
     )
-    await mark_thread_as_read(transaction, thread.id, _user_id(request))
+    await mark_thread_as_read(transaction, thread.id, user.id)
 
 
 @post("/{threadable_type:str}/batch-unread")
 async def get_batch_thread_unread(
-    request: Request,
+    user: User,
     threadable_type: str,
     data: BatchUnreadRequest,
     transaction: AsyncSession,
@@ -167,7 +162,7 @@ async def get_batch_thread_unread(
         transaction,
         threadable_type,
         [int(oid) for oid in data.object_ids],
-        _user_id(request),
+        user.id,
     )
 
     thread_infos: list[ThreadUnreadInfo] = []
