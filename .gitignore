@@ -11,3 +11,4 @@ infra/**/plan_output.txt
 infra/lambda/*.zip
 .vscode/settings.json
 .vscode/settings.json
+.playwright-mcp

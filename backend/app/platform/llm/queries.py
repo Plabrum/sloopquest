@@ -1,4 +1,6 @@
-from sqlalchemy import select
+from datetime import datetime
+
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.platform.llm.enums import MessageRole
@@ -11,7 +13,7 @@ async def get_thread_by_id(db: AsyncSession, thread_id: int) -> LLMThread | None
 
 
 async def get_messages_by_thread(db: AsyncSession, thread_id: int) -> list[LLMMessage]:
-    """Load the full message history for a thread (used server-side for LLM context)."""
+    """Full message history for a thread — used server-side for LLM context."""
     result = await db.execute(select(LLMMessage).where(LLMMessage.thread_id == thread_id).order_by(LLMMessage.id.asc()))
     return list(result.scalars().all())
 
@@ -69,3 +71,37 @@ async def create_message(db: AsyncSession, thread_id: int, role: MessageRole, co
     db.add(message)
     await db.flush()
     return message
+
+
+async def list_threads_by_user(
+    db: AsyncSession,
+    user_id: int,
+    limit: int = 20,
+) -> list[tuple[LLMThread, str | None, datetime | None]]:
+    """Return threads with their first user message content and last message timestamp."""
+    first_msg_subq = (
+        select(LLMMessage.content)
+        .where(LLMMessage.thread_id == LLMThread.id, LLMMessage.role == MessageRole.USER)
+        .order_by(LLMMessage.id.asc())
+        .limit(1)
+        .correlate(LLMThread)
+        .scalar_subquery()
+    )
+    last_at_subq = (
+        select(func.max(LLMMessage.created_at))
+        .where(LLMMessage.thread_id == LLMThread.id)
+        .correlate(LLMThread)
+        .scalar_subquery()
+    )
+    stmt = (
+        select(LLMThread, first_msg_subq, last_at_subq)
+        .where(LLMThread.user_id == user_id)
+        .order_by(last_at_subq.desc())
+        .limit(limit)
+    )
+    result = await db.execute(stmt)
+    return list(result.tuples())
+
+
+async def delete_thread(db: AsyncSession, thread_id: int) -> None:
+    await db.execute(delete(LLMThread).where(LLMThread.id == thread_id))

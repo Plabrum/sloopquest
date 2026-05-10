@@ -3,15 +3,58 @@
 
 from __future__ import annotations
 
+import json
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
 import pytest
 
-from app.platform.llm.base import registry
 from app.platform.llm.client import AnthropicLLMClient, LocalLLMClient
 from app.platform.llm.enums import MessageRole
-from app.platform.llm.tools import EchoTool  # noqa: F401 — ensures EchoTool is registered
+from app.platform.llm.registry import (
+    SloopTool,
+    ToolContext,
+    ToolResult,
+    get_tool_definitions,
+    register_tool,
+    serialize_tool_result,
+)
+from app.platform.llm.schemas import InputSchema, PropertySchema
+
+# --- Test tool registered inline so registry tests have something to work with ---
+
+
+class EchoInput:
+    def __init__(self, message: str) -> None:
+        self.message = message
+
+
+@register_tool
+class _EchoTool(SloopTool):
+    name = "_test_echo"
+    description = "Echo a message back (test only)."
+    input_schema = InputSchema(
+        properties={"message": PropertySchema(type="string", description="Message to echo.")},
+        required=["message"],
+    )
+
+    class _Struct:
+        def __init__(self, message: str) -> None:
+            self.message = message
+
+    input_struct = _Struct  # type: ignore[assignment]
+
+    async def execute(self, ctx: ToolContext, args: _Struct) -> ToolResult | str:
+        return str(args.message)
+
+
+async def _echo_executor(name: str, inputs: dict) -> str:
+    if name == "_test_echo":
+        return str(inputs.get("message", ""))
+    return f"Unknown tool: {name}"
+
+
+# --- Client tests ---
 
 
 async def test_local_client_returns_stub_without_calling_api() -> None:
@@ -21,23 +64,15 @@ async def test_local_client_returns_stub_without_calling_api() -> None:
 
 
 async def test_anthropic_agentic_loop_executes_tool_and_returns_text() -> None:
-    """Two-iteration loop: first response asks for `echo`, second returns final text.
-
-    Verifies the loop:
-      - dispatches `tool_use` blocks through the executor
-      - appends the assistant tool_use turn to history
-      - appends a `tool_result` user turn with the executor's output
-      - persists both turns via `persist_tool_message`
-      - returns the final assistant text on `end_turn`
-    """
+    """Two-iteration loop: first response uses a tool, second returns final text."""
     client = AnthropicLLMClient(api_key="test-key")
 
     tool_use_block = SimpleNamespace(
         type="tool_use",
         id="toolu_1",
-        name="echo",
+        name="_test_echo",
         input={"message": "ahoy"},
-        model_dump=lambda: {"type": "tool_use", "id": "toolu_1", "name": "echo", "input": {"message": "ahoy"}},
+        model_dump=lambda: {"type": "tool_use", "id": "toolu_1", "name": "_test_echo", "input": {"message": "ahoy"}},
     )
     text_block = SimpleNamespace(type="text", text="echoed: ahoy")
 
@@ -52,10 +87,11 @@ async def test_anthropic_agentic_loop_executes_tool_and_returns_text() -> None:
     async def persist(role: MessageRole, content: str) -> None:
         persisted.append((role, content))
 
+    tool_defs = get_tool_definitions()
     out = await client.chat(
         [{"role": "user", "content": "say ahoy"}],
-        tools=registry.definitions,
-        tool_executor=registry.execute,
+        tools=tool_defs,
+        tool_executor=_echo_executor,
         persist_tool_message=persist,
     )
 
@@ -89,22 +125,42 @@ async def test_anthropic_loop_bails_after_max_iterations() -> None:
     tool_use_block = SimpleNamespace(
         type="tool_use",
         id="toolu_loop",
-        name="echo",
+        name="_test_echo",
         input={"message": "x"},
-        model_dump=lambda: {"type": "tool_use", "id": "toolu_loop", "name": "echo", "input": {"message": "x"}},
+        model_dump=lambda: {"type": "tool_use", "id": "toolu_loop", "name": "_test_echo", "input": {"message": "x"}},
     )
     response = SimpleNamespace(stop_reason="tool_use", content=[tool_use_block])
     client._client = SimpleNamespace(messages=SimpleNamespace(create=AsyncMock(return_value=response)))
 
+    tool_defs = get_tool_definitions()
     out = await client.chat(
         [{"role": "user", "content": "go"}],
-        tools=registry.definitions,
-        tool_executor=registry.execute,
+        tools=tool_defs,
+        tool_executor=_echo_executor,
     )
     assert "wasn't able to complete" in out
 
 
-@pytest.mark.parametrize("name,expected", [("echo", "ahoy"), ("unknown", "Unknown tool: unknown")])
-async def test_registry_execute(name: str, expected: str) -> None:
-    out = await registry.execute(name, {"message": "ahoy"})
+@pytest.mark.parametrize("name,expected", [("_test_echo", "ahoy"), ("unknown", "Unknown tool: unknown")])
+async def test_echo_executor(name: str, expected: str) -> None:
+    out = await _echo_executor(name, {"message": "ahoy"})
     assert out == expected
+
+
+async def test_serialize_tool_result_str() -> None:
+    assert serialize_tool_result("plain string") == "plain string"
+
+
+async def test_serialize_tool_result_with_data() -> None:
+
+    result = ToolResult(data={"count": 3}, message="Found 3")
+    serialized = serialize_tool_result(result)
+    parsed = json.loads(serialized)
+    assert parsed["data"] == {"count": 3}
+    assert parsed["message"] == "Found 3"
+
+
+async def test_get_tool_definitions_returns_registered_tools() -> None:
+    defs = get_tool_definitions()
+    names = [d.name for d in defs]
+    assert "_test_echo" in names

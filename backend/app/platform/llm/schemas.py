@@ -18,6 +18,8 @@ class MessageSchema(BaseSchema):
 
 class CreateThreadBody(BaseSchema):
     content: str
+    timezone: str | None = None
+    context: dict | None = None
 
 
 class ThreadCreatedSchema(BaseSchema):
@@ -28,6 +30,8 @@ class ThreadCreatedSchema(BaseSchema):
 
 class SendMessageBody(BaseSchema):
     content: str
+    timezone: str | None = None
+    context: dict | None = None
 
 
 class SendMessageResponse(BaseSchema):
@@ -38,6 +42,16 @@ class MessagePageSchema(BaseSchema):
     messages: list[MessageSchema]
     has_more: bool
     next_cursor: Sqid | None
+
+
+class ThreadSummarySchema(BaseSchema):
+    id: Sqid
+    title: str | None
+    last_message_at: datetime | None
+
+
+class ThreadListPage(BaseSchema):
+    threads: list[ThreadSummarySchema]
 
 
 # --- Tool definition schemas (sent to Anthropic) ---

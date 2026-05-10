@@ -52,16 +52,16 @@ fixtures:
 dev:
     #!/usr/bin/env bash
     trap 'kill 0' EXIT
-    just dev-backend &
-    just dev-frontend &
+    (cd backend && uv run litestar --app app.index:app run -r -d -p 8000) &
+    (cd frontend && pnpm dev) &
     wait
 
 # Backend + SAQ worker in separate process (no frontend)
 dev-backend-all:
     #!/usr/bin/env bash
     trap 'kill 0' EXIT
-    just dev-backend &
-    just dev-worker &
+    (cd backend && uv run litestar --app app.index:app run -r -d -p 8000) &
+    (cd backend && uv run litestar --app app.index:app workers run) &
     wait
 
 # Start Litestar backend with hot reload

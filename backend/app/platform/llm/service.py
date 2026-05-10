@@ -2,17 +2,43 @@
 
 import json
 import logging
+from collections.abc import AsyncGenerator
+from datetime import UTC, datetime
 
 from litestar.exceptions import NotFoundException
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.domain.users.models import User
 from app.platform.llm.base import registry
 from app.platform.llm.client import BaseLLMClient
 from app.platform.llm.enums import MessageRole
+from app.platform.llm.executor import build_tool_executor
 from app.platform.llm.models import LLMMessage, LLMThread
 from app.platform.llm.queries import create_message, create_thread, get_messages_by_thread, get_thread_by_id
+from app.platform.llm.registry import get_tool_definitions
+from app.utils.sqids import Sqid
 
 logger = logging.getLogger(__name__)
+
+
+def _msg_to_dict(msg: LLMMessage) -> dict:
+    return {
+        "id": str(msg.id),
+        "thread_id": str(Sqid(msg.thread_id)),
+        "role": msg.role,
+        "content": msg.content,
+        "created_at": msg.created_at.isoformat(),
+    }
+
+
+def _build_system_prompt(context: dict | None = None) -> str:
+    today = datetime.now(tz=UTC).strftime("%Y-%m-%d")
+    parts = [f"Today's date is {today} (UTC)."]
+    if context:
+        page = context.get("current_page")
+        if page:
+            parts.append(f"The user is currently viewing: {page}")
+    return " ".join(parts)
 
 
 class LLMService:
@@ -97,3 +123,101 @@ class LLMService:
             self.transaction, thread_id=thread_id, role=MessageRole.ASSISTANT, content=response_text
         )
         return assistant_msg
+
+    async def stream_create_thread(
+        self,
+        content: str,
+        user: User,
+        *,
+        context: dict | None = None,
+        threadable_type: str | None = None,
+        threadable_id: int | None = None,
+    ) -> AsyncGenerator[tuple[str, dict]]:
+        invalidate_keys: list[str] = []
+        thread = await create_thread(
+            self.transaction,
+            user_id=int(user.id),
+            threadable_type=threadable_type,
+            threadable_id=threadable_id,
+        )
+        await create_message(self.transaction, thread_id=thread.id, role=MessageRole.USER, content=content)
+
+        executor = build_tool_executor(self.transaction, user, invalidate_keys)
+        system = _build_system_prompt(context)
+        tools = get_tool_definitions() or None
+        full_text = ""
+
+        async def persist_tool_message(role: MessageRole, json_content: str) -> None:
+            await create_message(self.transaction, thread_id=thread.id, role=role, content=json_content)
+
+        async for event_name, event_data in self.llm_client.stream(
+            [{"role": "user", "content": content}],
+            system=system,
+            tools=tools,
+            tool_executor=executor,
+            persist_tool_message=persist_tool_message,
+        ):
+            yield (event_name, event_data)
+            if event_name == "token":
+                full_text += event_data.get("delta", "")
+
+        assistant_msg = await create_message(
+            self.transaction, thread_id=thread.id, role=MessageRole.ASSISTANT, content=full_text
+        )
+        yield (
+            "message_complete",
+            {
+                "thread_id": str(thread.id),
+                "message": _msg_to_dict(assistant_msg),
+                "invalidate_queries": invalidate_keys,
+            },
+        )
+
+    async def stream_send_message(
+        self,
+        thread_id: int,
+        content: str,
+        user: User,
+        *,
+        context: dict | None = None,
+    ) -> AsyncGenerator[tuple[str, dict]]:
+        thread = await get_thread_by_id(self.transaction, thread_id)
+        if thread is None:
+            raise NotFoundException("Thread not found")
+
+        await create_message(self.transaction, thread_id=thread.id, role=MessageRole.USER, content=content)
+
+        history = await get_messages_by_thread(self.transaction, thread_id)
+        llm_messages = self._build_llm_messages(history)
+
+        invalidate_keys: list[str] = []
+        executor = build_tool_executor(self.transaction, user, invalidate_keys)
+        system = _build_system_prompt(context)
+        tools = get_tool_definitions() or None
+        full_text = ""
+
+        async def persist_tool_message(role: MessageRole, json_content: str) -> None:
+            await create_message(self.transaction, thread_id=thread_id, role=role, content=json_content)
+
+        async for event_name, event_data in self.llm_client.stream(
+            llm_messages,
+            system=system,
+            tools=tools,
+            tool_executor=executor,
+            persist_tool_message=persist_tool_message,
+        ):
+            yield (event_name, event_data)
+            if event_name == "token":
+                full_text += event_data.get("delta", "")
+
+        assistant_msg = await create_message(
+            self.transaction, thread_id=thread_id, role=MessageRole.ASSISTANT, content=full_text
+        )
+        yield (
+            "message_complete",
+            {
+                "thread_id": str(thread.id),
+                "message": _msg_to_dict(assistant_msg),
+                "invalidate_queries": invalidate_keys,
+            },
+        )

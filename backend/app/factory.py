@@ -41,6 +41,7 @@ from app.platform.base.schema_routes import schema_router
 from app.platform.billing import billing_webhook_router, connect_router
 from app.platform.comms.webhook_routes import comms_webhook_router
 from app.platform.documents import document_router
+from app.platform.llm.routes import llm_router
 from app.platform.media import local_files_router, media_router
 from app.platform.queue.config import queue_config
 from app.platform.threads import thread_handler, thread_router
@@ -176,6 +177,7 @@ def create_app(
             subscription_router,
             user_router,
             connect_router,
+            llm_router,
         ],
         plugins=plugins,
         on_app_init=[session_auth.on_app_init],
