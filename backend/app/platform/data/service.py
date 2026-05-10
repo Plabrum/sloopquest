@@ -28,11 +28,11 @@ class FieldConfig:
 
 
 def _is_numerical(field_type: FieldType) -> bool:
-    return field_type in (FieldType.int, FieldType.float, FieldType.cents)
+    return field_type in (FieldType.INT, FieldType.FLOAT, FieldType.CENTS)
 
 
 def _is_categorical(field_type: FieldType) -> bool:
-    return field_type in (FieldType.string, FieldType.enum, FieldType.bool)
+    return field_type in (FieldType.STRING, FieldType.ENUM, FieldType.BOOL)
 
 
 def _get_default_aggregation(field_type: FieldType) -> AggregationType:
@@ -66,76 +66,76 @@ def _resolve_time_range(
 
 def _calculate_start(time_range: TimeRange, end: datetime) -> datetime:
     match time_range:
-        case TimeRange.last_7_days:
+        case TimeRange.LAST_7_DAYS:
             return end - timedelta(days=7)
-        case TimeRange.last_30_days:
+        case TimeRange.LAST_30_DAYS:
             return end - timedelta(days=30)
-        case TimeRange.last_90_days:
+        case TimeRange.LAST_90_DAYS:
             return end - timedelta(days=90)
-        case TimeRange.last_6_months:
+        case TimeRange.LAST_6_MONTHS:
             return end - timedelta(days=180)
-        case TimeRange.last_year:
+        case TimeRange.LAST_YEAR:
             return end - timedelta(days=365)
-        case TimeRange.year_to_date:
+        case TimeRange.YEAR_TO_DATE:
             return end.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
-        case TimeRange.month_to_date:
+        case TimeRange.MONTH_TO_DATE:
             return end.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        case TimeRange.all_time:
+        case TimeRange.ALL_TIME:
             return end - timedelta(days=3650)
 
 
 def _determine_granularity(granularity: Granularity, start: datetime, end: datetime) -> Granularity:
-    if granularity != Granularity.auto:
+    if granularity != Granularity.AUTO:
         return granularity
 
     delta = end - start
     if delta <= timedelta(days=1):
-        return Granularity.hour
+        return Granularity.HOUR
     elif delta <= timedelta(days=7):
-        return Granularity.day
+        return Granularity.DAY
     elif delta <= timedelta(days=90):
-        return Granularity.week
+        return Granularity.WEEK
     elif delta <= timedelta(days=365):
-        return Granularity.month
+        return Granularity.MONTH
     elif delta <= timedelta(days=730):
-        return Granularity.quarter
+        return Granularity.QUARTER
     else:
-        return Granularity.year
+        return Granularity.YEAR
 
 
 def _trunc_format(granularity: Granularity) -> str:
     match granularity:
-        case Granularity.hour:
+        case Granularity.HOUR:
             return "hour"
-        case Granularity.day:
+        case Granularity.DAY:
             return "day"
-        case Granularity.week:
+        case Granularity.WEEK:
             return "week"
-        case Granularity.month:
+        case Granularity.MONTH:
             return "month"
-        case Granularity.quarter:
+        case Granularity.QUARTER:
             return "quarter"
-        case Granularity.year:
+        case Granularity.YEAR:
             return "year"
-        case Granularity.auto:
+        case Granularity.AUTO:
             raise ValueError("Granularity must be resolved before use")
 
 
 def _series_interval(granularity: Granularity) -> str:
     match granularity:
-        case Granularity.hour:
+        case Granularity.HOUR:
             return "1 hour"
-        case Granularity.day:
+        case Granularity.DAY:
             return "1 day"
-        case Granularity.week:
+        case Granularity.WEEK:
             return "1 week"
-        case Granularity.month:
+        case Granularity.MONTH:
             return "1 month"
-        case Granularity.quarter:
+        case Granularity.QUARTER:
             return "3 months"
-        case Granularity.year:
+        case Granularity.YEAR:
             return "1 year"
-        case Granularity.auto:
+        case Granularity.AUTO:
             raise ValueError("Granularity must be resolved before use")
 
 

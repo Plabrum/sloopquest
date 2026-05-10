@@ -4,11 +4,11 @@ from app.platform.base.schemas import BaseSchema
 
 
 class FieldType(StrEnum):
-    text = auto()
-    textarea = auto()
-    number = auto()
-    select = auto()
-    checkbox = auto()
+    TEXT = auto()
+    TEXTAREA = auto()
+    NUMBER = auto()
+    SELECT = auto()
+    CHECKBOX = auto()
 
 
 class FormField(BaseSchema):

@@ -45,11 +45,11 @@ _config = CRUDConfig(
     sortable_columns={"title", "created_at"},
     label_field="title",
     data_fields=[
-        FieldConfig("market_value_cents", "Market Value", FieldType.cents),
-        FieldConfig("replacement_value_cents", "Replacement Value", FieldType.cents),
-        FieldConfig("state", "Status", FieldType.enum),
-        FieldConfig("released_at", "Released", FieldType.datetime, aggregatable=False, filterable=True),
-        FieldConfig("created_at", "Created", FieldType.datetime, aggregatable=False),
+        FieldConfig("market_value_cents", "Market Value", FieldType.CENTS),
+        FieldConfig("replacement_value_cents", "Replacement Value", FieldType.CENTS),
+        FieldConfig("state", "Status", FieldType.ENUM),
+        FieldConfig("released_at", "Released", FieldType.DATETIME, aggregatable=False, filterable=True),
+        FieldConfig("created_at", "Created", FieldType.DATETIME, aggregatable=False),
     ],
 )
 

@@ -1,11 +1,11 @@
-from enum import StrEnum
+from enum import StrEnum, auto
 
 
 class EventType(StrEnum):
     """Types of activity events that can be tracked."""
 
-    CREATED = "created"
-    UPDATED = "updated"
-    DELETED = "deleted"
-    STATE_CHANGED = "state_changed"
-    CUSTOM = "custom"
+    CREATED = auto()
+    UPDATED = auto()
+    DELETED = auto()
+    STATE_CHANGED = auto()
+    CUSTOM = auto()

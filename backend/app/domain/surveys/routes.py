@@ -45,8 +45,8 @@ _survey_config = CRUDConfig(
     sortable_columns={"created_at"},
     label_field="state",
     data_fields=[
-        FieldConfig("state", "Status", FieldType.enum),
-        FieldConfig("created_at", "Created", FieldType.datetime, aggregatable=False),
+        FieldConfig("state", "Status", FieldType.ENUM),
+        FieldConfig("created_at", "Created", FieldType.DATETIME, aggregatable=False),
     ],
 )
 

@@ -65,13 +65,13 @@ _config = CRUDConfig(
     sortable_columns={"invoice_number", "issued_at", "due_at", "total_cents", "created_at"},
     label_field="invoice_number",
     data_fields=[
-        FieldConfig("total_cents", "Total", FieldType.cents),
-        FieldConfig("subtotal_cents", "Subtotal", FieldType.cents),
-        FieldConfig("tax_cents", "Tax", FieldType.cents),
-        FieldConfig("state", "Status", FieldType.enum),
-        FieldConfig("issued_at", "Issued", FieldType.datetime, aggregatable=False, filterable=True),
-        FieldConfig("due_at", "Due", FieldType.datetime, aggregatable=False, filterable=True),
-        FieldConfig("created_at", "Created", FieldType.datetime, aggregatable=False),
+        FieldConfig("total_cents", "Total", FieldType.CENTS),
+        FieldConfig("subtotal_cents", "Subtotal", FieldType.CENTS),
+        FieldConfig("tax_cents", "Tax", FieldType.CENTS),
+        FieldConfig("state", "Status", FieldType.ENUM),
+        FieldConfig("issued_at", "Issued", FieldType.DATETIME, aggregatable=False, filterable=True),
+        FieldConfig("due_at", "Due", FieldType.DATETIME, aggregatable=False, filterable=True),
+        FieldConfig("created_at", "Created", FieldType.DATETIME, aggregatable=False),
     ],
 )
 

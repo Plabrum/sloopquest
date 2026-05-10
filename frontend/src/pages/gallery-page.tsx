@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,28 +33,23 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
+import { useState } from "react";
+import { useTheme } from "@/lib/theme";
 
-type Theme = "default" | "angular" | "glass";
+type Theme = "shad" | "glass" | "angular";
+type ColorMode = "light" | "dark" | "system";
 
 const THEMES: { id: Theme; label: string; description: string }[] = [
-  { id: "default", label: "Default", description: "Base shadcn theme" },
-  { id: "angular", label: "Angular / Technical", description: "Sharp edges, dense, high contrast" },
-  { id: "glass", label: "Glass / Apple", description: "Rounded, translucent, soft" },
+  { id: "shad", label: "Shad", description: "Base shadcn theme" },
+  { id: "angular", label: "Angular", description: "Sharp edges, dense, high contrast" },
+  { id: "glass", label: "Glass", description: "Rounded, translucent, soft" },
 ];
 
-const THEME_VARS: Record<Theme, Record<string, string>> = {
-  default: {},
-  angular: {
-    "--radius": "2px",
-    "--card-blur": "0px",
-    "--card-bg-opacity": "1",
-  },
-  glass: {
-    "--radius": "16px",
-    "--card-blur": "16px",
-    "--card-bg-opacity": "0.75",
-  },
-};
+const COLOR_MODES: { id: ColorMode; label: string }[] = [
+  { id: "light", label: "Light" },
+  { id: "dark", label: "Dark" },
+  { id: "system", label: "System" },
+];
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -76,20 +70,15 @@ const MOCK_ROWS = [
 ];
 
 export function GalleryPage() {
-  const [theme, setTheme] = useState<Theme>("default");
+  const { theme, setTheme, colorMode, setColorMode } = useTheme();
   const [switchOn, setSwitchOn] = useState(false);
   const [checked, setChecked] = useState(false);
   const [sliderVal, setSliderVal] = useState([40]);
 
-  const cssVars = THEME_VARS[theme];
-
   return (
-    <div
-      style={cssVars as React.CSSProperties}
-      className="min-h-screen bg-background text-foreground"
-    >
+    <div className="min-h-screen bg-background text-foreground">
       {/* Theme bar */}
-      <div className="sticky top-0 z-50 flex items-center gap-3 border-b bg-background/80 px-6 py-3 backdrop-blur">
+      <div className="sticky top-0 z-50 flex flex-wrap items-center gap-3 border-b bg-background/80 px-6 py-3 backdrop-blur">
         <span className="text-sm font-medium">Theme</span>
         {THEMES.map((t) => (
           <button
@@ -103,6 +92,22 @@ export function GalleryPage() {
             ].join(" ")}
           >
             {t.label}
+          </button>
+        ))}
+        <div className="mx-2 h-4 w-px bg-border" />
+        <span className="text-sm font-medium">Mode</span>
+        {COLOR_MODES.map((m) => (
+          <button
+            key={m.id}
+            onClick={() => setColorMode(m.id)}
+            className={[
+              "rounded px-3 py-1 text-sm transition-colors",
+              colorMode === m.id
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:bg-muted/80",
+            ].join(" ")}
+          >
+            {m.label}
           </button>
         ))}
         <span className="ml-auto text-xs text-muted-foreground">
@@ -183,7 +188,7 @@ export function GalleryPage() {
 
         <Section title="Cards">
           <div className="grid grid-cols-2 gap-4">
-            <Card>
+            <Card className="surface-blur">
               <CardHeader>
                 <CardTitle>Survey SQ-001</CardTitle>
                 <CardDescription>MV Seabird · Hartmann & Co</CardDescription>
@@ -198,7 +203,7 @@ export function GalleryPage() {
                 <Button size="sm" variant="outline">Archive</Button>
               </CardFooter>
             </Card>
-            <Card>
+            <Card className="surface-blur">
               <CardHeader>
                 <CardTitle>Invoice #INV-042</CardTitle>
                 <CardDescription>Due 2026-05-30</CardDescription>

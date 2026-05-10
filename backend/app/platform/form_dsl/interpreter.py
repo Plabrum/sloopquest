@@ -19,11 +19,11 @@ def build_response_struct(definition: FormDefinition) -> type:
 
 def _python_type(field: FormField) -> type:
     match field.type:
-        case FieldType.number:
+        case FieldType.NUMBER:
             return float
-        case FieldType.checkbox:
+        case FieldType.CHECKBOX:
             return bool
-        case FieldType.select:
+        case FieldType.SELECT:
             return Literal[tuple(field.options)] if field.options else str  # type: ignore[return-value]
         case _:
             return str

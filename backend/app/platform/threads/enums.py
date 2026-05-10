@@ -1,31 +1,31 @@
 """Thread enums."""
 
-from enum import StrEnum
+from enum import StrEnum, auto
 
 
 class MessageActions(StrEnum):
     """Available actions for messages."""
 
-    update = "update"
-    delete = "delete"
+    UPDATE = auto()
+    DELETE = auto()
 
 
 class MessageUpdateType(StrEnum):
     """Type of message update."""
 
-    CREATED = "created"
-    UPDATED = "updated"
-    DELETED = "deleted"
+    CREATED = auto()
+    UPDATED = auto()
+    DELETED = auto()
 
 
 class ThreadSocketMessageType(StrEnum):
     """Types of messages exchanged over the thread WebSocket."""
 
-    MARK_READ = "mark_read"
-    USER_JOINED = "user_joined"
-    USER_LEFT = "user_left"
-    USER_FOCUS = "user_focus"
-    USER_BLUR = "user_blur"
-    MESSAGE_CREATED = "message_created"
-    MESSAGE_UPDATED = "message_updated"
-    MESSAGE_DELETED = "message_deleted"
+    MARK_READ = auto()
+    USER_JOINED = auto()
+    USER_LEFT = auto()
+    USER_FOCUS = auto()
+    USER_BLUR = auto()
+    MESSAGE_CREATED = auto()
+    MESSAGE_UPDATED = auto()
+    MESSAGE_DELETED = auto()

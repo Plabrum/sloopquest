@@ -12,7 +12,7 @@ class TimeSeriesDataRequest(BaseSchema):
     time_range: TimeRange | None = None
     start_date: datetime | None = None
     end_date: datetime | None = None
-    granularity: Granularity = Granularity.auto
+    granularity: Granularity = Granularity.AUTO
     aggregation: AggregationType | None = None
     filters: list[FilterDefinition] = []
     fill_missing: bool = True

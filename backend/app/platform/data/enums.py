@@ -1,14 +1,14 @@
-from enum import Enum, StrEnum
+from enum import Enum, StrEnum, auto
 
 
 class FieldType(StrEnum):
-    int = "int"
-    float = "float"
-    cents = "cents"
-    string = "string"
-    enum = "enum"
-    datetime = "datetime"
-    bool = "bool"
+    INT = auto()
+    FLOAT = auto()
+    CENTS = auto()
+    STRING = auto()
+    ENUM = auto()
+    DATETIME = auto()
+    BOOL = auto()
 
 
 class AggregationType(Enum):
@@ -20,21 +20,21 @@ class AggregationType(Enum):
 
 
 class Granularity(StrEnum):
-    hour = "hour"
-    day = "day"
-    week = "week"
-    month = "month"
-    quarter = "quarter"
-    year = "year"
-    auto = "auto"
+    HOUR = auto()
+    DAY = auto()
+    WEEK = auto()
+    MONTH = auto()
+    QUARTER = auto()
+    YEAR = auto()
+    AUTO = auto()
 
 
 class TimeRange(StrEnum):
-    last_7_days = "last_7_days"
-    last_30_days = "last_30_days"
-    last_90_days = "last_90_days"
-    last_6_months = "last_6_months"
-    last_year = "last_year"
-    year_to_date = "year_to_date"
-    month_to_date = "month_to_date"
-    all_time = "all_time"
+    LAST_7_DAYS = auto()
+    LAST_30_DAYS = auto()
+    LAST_90_DAYS = auto()
+    LAST_6_MONTHS = auto()
+    LAST_YEAR = auto()
+    YEAR_TO_DATE = auto()
+    MONTH_TO_DATE = auto()
+    ALL_TIME = auto()

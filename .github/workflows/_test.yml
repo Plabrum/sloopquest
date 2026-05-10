@@ -57,3 +57,8 @@ jobs:
 
       - name: Lint
         run: cd backend && uv run ruff check .
+
+      - name: Semgrep
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: semgrep/

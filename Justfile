@@ -88,6 +88,14 @@ test:
 
 # ─── Code Quality ─────────────────────────────────────────────────────────────
 
+# Run semgrep custom rules against backend
+semgrep:
+    semgrep --config=semgrep/ --error backend/
+
+# Run semgrep tests against rule test files
+semgrep-test:
+    semgrep --test semgrep/
+
 # Lint + format all code (backend + frontend + landing)
 lint: lint-backend lint-frontend lint-landing
 

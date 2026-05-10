@@ -74,14 +74,14 @@ _config = CRUDConfig(
     sortable_columns={"name", "year_built", "created_at"},
     label_field="name",
     data_fields=[
-        FieldConfig("vessel_type", "Vessel Type", FieldType.enum),
-        FieldConfig("propulsion_type", "Propulsion Type", FieldType.enum),
-        FieldConfig("hull_material", "Hull Material", FieldType.enum),
-        FieldConfig("year_built", "Year Built", FieldType.int, filterable=True),
-        FieldConfig("loa_ft", "Length Overall (ft)", FieldType.float),
-        FieldConfig("beam_ft", "Beam (ft)", FieldType.float),
-        FieldConfig("draft_ft", "Draft (ft)", FieldType.float),
-        FieldConfig("created_at", "Created", FieldType.datetime, aggregatable=False),
+        FieldConfig("vessel_type", "Vessel Type", FieldType.ENUM),
+        FieldConfig("propulsion_type", "Propulsion Type", FieldType.ENUM),
+        FieldConfig("hull_material", "Hull Material", FieldType.ENUM),
+        FieldConfig("year_built", "Year Built", FieldType.INT, filterable=True),
+        FieldConfig("loa_ft", "Length Overall (ft)", FieldType.FLOAT),
+        FieldConfig("beam_ft", "Beam (ft)", FieldType.FLOAT),
+        FieldConfig("draft_ft", "Draft (ft)", FieldType.FLOAT),
+        FieldConfig("created_at", "Created", FieldType.DATETIME, aggregatable=False),
     ],
 )
 
