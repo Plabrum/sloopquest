@@ -19,10 +19,26 @@ interface StatCardsProps {
 }
 
 const COLOR_MAP: Record<StatCardColor, { bg: string; border: string; text: string }> = {
-  blue:   { bg: "#EFF6FF", border: "#3B82F640", text: "#3B82F6" },
-  green:  { bg: "#EFF5F1", border: "#4A8C3F40", text: "#4A8C3F" },
-  red:    { bg: "#FEF2F2", border: "#C45A4A40", text: "#C45A4A" },
-  yellow: { bg: "#FDF3E7", border: "#D4944A40", text: "#D4944A" },
+  blue:   {
+    bg:     "var(--color-blue-light, #EFF6FF)",
+    border: "var(--color-blue-light, #3B82F640)",
+    text:   "var(--color-blue, #3B82F6)",
+  },
+  green:  {
+    bg:     "var(--color-green-light, #EFF5F1)",
+    border: "var(--color-green-light, #4A8C3F40)",
+    text:   "var(--color-green, #4A8C3F)",
+  },
+  red:    {
+    bg:     "var(--color-red-light, #FEF2F2)",
+    border: "var(--color-red-light, #C45A4A40)",
+    text:   "var(--color-red, #C45A4A)",
+  },
+  yellow: {
+    bg:     "var(--color-yellow-light, #FDF3E7)",
+    border: "var(--color-yellow-light, #D4944A40)",
+    text:   "var(--color-yellow, #D4944A)",
+  },
 };
 
 function StatCard({ value, label, change, color, href, className }: StatCardProps) {

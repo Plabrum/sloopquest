@@ -35,6 +35,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
 import { useState } from "react";
 import { useTheme } from "@/lib/theme";
+import { MetricBarChart } from "@/components/data-display/metric-bar-chart";
+import { MetricAreaChart } from "@/components/data-display/metric-area-chart";
+import { StatCards } from "@/components/data-display/stat-card";
 
 type Theme = "shad" | "glass" | "angular";
 type ColorMode = "light" | "dark" | "system";
@@ -263,6 +266,51 @@ export function GalleryPage() {
               ))}
             </TableBody>
           </Table>
+        </Section>
+
+        <Section title="Stat Cards">
+          <StatCards
+            stats={[
+              { value: "24", label: "Active surveys", color: "blue", change: { value: 12, direction: "up" } },
+              { value: "8", label: "Overdue", color: "red", change: { value: 3.2, direction: "down" } },
+              { value: "$18.4k", label: "Invoiced MTD", color: "green", change: { value: 7.1, direction: "up" } },
+              { value: "3", label: "Pending review", color: "yellow" },
+            ]}
+          />
+        </Section>
+
+        <Section title="Bar Chart">
+          <MetricBarChart
+            title="Surveys by vessel type"
+            subtitle="Last 6 months"
+            bars={[
+              { label: "Motor", value: 14 },
+              { label: "Sail", value: 9 },
+              { label: "Power", value: 11 },
+              { label: "Comm.", value: 4 },
+              { label: "Work", value: 7 },
+            ]}
+          />
+        </Section>
+
+        <Section title="Area Chart">
+          <MetricAreaChart
+            title="Revenue over time"
+            subtitle="Jan–Jun 2026"
+            data={[
+              { label: "Jan", invoiced: 8200, collected: 7100 },
+              { label: "Feb", invoiced: 9400, collected: 8800 },
+              { label: "Mar", invoiced: 7800, collected: 7200 },
+              { label: "Apr", invoiced: 12100, collected: 10500 },
+              { label: "May", invoiced: 18400, collected: 14200 },
+              { label: "Jun", invoiced: 15600, collected: 13800 },
+            ]}
+            series={[
+              { key: "invoiced", label: "Invoiced" },
+              { key: "collected", label: "Collected" },
+            ]}
+            valuePrefix="$"
+          />
         </Section>
 
         <Section title="Avatars & Skeletons">

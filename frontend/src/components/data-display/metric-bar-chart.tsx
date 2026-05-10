@@ -1,3 +1,16 @@
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
 
 interface BarData {
@@ -16,13 +29,6 @@ interface MetricBarChartProps {
   className?: string;
 }
 
-const BAR_GREEN = "#A7D5B8";
-const BAR_ORANGE = "#F4B183";
-
-function defaultColorForBar(value: number, max: number): string {
-  return value / max >= 0.5 ? BAR_GREEN : BAR_ORANGE;
-}
-
 export function MetricBarChart({
   title,
   subtitle,
@@ -32,18 +38,24 @@ export function MetricBarChart({
   defaultBarColor,
   className,
 }: MetricBarChartProps) {
-  const maxValue = Math.max(...bars.map((b) => b.value), 1);
-  const maxBarHeight = 150;
+  const chartData = bars.map((b) => ({ label: b.label, value: b.value }));
+
+  const chartConfig: ChartConfig = {
+    value: {
+      label: title,
+      color: defaultBarColor ?? "var(--chart-1)",
+    },
+  };
 
   return (
     <div
       className={cn(
-        "rounded-2xl border border-[#E8E2D9] bg-card shadow-sm",
+        "rounded-[var(--radius-lg)] border border-border bg-card shadow-sm",
         className,
       )}
     >
-      <div className="flex items-center justify-between border-b border-[#E5E4E1] px-6 pb-3 pt-4">
-        <h3 className="font-display text-base font-bold text-[#1A1918]">
+      <div className="flex items-center justify-between border-b border-border px-6 pb-3 pt-4">
+        <h3 className="font-display text-base font-bold text-foreground">
           {title}
         </h3>
         {subtitle && (
@@ -56,31 +68,37 @@ export function MetricBarChart({
           No data available
         </p>
       ) : (
-        <div className="flex items-end justify-around gap-2 px-6 pb-4 pt-6">
-          {bars.map((bar) => {
-            const height = Math.max((bar.value / maxValue) * maxBarHeight, 4);
-            const barColor =
-              bar.color ?? defaultBarColor ?? defaultColorForBar(bar.value, maxValue);
-
-            return (
-              <div
-                key={bar.label}
-                className="flex flex-1 flex-col items-center gap-1.5"
-              >
-                <span className="text-[13px] font-semibold text-foreground">
-                  {valuePrefix}{bar.value}{valueSuffix}
-                </span>
-                <div
-                  className="w-full max-w-[60px] rounded-t-md"
-                  style={{ height, backgroundColor: barColor }}
-                />
-                <span className="text-[12px] font-medium text-muted-foreground">
-                  {bar.label}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+        <ChartContainer config={chartConfig} className="aspect-auto h-[200px] w-full px-2 pt-4 pb-2">
+          <BarChart data={chartData} margin={{ top: 4, right: 8, bottom: 4, left: 8 }}>
+            <CartesianGrid
+              vertical={false}
+              stroke="var(--border)"
+              strokeOpacity={0.5}
+            />
+            <XAxis
+              dataKey="label"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
+            />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
+              tickFormatter={(v) => `${valuePrefix}${v}${valueSuffix}`}
+              width={40}
+            />
+            <ChartTooltip
+              cursor={{ fill: "var(--muted)", opacity: 0.4 }}
+              content={(props) => <ChartTooltipContent {...props} hideLabel />}
+            />
+            <Bar
+              dataKey="value"
+              fill="var(--color-value)"
+              radius={[4, 4, 0, 0]}
+            />
+          </BarChart>
+        </ChartContainer>
       )}
     </div>
   );

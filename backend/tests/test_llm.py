@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 import json
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from types import SimpleNamespace
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -21,12 +23,7 @@ from app.platform.llm.registry import (
 )
 from app.platform.llm.schemas import InputSchema, PropertySchema
 
-# --- Test tool registered inline so registry tests have something to work with ---
-
-
-class EchoInput:
-    def __init__(self, message: str) -> None:
-        self.message = message
+# --- Test tool registered inline ---
 
 
 @register_tool
@@ -54,6 +51,11 @@ async def _echo_executor(name: str, inputs: dict) -> str:
     return f"Unknown tool: {name}"
 
 
+async def _aiter(*items: str) -> AsyncIterator[str]:
+    for item in items:
+        yield item
+
+
 # --- Client tests ---
 
 
@@ -74,13 +76,27 @@ async def test_anthropic_agentic_loop_executes_tool_and_returns_text() -> None:
         input={"message": "ahoy"},
         model_dump=lambda: {"type": "tool_use", "id": "toolu_1", "name": "_test_echo", "input": {"message": "ahoy"}},
     )
-    text_block = SimpleNamespace(type="text", text="echoed: ahoy")
 
-    response_tool = SimpleNamespace(stop_reason="tool_use", content=[tool_use_block])
-    response_final = SimpleNamespace(stop_reason="end_turn", content=[text_block])
+    response_tool = SimpleNamespace(stop_reason="tool_use", content=[tool_use_block], usage=None)
+    response_final = SimpleNamespace(stop_reason="end_turn", content=[], usage=None)
 
-    mock_create = AsyncMock(side_effect=[response_tool, response_final])
-    client._client = SimpleNamespace(messages=SimpleNamespace(create=mock_create))
+    stream_calls: list[dict] = []
+
+    @asynccontextmanager
+    async def fake_stream(**kwargs):
+        stream_calls.append(kwargs)
+        if len(stream_calls) == 1:
+            ctx = MagicMock()
+            ctx.text_stream = _aiter()
+            ctx.get_final_message = AsyncMock(return_value=response_tool)
+            yield ctx
+        else:
+            ctx = MagicMock()
+            ctx.text_stream = _aiter("echoed: ahoy")
+            ctx.get_final_message = AsyncMock(return_value=response_final)
+            yield ctx
+
+    client._client = SimpleNamespace(messages=SimpleNamespace(stream=fake_stream))
 
     persisted: list[tuple[MessageRole, str]] = []
 
@@ -96,9 +112,9 @@ async def test_anthropic_agentic_loop_executes_tool_and_returns_text() -> None:
     )
 
     assert out == "echoed: ahoy"
-    assert mock_create.await_count == 2
+    assert len(stream_calls) == 2
 
-    second_call_msgs = mock_create.await_args_list[1].kwargs["messages"]
+    second_call_msgs = stream_calls[1]["messages"]
     assert second_call_msgs[0] == {"role": "user", "content": "say ahoy"}
     assert second_call_msgs[1]["role"] == "assistant"
     assert second_call_msgs[2]["role"] == "user"
@@ -112,10 +128,16 @@ async def test_anthropic_agentic_loop_executes_tool_and_returns_text() -> None:
 
 async def test_anthropic_returns_text_directly_on_end_turn() -> None:
     client = AnthropicLLMClient(api_key="test-key")
-    text_block = SimpleNamespace(type="text", text="hello back")
-    response = SimpleNamespace(stop_reason="end_turn", content=[text_block])
-    client._client = SimpleNamespace(messages=SimpleNamespace(create=AsyncMock(return_value=response)))
+    response = SimpleNamespace(stop_reason="end_turn", content=[], usage=None)
 
+    @asynccontextmanager
+    async def fake_stream(**kwargs):
+        ctx = MagicMock()
+        ctx.text_stream = _aiter("hello back")
+        ctx.get_final_message = AsyncMock(return_value=response)
+        yield ctx
+
+    client._client = SimpleNamespace(messages=SimpleNamespace(stream=fake_stream))
     out = await client.chat([{"role": "user", "content": "hi"}])
     assert out == "hello back"
 
@@ -129,8 +151,16 @@ async def test_anthropic_loop_bails_after_max_iterations() -> None:
         input={"message": "x"},
         model_dump=lambda: {"type": "tool_use", "id": "toolu_loop", "name": "_test_echo", "input": {"message": "x"}},
     )
-    response = SimpleNamespace(stop_reason="tool_use", content=[tool_use_block])
-    client._client = SimpleNamespace(messages=SimpleNamespace(create=AsyncMock(return_value=response)))
+    response = SimpleNamespace(stop_reason="tool_use", content=[tool_use_block], usage=None)
+
+    @asynccontextmanager
+    async def fake_stream(**kwargs):
+        ctx = MagicMock()
+        ctx.text_stream = _aiter()
+        ctx.get_final_message = AsyncMock(return_value=response)
+        yield ctx
+
+    client._client = SimpleNamespace(messages=SimpleNamespace(stream=fake_stream))
 
     tool_defs = get_tool_definitions()
     out = await client.chat(
@@ -138,7 +168,7 @@ async def test_anthropic_loop_bails_after_max_iterations() -> None:
         tools=tool_defs,
         tool_executor=_echo_executor,
     )
-    assert "wasn't able to complete" in out
+    assert "could not be completed" in out
 
 
 @pytest.mark.parametrize("name,expected", [("_test_echo", "ahoy"), ("unknown", "Unknown tool: unknown")])
@@ -152,7 +182,6 @@ async def test_serialize_tool_result_str() -> None:
 
 
 async def test_serialize_tool_result_with_data() -> None:
-
     result = ToolResult(data={"count": 3}, message="Found 3")
     serialized = serialize_tool_result(result)
     parsed = json.loads(serialized)

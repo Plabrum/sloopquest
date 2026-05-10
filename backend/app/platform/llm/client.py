@@ -70,7 +70,10 @@ class LocalLLMClient(BaseLLMClient):
 
 class AnthropicLLMClient(BaseLLMClient):
     def __init__(self, api_key: str | None = None) -> None:
-        self._client = anthropic.AsyncAnthropic(api_key=api_key or config.ANTHROPIC_API_KEY)
+        self._client = anthropic.AsyncAnthropic(
+            api_key=api_key or config.ANTHROPIC_API_KEY,
+            timeout=anthropic.Timeout(connect=10.0, read=120.0, write=10.0, pool=5.0),
+        )
 
     async def chat(
         self,
@@ -81,56 +84,19 @@ class AnthropicLLMClient(BaseLLMClient):
         tool_executor: ToolExecutorFn | None = None,
         persist_tool_message: PersistToolMessageFn | None = None,
     ) -> str:
-        msgs = list(messages)
-        max_iterations = 10
-
-        for _ in range(max_iterations):
-            kwargs: dict = {
-                "model": "claude-sonnet-4-6",
-                "max_tokens": 1024,
-                "messages": msgs,
-            }
-            if system:
-                kwargs["system"] = system
-            if tools:
-                kwargs["tools"] = msgspec.to_builtins(tools)
-
-            response = await self._client.messages.create(**kwargs)
-
-            if response.stop_reason == "tool_use" and tool_executor is not None:
-                assistant_content = [block.model_dump() for block in response.content]
-                msgs.append({"role": "assistant", "content": response.content})
-
-                if persist_tool_message is not None:
-                    await persist_tool_message(MessageRole.ASSISTANT_TOOL, json.dumps(assistant_content))
-
-                tool_results = []
-                for block in response.content:
-                    if block.type == "tool_use":
-                        result = await tool_executor(block.name, block.input)
-                        tool_results.append(
-                            {
-                                "type": "tool_result",
-                                "tool_use_id": block.id,
-                                "content": result,
-                            }
-                        )
-
-                msgs.append({"role": "user", "content": tool_results})
-
-                if persist_tool_message is not None:
-                    await persist_tool_message(MessageRole.TOOL_RESULT, json.dumps(tool_results))
-
-                continue
-
-            for block in response.content:
-                if block.type == "text":
-                    return block.text
-
-            return ""
-
-        logger.warning("LLM agentic loop hit max_iterations=%d", max_iterations)
-        return "I wasn't able to complete that request."
+        text_parts: list[str] = []
+        async for event_name, event_data in self.stream(
+            messages,
+            system=system,
+            tools=tools,
+            tool_executor=tool_executor,
+            persist_tool_message=persist_tool_message,
+        ):
+            if event_name == "token":
+                text_parts.append(event_data["delta"])
+            elif event_name == "error":
+                return event_data.get("message", "I wasn't able to complete that request.")
+        return "".join(text_parts)
 
     async def stream(  # type: ignore[override]
         self,

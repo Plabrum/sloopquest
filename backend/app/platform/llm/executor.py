@@ -31,7 +31,11 @@ def build_tool_executor(
             logger.warning("Tool input invalid for %r: %r", name, inputs)
             return "Tool input invalid."
         ctx = ToolContext(db=db, user=user, invalidate_keys=invalidate_keys)
-        result = await tool_cls().execute(ctx, args)
+        try:
+            result = await tool_cls().execute(ctx, args)
+        except Exception:
+            logger.warning("Tool %r raised an exception", name, exc_info=True)
+            return f"Tool {name!r} encountered an error. Let the user know and try a different approach."
         return serialize_tool_result(result)
 
     return execute
