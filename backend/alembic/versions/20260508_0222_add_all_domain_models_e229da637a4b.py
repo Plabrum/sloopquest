@@ -6,6 +6,7 @@ Create Date: 2026-05-08 02:22:32.083113+00:00
 
 """
 
+from enum import Enum as _Enum
 from typing import Sequence
 
 import sqlalchemy as sa
@@ -16,20 +17,98 @@ from app.domain.clients.enums import ClientType
 from app.domain.invoices.enums import InvoiceState
 from app.domain.reports.enums import ReportState
 from app.domain.subscriptions.enums import SubscriptionPlan, SubscriptionStatus
-from app.domain.surveys.enums import (
-    AppraisalPurpose,
-    FindingSeverity,
-    LossType,
-    RecommendationTimeframe,
-    ResponseItemStatus,
-    SurveyPartyRole,
-    SurveyState,
-    SurveyType,
-    SystemArea,
-    VesselStateAtInspection,
-)
-from app.domain.users.roles import Role
-from app.domain.vessels.enums import (
+from app.domain.surveys.enums import SurveyState
+
+
+class FindingSeverity(_Enum):
+    A_safety_critical = "A_safety_critical"
+    B_significant = "B_significant"
+    C_minor = "C_minor"
+
+
+class RecommendationTimeframe(_Enum):
+    immediate = "immediate"
+    within_30_days = "within_30_days"
+    within_60_days = "within_60_days"
+    within_90_days = "within_90_days"
+    prior_to_next_haulout = "prior_to_next_haulout"
+    monitor_only = "monitor_only"
+    informational = "informational"
+
+
+class SurveyPartyRole(_Enum):
+    engaging_party = "engaging_party"
+    buyer = "buyer"
+    seller = "seller"
+    current_owner = "current_owner"
+    insurer = "insurer"
+    lender = "lender"
+    broker = "broker"
+    attorney = "attorney"
+    other = "other"
+
+
+# Inline definitions for enums deleted in a later migration — kept here so
+# this migration file remains replayable from scratch.
+class AppraisalPurpose(_Enum):
+    insurance = "insurance"
+    sale = "sale"
+    estate = "estate"
+    donation = "donation"
+    financing = "financing"
+    other = "other"
+
+
+class LossType(_Enum):
+    grounding = "grounding"
+    collision = "collision"
+    fire = "fire"
+    flooding = "flooding"
+    storm = "storm"
+    theft = "theft"
+    vandalism = "vandalism"
+    other = "other"
+
+
+class ResponseItemStatus(_Enum):
+    not_started = "not_started"
+    in_progress = "in_progress"
+    complete = "complete"
+    not_applicable = "not_applicable"
+
+
+class SurveyType(_Enum):
+    pre_purchase = "pre_purchase"
+    condition_and_valuation = "condition_and_valuation"
+    damage = "damage"
+    appraisal = "appraisal"
+
+
+class SystemArea(_Enum):
+    hull = "hull"
+    deck = "deck"
+    rigging = "rigging"
+    propulsion = "propulsion"
+    fuel = "fuel"
+    electrical_ac = "electrical_ac"
+    electrical_dc = "electrical_dc"
+    plumbing = "plumbing"
+    safety = "safety"
+    electronics = "electronics"
+    interior = "interior"
+    cosmetic = "cosmetic"
+    other = "other"
+
+
+class VesselStateAtInspection(_Enum):
+    afloat = "afloat"
+    on_hard = "on_hard"
+    on_trailer = "on_trailer"
+    in_lift = "in_lift"
+
+
+from app.domain.users.roles import Role  # noqa: E402
+from app.domain.vessels.enums import (  # noqa: E402
     EnginePosition,
     EngineType,
     FuelType,
@@ -38,14 +117,14 @@ from app.domain.vessels.enums import (
     RiggingType,
     VesselType,
 )
-from app.platform.comms.enums import EmailMessageStatus
-from app.platform.documents.enums import DocumentStates
-from app.platform.events.enums import EventType
-from app.platform.llm.enums import MessageRole
-from app.platform.media.enums import MediaStates
-from app.platform.queue.enums import TaskStatus
-from app.utils.sqids import SqidType
-from app.utils.textenum import TextEnum
+from app.platform.comms.enums import EmailMessageStatus  # noqa: E402
+from app.platform.documents.enums import DocumentStates  # noqa: E402
+from app.platform.events.enums import EventType  # noqa: E402
+from app.platform.llm.enums import MessageRole  # noqa: E402
+from app.platform.media.enums import MediaStates  # noqa: E402
+from app.platform.queue.enums import TaskStatus  # noqa: E402
+from app.utils.sqids import SqidType  # noqa: E402
+from app.utils.textenum import TextEnum  # noqa: E402
 
 # revision identifiers, used by Alembic.
 revision: str = "e229da637a4b"

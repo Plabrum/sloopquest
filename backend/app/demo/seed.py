@@ -17,13 +17,7 @@ from app.domain.clients.enums import ClientType
 from app.domain.invoices.enums import InvoiceState
 from app.domain.reports.enums import ReportState
 from app.domain.subscriptions.enums import SubscriptionPlan, SubscriptionStatus
-from app.domain.surveys.enums import (
-    FindingSeverity,
-    RecommendationTimeframe,
-    ResponseItemStatus,
-    SurveyState,
-    SurveyType,
-)
+from app.domain.surveys.enums import SurveyState
 from app.domain.users.models import Organization
 from app.domain.users.roles import Role
 from app.domain.vessels.enums import FuelType, HullMaterial, PropulsionType, VesselType
@@ -42,26 +36,20 @@ from tests.factories.clients import ClientFactory  # noqa: E402
 from tests.factories.invoices import InvoiceFactory, InvoiceLineItemFactory  # noqa: E402
 from tests.factories.reports import ReportFactory  # noqa: E402
 from tests.factories.subscriptions import SubscriptionFactory  # noqa: E402
-from tests.factories.surveys import (  # noqa: E402
-    FindingFactory,
-    RecommendationFactory,
-    SurveyFactory,
-    SurveyPartyFactory,
-    SurveyResponseItemFactory,
-)
+from tests.factories.surveys import SurveyFactory  # noqa: E402
 from tests.factories.users import OrgFactory, UserFactory  # noqa: E402
 from tests.factories.vessels import EngineFactory, VesselFactory  # noqa: E402
 
 # Survey states spread across the pipeline so the demo shows all stages
-_SURVEY_CONFIGS: list[tuple[SurveyType, SurveyState]] = [
-    (SurveyType.pre_purchase, SurveyState.inquiry),
-    (SurveyType.pre_purchase, SurveyState.scheduled),
-    (SurveyType.condition_and_valuation, SurveyState.in_field),
-    (SurveyType.pre_purchase, SurveyState.in_draft),
-    (SurveyType.damage, SurveyState.in_review),
-    (SurveyType.condition_and_valuation, SurveyState.delivered),
-    (SurveyType.appraisal, SurveyState.paid),
-    (SurveyType.pre_purchase, SurveyState.cancelled),
+_SURVEY_STATES: list[SurveyState] = [
+    SurveyState.inquiry,
+    SurveyState.scheduled,
+    SurveyState.in_field,
+    SurveyState.in_draft,
+    SurveyState.in_review,
+    SurveyState.delivered,
+    SurveyState.paid,
+    SurveyState.cancelled,
 ]
 
 _STATE_PATHS: dict[SurveyState, list[SurveyState]] = {
@@ -185,32 +173,21 @@ async def seed_demo_org(session: AsyncSession) -> Organization:
 
     # ── 6. Surveys ────────────────────────────────────────────────────────────
     surveys = []
-    for i, (survey_type, survey_state) in enumerate(_SURVEY_CONFIGS):
+    for i, survey_state in enumerate(_SURVEY_STATES):
         vessel = vessels[i % len(vessels)]
-        client = clients[i % len(clients)]
-        is_past = survey_state not in (SurveyState.inquiry, SurveyState.scheduled, SurveyState.cancelled)
         survey = SurveyFactory.build(
             organization_id=org.id,
             vessel_id=vessel.id,
             assigned_surveyor_id=surveyor.id,
-            survey_type=survey_type.value,
             state=survey_state,
-            scheduled_for=now - timedelta(days=30 - i * 5) if survey_state != SurveyState.inquiry else None,
-            inspection_started_at=now - timedelta(days=25 - i * 5) if is_past else None,
-            inspection_completed_at=now - timedelta(days=20 - i * 5) if is_past else None,
         )
         session.add(survey)
         surveys.append(survey)
     await session.flush()
     logger.info("Created %d surveys", len(surveys))
 
-    # Attach engaging-party to each survey
-    for i, survey in enumerate(surveys):
-        session.add(SurveyPartyFactory.build(survey_id=survey.id, client_id=clients[i % len(clients)].id))
-    await session.flush()
-
     # ── 7. State transition logs ──────────────────────────────────────────────
-    for survey, (_, survey_state) in zip(surveys, _SURVEY_CONFIGS):
+    for survey, survey_state in zip(surveys, _SURVEY_STATES):
         path = _STATE_PATHS.get(survey_state, [])
         prev = SurveyState.inquiry
         base_time = now - timedelta(days=60)
@@ -230,64 +207,9 @@ async def seed_demo_org(session: AsyncSession) -> Organization:
     await session.flush()
     logger.info("Created state transition logs")
 
-    # ── 8. Findings + Recommendations (for in-draft and beyond) ──────────────
-    finding_states = {SurveyState.in_draft, SurveyState.in_review, SurveyState.delivered, SurveyState.paid}
-    finding_count = 0
-    for survey, (_, survey_state) in zip(surveys, _SURVEY_CONFIGS):
-        if survey_state not in finding_states:
-            continue
-        # 3 findings per survey with escalating severity
-        for j, severity in enumerate(
-            [FindingSeverity.C_minor, FindingSeverity.B_significant, FindingSeverity.A_safety_critical]
-        ):
-            finding = FindingFactory.build(survey_id=survey.id, severity=severity)
-            session.add(finding)
-            await session.flush()
-            # Add a recommendation to each finding
-            session.add(
-                RecommendationFactory.build(
-                    finding_id=finding.id,
-                    timeframe=RecommendationTimeframe.within_30_days if j < 2 else RecommendationTimeframe.immediate,
-                    is_completed=(survey_state == SurveyState.paid),
-                )
-            )
-            finding_count += 1
-    await session.flush()
-    logger.info("Created %d findings", finding_count)
-
-    # ── 9. Response items (for in-draft and beyond) ───────────────────────────
-    sections = [
-        "Hull & Structure",
-        "Deck & Hardware",
-        "Rigging & Sails",
-        "Propulsion & Mechanical",
-        "Electrical Systems",
-        "Safety Equipment",
-    ]
-    for survey, (_, survey_state) in zip(surveys, _SURVEY_CONFIGS):
-        if survey_state not in finding_states:
-            continue
-        for k, heading in enumerate(sections):
-            status = (
-                ResponseItemStatus.complete
-                if survey_state == SurveyState.paid
-                else (ResponseItemStatus.in_progress if k < 3 else ResponseItemStatus.not_started)
-            )
-            session.add(
-                SurveyResponseItemFactory.build(
-                    survey_id=survey.id,
-                    heading_label=heading,
-                    category_path=[heading],
-                    status=status,
-                    sort_order=k,
-                )
-            )
-    await session.flush()
-    logger.info("Created response items")
-
-    # ── 10. Invoices ──────────────────────────────────────────────────────────
+    # ── 8. Invoices ───────────────────────────────────────────────────────────
     invoiced_states = {SurveyState.delivered, SurveyState.paid}
-    for survey, (_, survey_state) in zip(surveys, _SURVEY_CONFIGS):
+    for survey, survey_state in zip(surveys, _SURVEY_STATES):
         if survey_state not in invoiced_states:
             continue
         client = clients[surveys.index(survey) % len(clients)]
@@ -316,9 +238,9 @@ async def seed_demo_org(session: AsyncSession) -> Organization:
     await session.flush()
     logger.info("Created invoices")
 
-    # ── 11. Reports ───────────────────────────────────────────────────────────
+    # ── 9. Reports ────────────────────────────────────────────────────────────
     reported_states = {SurveyState.in_review, SurveyState.delivered, SurveyState.paid}
-    for survey, (_, survey_state) in zip(surveys, _SURVEY_CONFIGS):
+    for survey, survey_state in zip(surveys, _SURVEY_STATES):
         if survey_state not in reported_states:
             continue
         report_state = (

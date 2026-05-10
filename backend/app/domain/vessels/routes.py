@@ -13,7 +13,7 @@ def _to_engine(engine: Engine) -> EngineSchema:
     return EngineSchema(
         id=engine.id,
         position=engine.position,
-        make=engine.make,
+        manufacturer_id=engine.manufacturer_id,
         model=engine.model,
         serial_number=engine.serial_number,
         year=engine.year,
@@ -44,7 +44,7 @@ def _to_detail(vessel: Vessel, user: User) -> VesselDetail:
         hin=vessel.hin,
         uscg_official_number=vessel.uscg_official_number,
         state_registration_number=vessel.state_registration_number,
-        builder=vessel.builder,
+        manufacturer_id=vessel.manufacturer_id,
         model=vessel.model,
         year_built=vessel.year_built,
         vessel_type=vessel.vessel_type,

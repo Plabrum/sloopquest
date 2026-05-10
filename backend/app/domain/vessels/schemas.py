@@ -17,7 +17,7 @@ from app.utils.sqids import Sqid
 class EngineSchema(BaseSchema):
     id: Sqid
     position: EnginePosition
-    make: str | None
+    manufacturer_id: Sqid | None
     model: str | None
     serial_number: str | None
     year: int | None
@@ -44,7 +44,7 @@ class VesselDetail(BaseSchema):
     hin: str | None
     uscg_official_number: str | None
     state_registration_number: str | None
-    builder: str | None
+    manufacturer_id: Sqid | None
     model: str | None
     year_built: int | None
     vessel_type: VesselType | None
@@ -67,7 +67,7 @@ class VesselCreateData(BaseSchema):
     hin: str | None = None
     uscg_official_number: str | None = None
     state_registration_number: str | None = None
-    builder: str | None = None
+    manufacturer_id: Sqid | None = None
     model: str | None = None
     year_built: int | None = None
     vessel_type: VesselType | None = None
@@ -87,7 +87,7 @@ class VesselUpdateData(BaseSchema):
     hin: str | None
     uscg_official_number: str | None
     state_registration_number: str | None
-    builder: str | None
+    manufacturer_id: Sqid | None
     model: str | None
     year_built: int | None
     vessel_type: VesselType | None
@@ -104,7 +104,7 @@ class VesselUpdateData(BaseSchema):
 
 class AddEngineData(BaseSchema):
     position: EnginePosition
-    make: str | None = None
+    manufacturer_id: Sqid | None = None
     model: str | None = None
     serial_number: str | None = None
     year: int | None = None
@@ -117,7 +117,7 @@ class AddEngineData(BaseSchema):
 class UpdateEngineData(BaseSchema):
     engine_id: Sqid
     position: EnginePosition
-    make: str | None
+    manufacturer_id: Sqid | None
     model: str | None
     serial_number: str | None
     year: int | None

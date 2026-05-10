@@ -1,5 +1,4 @@
 import logging
-import time
 from dataclasses import dataclass
 
 from litestar import Request, Router, get, post
@@ -52,7 +51,7 @@ async def request_magic_link(
             await db_session.execute(select(User).where(User.email == email, User.organization_id == _DEMO_ORG_ID))
         ).scalar_one_or_none()
         if user is not None:
-            request.set_session({"user_id": int(user.id), "last_activity": time.time()})
+            request.set_session({"user_id": int(user.id)})
             logger.info("Demo login for %s", email)
             return {"message": "Authenticated", "redirect": "/"}
 
@@ -74,7 +73,7 @@ async def verify_magic_link(
     user = await auth_service.verify_magic_link(token)
 
     if user is not None:
-        request.set_session({"user_id": int(user.id), "last_activity": time.time()})
+        request.set_session({"user_id": int(user.id)})
         return {"message": "Authenticated"}
     if existing_user_id is not None:
         return {"message": "Already authenticated"}

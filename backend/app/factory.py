@@ -1,4 +1,3 @@
-import time
 from typing import Any
 
 from advanced_alchemy.extensions.litestar import (
@@ -26,6 +25,8 @@ from app.config import Config
 from app.demo.routes import demo_router
 from app.domain.clients.routes import client_router
 from app.domain.invoices.routes import invoice_router
+from app.domain.manufacturers.routes import manufacturer_router
+from app.domain.parts.routes import part_router
 from app.domain.reports.routes import report_router
 from app.domain.subscriptions.routes import subscription_router
 from app.domain.surveys.routes import survey_router, survey_template_router
@@ -109,20 +110,10 @@ def create_app(
         arbitrary_channels_allowed=True,
     )
 
-    # ─── Session auth ─────────────────────────────────────────────────────────
-    inactivity_timeout = 30 * 60  # 30-minute inactivity timeout
-
     async def retrieve_user_handler(session: dict, _conn: ASGIConnection) -> User | None:
         user_id = session.get("user_id")
         if not user_id:
             return None
-
-        last_activity = session.get("last_activity")
-        if last_activity and (time.time() - last_activity) > inactivity_timeout:
-            session.clear()
-            return None
-
-        session["last_activity"] = time.time()
 
         async with session_factory() as db:
             return await get_user_by_id(db, user_id)
@@ -175,6 +166,8 @@ def create_app(
             document_router,
             local_files_router,
             vessel_router,
+            manufacturer_router,
+            part_router,
             client_router,
             survey_router,
             survey_template_router,

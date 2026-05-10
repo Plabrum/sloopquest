@@ -6,6 +6,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.domain.addresses.models import Address
+from app.domain.manufacturers.models import Manufacturer
 from app.domain.vessels.enums import (
     EnginePosition,
     EngineType,
@@ -16,6 +17,7 @@ from app.domain.vessels.enums import (
     VesselType,
 )
 from app.platform.base.models import BaseDBModel, TimestampMixin
+from app.utils.sqids import Sqid, SqidType
 from app.utils.textenum import TextEnum
 
 
@@ -27,7 +29,16 @@ class Vessel(TimestampMixin, BaseDBModel):
     uscg_official_number: Mapped[str | None] = mapped_column(sa.Text)
     state_registration_number: Mapped[str | None] = mapped_column(sa.Text)
 
-    builder: Mapped[str | None] = mapped_column(sa.Text)
+    manufacturer_id: Mapped[Sqid | None] = mapped_column(
+        SqidType,
+        sa.ForeignKey("manufacturers.id", ondelete="SET NULL"),
+        index=True,
+    )
+    manufacturer: Mapped[Manufacturer | None] = relationship(
+        "Manufacturer",
+        foreign_keys=[manufacturer_id],
+        lazy="raise",
+    )
     model: Mapped[str | None] = mapped_column(sa.Text)
     year_built: Mapped[int | None] = mapped_column(sa.Integer)
     vessel_type: Mapped[VesselType | None] = mapped_column(TextEnum(VesselType))
@@ -76,7 +87,16 @@ class Engine(BaseDBModel):
         index=True,
     )
     position: Mapped[EnginePosition] = mapped_column(TextEnum(EnginePosition), nullable=False)
-    make: Mapped[str | None] = mapped_column(sa.Text)
+    manufacturer_id: Mapped[Sqid | None] = mapped_column(
+        SqidType,
+        sa.ForeignKey("manufacturers.id", ondelete="SET NULL"),
+        index=True,
+    )
+    manufacturer: Mapped[Manufacturer | None] = relationship(
+        "Manufacturer",
+        foreign_keys=[manufacturer_id],
+        lazy="raise",
+    )
     model: Mapped[str | None] = mapped_column(sa.Text)
     serial_number: Mapped[str | None] = mapped_column(sa.Text)
     year: Mapped[int | None] = mapped_column(sa.Integer)

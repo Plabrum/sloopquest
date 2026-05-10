@@ -13,10 +13,12 @@ import {
   InvoiceActionsAddLineItemForm,
   SubscriptionActionsCreateForm,
   SubscriptionActionsUpdateForm,
+  ManufacturerActionsCreateForm,
+  ManufacturerActionsUpdateForm,
+  PartActionsCreateForm,
+  PartActionsUpdateForm,
   SurveyActionsCreateForm,
   SurveyActionsUpdateForm,
-  SurveyActionsAddPartyForm,
-  SurveyActionsAddFindingForm,
   SurveyTemplateActionsCreateForm,
   SurveyTemplateActionsUpdateForm,
   ReportActionsCreateForm,
@@ -55,17 +57,23 @@ export const generatedRegistry: Record<string, { render: (params: any) => ReactE
   "subscription_actions__update": {
     render: (params) => <SubscriptionActionsUpdateForm {...params} />,
   },
+  "manufacturer_actions__create": {
+    render: (params) => <ManufacturerActionsCreateForm {...params} />,
+  },
+  "manufacturer_actions__update": {
+    render: (params) => <ManufacturerActionsUpdateForm {...params} />,
+  },
+  "part_actions__create": {
+    render: (params) => <PartActionsCreateForm {...params} />,
+  },
+  "part_actions__update": {
+    render: (params) => <PartActionsUpdateForm {...params} />,
+  },
   "survey_actions__create": {
     render: (params) => <SurveyActionsCreateForm {...params} />,
   },
   "survey_actions__update": {
     render: (params) => <SurveyActionsUpdateForm {...params} />,
-  },
-  "survey_actions__add_party": {
-    render: (params) => <SurveyActionsAddPartyForm {...params} />,
-  },
-  "survey_actions__add_finding": {
-    render: (params) => <SurveyActionsAddFindingForm {...params} />,
   },
   "survey_template_actions__create": {
     render: (params) => <SurveyTemplateActionsCreateForm {...params} />,

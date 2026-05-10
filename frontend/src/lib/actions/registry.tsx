@@ -3,6 +3,10 @@ import type {
   ActionsActionGroupObjectIdExecuteObjectActionBody,
 } from "@/openapi/litestarAPI.schemas";
 import { generatedRegistry } from "@/openapi/actions/registry.gen";
+import {
+  SurveyTemplateCreateForm,
+  SurveyTemplateUpdateForm,
+} from "@/openapi/actions/survey-template-forms";
 
 export type ActionBodyUnion =
   | ActionsActionGroupExecuteActionBody
@@ -33,6 +37,8 @@ export type ActionRegistry = Partial<{
 
 export const actionRegistry: ActionRegistry = {
   ...generatedRegistry,
+  "survey_template_actions__create": { render: (p) => <SurveyTemplateCreateForm {...(p as Parameters<typeof SurveyTemplateCreateForm>[0])} /> },
+  "survey_template_actions__update": { render: (p) => <SurveyTemplateUpdateForm {...(p as Parameters<typeof SurveyTemplateUpdateForm>[0])} /> },
 } as ActionRegistry;
 
 export function getActionRenderer(

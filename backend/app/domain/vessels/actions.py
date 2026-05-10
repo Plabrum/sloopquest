@@ -53,7 +53,7 @@ class CreateVessel(BaseTopLevelAction[VesselCreateData]):
             hin=data.hin,
             uscg_official_number=data.uscg_official_number,
             state_registration_number=data.state_registration_number,
-            builder=data.builder,
+            manufacturer_id=data.manufacturer_id,
             model=data.model,
             year_built=data.year_built,
             vessel_type=data.vessel_type,
@@ -87,7 +87,7 @@ class UpdateVessel(BaseObjectAction[Vessel, VesselUpdateData]):
         obj.hin = data.hin
         obj.uscg_official_number = data.uscg_official_number
         obj.state_registration_number = data.state_registration_number
-        obj.builder = data.builder
+        obj.manufacturer_id = data.manufacturer_id
         obj.model = data.model
         obj.year_built = data.year_built
         obj.vessel_type = data.vessel_type
@@ -134,7 +134,7 @@ class AddEngine(BaseObjectAction[Vessel, AddEngineData]):
         engine = Engine(
             vessel_id=obj.id,
             position=data.position,
-            make=data.make,
+            manufacturer_id=data.manufacturer_id,
             model=data.model,
             serial_number=data.serial_number,
             year=data.year,
@@ -167,7 +167,7 @@ class UpdateEngine(BaseObjectAction[Vessel, UpdateEngineData]):
         if engine is None:
             raise NotFoundException()
         engine.position = data.position
-        engine.make = data.make
+        engine.manufacturer_id = data.manufacturer_id
         engine.model = data.model
         engine.serial_number = data.serial_number
         engine.year = data.year
