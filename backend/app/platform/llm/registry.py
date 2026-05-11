@@ -9,6 +9,7 @@ import json
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Any, ClassVar
 
 from msgspec import Struct
@@ -71,9 +72,11 @@ def get_tool_definitions() -> list[ToolDefinition]:
     return [cls.definition() for cls in _TOOL_REGISTRY.values()]
 
 
-def _sqid_default(obj: object) -> object:
+def _json_default(obj: object) -> object:
     if isinstance(obj, Sqid):
         return str(obj)
+    if isinstance(obj, Enum):
+        return obj.value
     raise TypeError(f"Not JSON serializable: {type(obj)!r}")
 
 
@@ -85,4 +88,4 @@ def serialize_tool_result(result: "ToolResult | str") -> str:
         parts["data"] = result.data
     if result.message:
         parts["message"] = result.message
-    return json.dumps(parts, default=_sqid_default)
+    return json.dumps(parts, default=_json_default)
