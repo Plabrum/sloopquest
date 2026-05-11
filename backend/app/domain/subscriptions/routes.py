@@ -41,6 +41,6 @@ _config = CRUDConfig(
     sortable_columns={"current_period_end", "created_at"},
 )
 
-_controller = make_crud_controller("/subscriptions", _config)
+_controller = make_crud_controller("", _config)
 
 subscription_router = Router(path="/subscriptions", route_handlers=[_controller], tags=["subscriptions"])

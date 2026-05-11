@@ -36,7 +36,6 @@ function VesselDetailContent() {
             { label: "Rigging Type", value: data.rigging_type ?? "—" },
             { label: "Hull Material", value: data.hull_material ?? "—" },
             { label: "Year Built", value: data.year_built ?? "—" },
-            { label: "Builder", value: data.builder ?? "—" },
             { label: "Model", value: data.model ?? "—" },
             { label: "LOA (ft)", value: data.loa_ft ?? "—" },
             { label: "Beam (ft)", value: data.beam_ft ?? "—" },

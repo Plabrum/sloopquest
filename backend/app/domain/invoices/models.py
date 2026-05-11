@@ -8,15 +8,26 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.domain.invoices.enums import InvoiceState
 from app.platform.base.models import BaseDBModel, TimestampMixin
+from app.platform.base.search import SearchMixin
 from app.platform.state_machine.models import StateMachineMixin
 from app.utils.sqids import Sqid, SqidType
 
 
 class Invoice(
+    SearchMixin,
     TimestampMixin,
     StateMachineMixin(state_enum=InvoiceState, initial_state=InvoiceState.draft),
     BaseDBModel,
 ):
+    trgm_columns = ["invoice_number"]
+    fts_columns = ["notes"]
+    search_label_field = "invoice_number"
+    search_entity_type = "invoice"
+    search_detail_prefix = "/invoices"
+
+    def get_search_label(self) -> str:
+        return self.invoice_number or str(self.id)
+
     __tablename__ = "invoices"
 
     organization_id: Mapped[int] = mapped_column(

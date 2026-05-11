@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import type { ColumnDefinition, FilterType } from "@/lib/resource-table-types";
 
 export type DisplayType =
@@ -9,9 +10,10 @@ export type DisplayType =
   | "number"
   | "currency"
   | "boolean"
-  | "duration";
+  | "duration"
+  | "entity";
 
-const DISPLAY_TO_FILTER: Record<DisplayType, FilterType> = {
+const DISPLAY_TO_FILTER: Record<DisplayType, FilterType | undefined> = {
   text: "text",
   enum: "enum",
   status: "enum",
@@ -21,6 +23,7 @@ const DISPLAY_TO_FILTER: Record<DisplayType, FilterType> = {
   currency: "range",
   boolean: "boolean",
   duration: "range",
+  entity: undefined,
 };
 
 interface ColumnConfig {
@@ -118,6 +121,21 @@ function defaultRenderer<T>(entry: ColumnEntry<T>): (item: T) => React.ReactNode
         );
       case "boolean":
         return value ? "Yes" : "No";
+      case "entity": {
+        const ref = value as { id?: string; label?: string; href?: string };
+        if (!ref?.href || !ref?.label) {
+          return <span className="block truncate">{ref?.label ?? "—"}</span>;
+        }
+        return (
+          <Link
+            to={ref.href}
+            onClick={(e) => e.stopPropagation()}
+            className="block truncate text-primary hover:underline"
+          >
+            {ref.label}
+          </Link>
+        );
+      }
       case "text":
       default:
         return <span className="block truncate">{String(value)}</span>;
@@ -167,6 +185,10 @@ export class ColumnBuilder<T> {
 
   duration(key: keyof T & string, config: ColumnConfig): this {
     return this.add(key, "duration", config);
+  }
+
+  entity(key: keyof T & string, config: ColumnConfig): this {
+    return this.add(key, "entity", config);
   }
 
   /** Return a new builder with only the specified columns, in the given order. */

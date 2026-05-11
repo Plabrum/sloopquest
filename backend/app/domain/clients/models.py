@@ -6,10 +6,16 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.domain.addresses.models import Address
 from app.domain.clients.enums import ClientType
 from app.platform.base.models import BaseDBModel, TimestampMixin
+from app.platform.base.search import SearchMixin
+from app.utils.sqids import Sqid, SqidType
 from app.utils.textenum import TextEnum
 
 
-class Client(TimestampMixin, BaseDBModel):
+class Client(SearchMixin, TimestampMixin, BaseDBModel):
+    trgm_columns = ["display_name", "email", "first_name", "last_name", "company_name"]
+    search_label_field = "display_name"
+    search_entity_type = "client"
+    search_detail_prefix = "/clients"
     __tablename__ = "clients"
 
     organization_id: Mapped[int] = mapped_column(
@@ -17,6 +23,7 @@ class Client(TimestampMixin, BaseDBModel):
         nullable=False,
         index=True,
     )
+    user_id: Mapped[Sqid | None] = mapped_column(SqidType, sa.ForeignKey("users.id", ondelete="SET NULL"), index=True)
     client_type: Mapped[ClientType] = mapped_column(TextEnum(ClientType), nullable=False, index=True)
     display_name: Mapped[str] = mapped_column(sa.Text)
     email: Mapped[str | None] = mapped_column(sa.Text)

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import msgspec
 from litestar import Router
+from sqlalchemy.orm import joinedload
 
 from app.domain.surveys.models import Survey, SurveyTemplate
 from app.domain.surveys.schemas import (
@@ -12,6 +13,7 @@ from app.domain.surveys.schemas import (
 )
 from app.domain.users.models import User
 from app.platform.base.crud import CRUDConfig, make_crud_controller
+from app.platform.base.schemas import EntityRef
 from app.platform.data.enums import FieldType
 from app.platform.data.service import FieldConfig
 from app.platform.form_dsl.schema import FormDefinition
@@ -21,8 +23,17 @@ def _to_survey_list_item(survey: Survey, user: User) -> SurveyListItem:
     return SurveyListItem(
         id=survey.id,
         state=survey.state,
-        vessel_id=survey.vessel_id,
-        assigned_surveyor_id=survey.assigned_surveyor_id,
+        vessel=EntityRef(
+            id=survey.vessel_id,
+            label=survey.vessel.name,
+            href=f"/vessels/{survey.vessel_id}",
+        ),
+        surveyor=EntityRef(
+            id=survey.assigned_surveyor_id,
+            label=survey.assigned_surveyor.name,
+            href=f"/users/{survey.assigned_surveyor_id}",
+        ),
+        created_at=survey.created_at,
     )
 
 
@@ -41,6 +52,7 @@ _survey_config = CRUDConfig(
     model=Survey,
     to_list_item=_to_survey_list_item,
     to_detail=_to_survey_detail,
+    list_load_options=[joinedload(Survey.vessel), joinedload(Survey.assigned_surveyor)],
     filterable_columns={"state", "vessel_id", "assigned_surveyor_id", "created_at"},
     sortable_columns={"created_at"},
     label_field="state",
@@ -50,7 +62,7 @@ _survey_config = CRUDConfig(
     ],
 )
 
-_survey_controller = make_crud_controller("/surveys", _survey_config)
+_survey_controller = make_crud_controller("", _survey_config)
 
 survey_router = Router(path="/surveys", route_handlers=[_survey_controller], tags=["surveys"])
 
@@ -81,7 +93,7 @@ _template_config = CRUDConfig(
     label_field="name",
 )
 
-_template_controller = make_crud_controller("/survey-templates", _template_config)
+_template_controller = make_crud_controller("", _template_config)
 
 survey_template_router = Router(
     path="/survey-templates", route_handlers=[_template_controller], tags=["survey-templates"]

@@ -75,6 +75,6 @@ _config = CRUDConfig(
     ],
 )
 
-_controller = make_crud_controller("/invoices", _config)
+_controller = make_crud_controller("", _config)
 
 invoice_router = Router(path="/invoices", route_handlers=[_controller], tags=["invoices"])

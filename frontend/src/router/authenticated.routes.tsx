@@ -30,6 +30,7 @@ export const searchRoute = createRoute({
   path: "/search",
   validateSearch: (search: Record<string, unknown>) => ({
     q: typeof search.q === "string" ? search.q : "",
+    tab: typeof search.tab === "string" ? search.tab : "global",
   }),
   component: SearchPage,
 });

@@ -31,14 +31,7 @@ function SurveyTemplateDetailContent() {
         <KeyValueGrid
           items={[
             { label: "Name", value: data.name },
-            {
-              label: "Applies To",
-              value: Array.isArray(data.applies_to_survey_types)
-                ? data.applies_to_survey_types.join(", ") || "—"
-                : "—",
-            },
-            { label: "Created", value: data.created_at },
-            { label: "Updated", value: data.updated_at },
+            { label: "Tags", value: data.tags.join(", ") || "—" },
           ]}
         />
       </div>

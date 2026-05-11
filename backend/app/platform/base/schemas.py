@@ -1,12 +1,21 @@
 from msgspec import Struct
 
 from app.platform.base.filters import FilterDefinition, SortDefinition
+from app.utils.sqids import Sqid
 
 
 class BaseSchema(Struct):
     """Base schema class for all msgspec structs."""
 
     pass
+
+
+class EntityRef(BaseSchema):
+    """Reference to another resource — id, display label, and detail href."""
+
+    id: Sqid
+    label: str
+    href: str
 
 
 class ListRequest(Struct):

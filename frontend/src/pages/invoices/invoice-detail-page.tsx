@@ -31,7 +31,7 @@ function InvoiceDetailContent() {
         <KeyValueGrid
           items={[
             { label: "Invoice #", value: data.invoice_number ?? "—" },
-            { label: "Status", value: data.status },
+            { label: "State", value: data.state },
             { label: "Currency", value: data.currency },
             { label: "Subtotal", value: `$${(data.subtotal_cents / 100).toFixed(2)}` },
             { label: "Tax", value: `$${(data.tax_cents / 100).toFixed(2)}` },

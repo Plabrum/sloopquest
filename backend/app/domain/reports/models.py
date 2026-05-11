@@ -8,14 +8,21 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.domain.reports.enums import ReportState
 from app.platform.base.models import TimestampMixin
+from app.platform.base.search import SearchMixin
 from app.platform.state_machine.models import StateMachineMixin
 from app.utils.sqids import Sqid, SqidType
 
 
 class Report(
+    SearchMixin,
     TimestampMixin,
     StateMachineMixin(state_enum=ReportState, initial_state=ReportState.draft),
 ):
+    trgm_columns = ["title"]
+    fts_columns = ["summary"]
+    search_label_field = "title"
+    search_entity_type = "report"
+    search_detail_prefix = "/reports"
     __tablename__ = "reports"
 
     organization_id: Mapped[int] = mapped_column(

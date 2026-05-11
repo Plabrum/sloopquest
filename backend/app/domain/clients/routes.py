@@ -50,6 +50,6 @@ _config = CRUDConfig(
     label_field="display_name",
 )
 
-_controller = make_crud_controller("/clients", _config)
+_controller = make_crud_controller("", _config)
 
 client_router = Router(path="/clients", route_handlers=[_controller], tags=["clients"])

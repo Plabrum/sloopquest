@@ -21,6 +21,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { NavUser } from "@/components/nav-user";
+import { GlobalSearch } from "@/components/global-search";
 
 interface NavItem {
   title: string;
@@ -89,6 +90,7 @@ export function AppSidebar({ user }: { user: { email?: string; name?: string } }
         <NavUser user={user} />
       </SidebarFooter>
       <SidebarRail />
+      <GlobalSearch />
     </Sidebar>
   );
 }

@@ -2,11 +2,11 @@ import { useEffect, useRef } from "react";
 import { Loader2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageItem } from "./message-item";
-import type { MessageSchema } from "@/openapi/litestarAPI.schemas";
+import type { ThreadsSchemasMessageSchema } from "@/openapi/litestarAPI.schemas";
 import type { TiptapContent } from "@/lib/tiptap";
 
 interface MessageListProps {
-  messages: MessageSchema[];
+  messages: ThreadsSchemasMessageSchema[];
   currentUserId: string;
   isLoading?: boolean;
   onEditMessage?: (messageId: string, content: TiptapContent) => Promise<void>;

@@ -4,10 +4,20 @@ from app.domain.users.roles import Role
 from app.platform.state_machine.machine import State, StateMachine, Transition
 
 _staff: set[Role] = {Role.ADMIN, Role.SUPERADMIN}
+_system: set[Role] = {Role.SYSTEM}
 
 
 class InquiryState(State[SurveyState, Survey]):
     value = SurveyState.inquiry
+    transitions = [
+        Transition(to=SurveyState.quoted, roles=_staff | _system),
+        Transition(to=SurveyState.scheduled, roles=_staff),
+        Transition(to=SurveyState.cancelled, roles=_staff),
+    ]
+
+
+class QuotedState(State[SurveyState, Survey]):
+    value = SurveyState.quoted
     transitions = [
         Transition(to=SurveyState.scheduled, roles=_staff),
         Transition(to=SurveyState.cancelled, roles=_staff),
@@ -67,6 +77,7 @@ survey_state_machine = StateMachine(
     enum_type=SurveyState,
     states={
         SurveyState.inquiry: InquiryState,
+        SurveyState.quoted: QuotedState,
         SurveyState.scheduled: ScheduledState,
         SurveyState.in_field: InFieldState,
         SurveyState.in_draft: InDraftState,

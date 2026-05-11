@@ -37,6 +37,6 @@ _config = CRUDConfig(
     label_field="name",
 )
 
-_controller = make_crud_controller("/manufacturers", _config)
+_controller = make_crud_controller("", _config)
 
 manufacturer_router = Router(path="/manufacturers", route_handlers=[_controller], tags=["manufacturers"])

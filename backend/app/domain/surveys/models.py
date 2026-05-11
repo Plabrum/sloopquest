@@ -9,11 +9,16 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.domain.surveys.enums import SurveyState
 from app.domain.vessels.models import Vessel
 from app.platform.base.models import BaseDBModel, TimestampMixin
+from app.platform.base.search import SearchMixin
 from app.platform.state_machine.models import StateMachineMixin
 from app.utils.sqids import Sqid, SqidType
 
 
-class SurveyTemplate(TimestampMixin, BaseDBModel):
+class SurveyTemplate(SearchMixin, TimestampMixin, BaseDBModel):
+    trgm_columns = ["name"]
+    search_label_field = "name"
+    search_entity_type = "survey_template"
+    search_detail_prefix = "/surveys/templates"
     __tablename__ = "survey_templates"
 
     organization_id: Mapped[int] = mapped_column(

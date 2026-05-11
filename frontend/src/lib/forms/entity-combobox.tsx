@@ -28,7 +28,7 @@ const ENTITY_LOADERS: Record<string, () => Promise<ComboboxOption[]>> = {
     listSurvey({ limit: 200 }).then((r) =>
       r.items.map((s) => ({
         value: s.id,
-        label: `${s.survey_type} — ${s.state}`,
+        label: `${s.vessel.label} — ${s.state}`,
       })),
     ),
   SurveyTemplate: () =>
@@ -101,7 +101,8 @@ export function EntityCombobox({
       setCreating(true);
       try {
         const res = await actionsActionGroupExecuteAction(actionGroup, {
-          action: createAction,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          action: createAction as any,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           data: { name } as any,
         });

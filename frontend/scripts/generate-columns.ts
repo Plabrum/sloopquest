@@ -90,12 +90,13 @@ function isHidden(key: string, schema: RefOrSchema, spec: OpenAPISchema): boolea
   if (key.endsWith("_id")) return true;
   // Skip array-of-object fields
   if (schema.type === "array" && schema.items?.$ref) return true;
-  // Skip composite-object refs (including nullable ones). Enums would be
-  // resolved into a real display type further down, but a `$ref` pointing to
-  // a Struct (e.g. AppointmentPrepStatus) has no sensible plain-text rendering —
-  // consumers render those columns manually.
+  // Skip composite-object refs (including nullable ones). Enums and EntityRef
+  // are resolved into real display types further down; other Struct refs have
+  // no sensible plain-text rendering.
   const { schema: unwrapped } = unwrapNullable(schema);
   if (unwrapped.$ref) {
+    const name = refName(unwrapped.$ref);
+    if (name === "EntityRef") return false;
     const resolved = resolveRef(spec, unwrapped.$ref);
     if (!resolved.enum) return true;
   }
@@ -128,6 +129,17 @@ function inferColumn(
 
   const header = columnLabels[key] ?? humanizeHeader(key);
   const { schema } = unwrapNullable(prop);
+
+  // EntityRef: relationship column rendered as a link
+  if (schema.$ref && refName(schema.$ref) === "EntityRef") {
+    return {
+      key,
+      displayType: "entity",
+      header,
+      sortable: sortable.has(key),
+      filterable: false,
+    };
+  }
 
   // Resolve enum ref once — used by both the type override path and auto-detect
   let enumRef: string | undefined;

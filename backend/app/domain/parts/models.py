@@ -6,11 +6,17 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.domain.manufacturers.models import Manufacturer
 from app.domain.parts.enums import PartCategory
 from app.platform.base.models import BaseDBModel, TimestampMixin
+from app.platform.base.search import SearchMixin
 from app.utils.sqids import Sqid, SqidType
 from app.utils.textenum import TextEnum
 
 
-class Part(TimestampMixin, BaseDBModel):
+class Part(SearchMixin, TimestampMixin, BaseDBModel):
+    trgm_columns = ["name", "part_number"]
+    fts_columns = ["description"]
+    search_label_field = "name"
+    search_entity_type = "part"
+    search_detail_prefix = "/parts"
     __tablename__ = "parts"
 
     name: Mapped[str] = mapped_column(sa.Text)

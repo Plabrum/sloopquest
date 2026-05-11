@@ -6,3 +6,4 @@ class Role(StrEnum):
     ADMIN = auto()
     MEMBER = auto()
     SYSTEM = auto()
+    CLIENT = auto()

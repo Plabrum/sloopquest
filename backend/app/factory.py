@@ -38,6 +38,7 @@ from app.platform.actions.routes import action_router
 from app.platform.auth.routes import auth_router
 from app.platform.base.models import BaseDBModel
 from app.platform.base.schema_routes import schema_router
+from app.platform.base.search_routes import search_router
 from app.platform.billing import billing_webhook_router, connect_router
 from app.platform.comms.webhook_routes import comms_webhook_router
 from app.platform.documents import document_router
@@ -178,6 +179,7 @@ def create_app(
             user_router,
             connect_router,
             llm_router,
+            search_router,
         ],
         plugins=plugins,
         on_app_init=[session_auth.on_app_init],

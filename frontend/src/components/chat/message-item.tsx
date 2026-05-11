@@ -5,10 +5,10 @@ import { MessageContent } from "./message-content";
 import { MessageInput } from "./message-input";
 import { formatRelativeTime } from "@/lib/format";
 import { type TiptapContent, hasContentText } from "@/lib/tiptap";
-import type { MessageSchema } from "@/openapi/litestarAPI.schemas";
+import type { ThreadsSchemasMessageSchema } from "@/openapi/litestarAPI.schemas";
 
 interface MessageItemProps {
-  message: MessageSchema;
+  message: ThreadsSchemasMessageSchema;
   isCurrentUser: boolean;
   onEdit?: (messageId: string, content: TiptapContent) => Promise<void>;
   onDelete?: (messageId: string) => Promise<void>;

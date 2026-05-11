@@ -26,6 +26,6 @@ _config = CRUDConfig(
     expose_detail=False,
 )
 
-_controller = make_crud_controller("/users", _config)
+_controller = make_crud_controller("", _config)
 
 user_router = Router(path="/users", route_handlers=[_controller], tags=["user"])

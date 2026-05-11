@@ -14,7 +14,7 @@ from app.platform.base.filters import apply_filter, apply_sorts
 from app.platform.base.models import BaseDBModel
 from app.platform.base.registry import BaseRegistry
 from app.platform.base.schemas import ListRequest, PagedResponse
-from app.platform.base.search import SearchMixin
+from app.platform.base.search import SearchMixin, SearchRegistry
 from app.platform.data.schemas import DataSchemaResponse, FieldSchema, TimeSeriesDataRequest, TimeSeriesDataResponse
 from app.platform.data.service import FieldConfig, query_time_series_data
 from app.utils.sqids import Sqid
@@ -251,5 +251,8 @@ def make_crud_controller[ModelT: BaseDBModel, ListT: Struct, DetailT: Struct](
     _crud_metadata[f"list_{model_name}"] = metadata
 
     CRUDRegistry().register(model, CRUDEntry(path=path, config=config))
+
+    if issubclass(model, SearchMixin) and (model.trgm_columns or model.fts_columns):
+        SearchRegistry[model.search_entity_type] = model
 
     return controller_cls

@@ -17,11 +17,16 @@ from app.domain.vessels.enums import (
     VesselType,
 )
 from app.platform.base.models import BaseDBModel, TimestampMixin
+from app.platform.base.search import SearchMixin
 from app.utils.sqids import Sqid, SqidType
 from app.utils.textenum import TextEnum
 
 
-class Vessel(TimestampMixin, BaseDBModel):
+class Vessel(SearchMixin, TimestampMixin, BaseDBModel):
+    trgm_columns = ["name", "hin", "model"]
+    search_label_field = "name"
+    search_entity_type = "vessel"
+    search_detail_prefix = "/vessels"
     __tablename__ = "vessels"
 
     name: Mapped[str] = mapped_column(sa.Text)

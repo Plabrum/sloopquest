@@ -53,6 +53,6 @@ _config = CRUDConfig(
     ],
 )
 
-_controller = make_crud_controller("/reports", _config)
+_controller = make_crud_controller("", _config)
 
 report_router = Router(path="/reports", route_handlers=[_controller], tags=["reports"])

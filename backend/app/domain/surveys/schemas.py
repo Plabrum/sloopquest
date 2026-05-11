@@ -1,7 +1,8 @@
+from datetime import datetime
 from typing import Any
 
 from app.domain.surveys.enums import SurveyState
-from app.platform.base.schemas import BaseSchema
+from app.platform.base.schemas import BaseSchema, EntityRef
 from app.platform.form_dsl.schema import FormDefinition
 from app.utils.sqids import Sqid
 
@@ -9,8 +10,9 @@ from app.utils.sqids import Sqid
 class SurveyListItem(BaseSchema):
     id: Sqid
     state: SurveyState
-    vessel_id: Sqid
-    assigned_surveyor_id: Sqid
+    vessel: EntityRef
+    surveyor: EntityRef
+    created_at: datetime
 
 
 class SurveyDetail(BaseSchema):

@@ -85,6 +85,6 @@ _config = CRUDConfig(
     ],
 )
 
-_controller = make_crud_controller("/vessels", _config)
+_controller = make_crud_controller("", _config)
 
 vessel_router = Router(path="/vessels", route_handlers=[_controller], tags=["vessels"])

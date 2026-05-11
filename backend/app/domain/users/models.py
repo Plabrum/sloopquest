@@ -5,6 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.domain.users.roles import Role
 from app.platform.base.models import BaseDBModel
+from app.platform.base.search import SearchMixin
 from app.utils.textenum import TextEnum
 
 # NOTE: User and Organization deliberately do NOT use OrgRootMixin / OrgScopedMixin
@@ -31,8 +32,12 @@ class Organization(BaseDBModel):
     stripe_account_id: Mapped[str | None] = mapped_column(sa.Text)
 
 
-class User(BaseDBModel):
+class User(SearchMixin, BaseDBModel):
     __tablename__ = "users"
+    trgm_columns = ["name", "email"]
+    search_label_field = "name"
+    search_entity_type = "user"
+    search_detail_prefix = "/users"
     __table_args__ = (sa.Index("ix_users_email", "email", unique=True),)
 
     organization_id: Mapped[int] = mapped_column(

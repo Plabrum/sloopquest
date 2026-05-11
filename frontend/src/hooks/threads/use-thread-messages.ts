@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import type { MessageSchema, MessageListResponse } from "@/openapi/litestarAPI.schemas";
+import type { ThreadsSchemasMessageSchema, MessageListResponse } from "@/openapi/litestarAPI.schemas";
 import type { TiptapContent } from "@/lib/tiptap";
 import type { AuthUser } from "@/lib/auth-loader";
 import {
@@ -62,7 +62,7 @@ export function useThreadMessages({
                 email: user.email,
                 name: user.name ?? user.email,
               },
-            } as unknown as MessageSchema;
+            } as unknown as ThreadsSchemasMessageSchema;
 
             queryClient.setQueryData<MessageListResponse>(queryKey, {
               ...previousMessages,

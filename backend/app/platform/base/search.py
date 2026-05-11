@@ -1,50 +1,87 @@
-"""SearchMixin for models that support text search across columns.
-
-Declaring `search_columns` on a model auto-generates a persisted `search_vector`
-`tsvector` column wired to those columns via Postgres `GENERATED ALWAYS AS
-... STORED`. Postgres recomputes the value on every INSERT/UPDATE — no triggers,
-no application-level bookkeeping.
-
-The default `search_filter()` returns an `ilike` OR-chain so the CRUD list
-handler works from day one. When a model's dataset grows large enough to need
-true full-text search, override `search_filter()` to use `search_vector` with
-`websearch_to_tsquery`. The mixin interface stays unchanged.
-"""
-
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import Any, ClassVar
 
 import sqlalchemy as sa
-from sqlalchemy import ColumnElement, or_
+from sqlalchemy import ColumnElement, Index, or_
 from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.orm import declared_attr
 
+from app.platform.base.models import BaseDBModel
 
-class SearchMixin:
-    """Mixin for BaseDBModel subclasses that opt into text search.
+# Keyed by search_entity_type → model class
+SearchRegistry: dict[str, type[SearchMixin]] = {}
 
-    Usage:
-        class Survey(BaseDBModel, SearchMixin):
-            search_columns = ["name", "description", "reference_number"]
-    """
 
-    search_columns: ClassVar[list[str]] = []
+class SearchMixin(BaseDBModel):
+    """Abstract mixin — never mapped directly; concrete subclasses get trgm/fts columns."""
 
-    @declared_attr  # pyright: ignore[reportArgumentType]
-    def search_vector(cls):  # noqa: N805 — declared_attr convention uses `cls`
-        if not cls.search_columns:
-            return None
-        expression = " || ' ' || ".join(f"coalesce({col}, '')" for col in cls.search_columns)
-        return sa.Column(
-            TSVECTOR,
-            sa.Computed(f"to_tsvector('english', {expression})", persisted=True),
-            nullable=True,
-        )
+    __abstract__ = True
+
+    trgm_columns: ClassVar[list[str]] = []  # pg_trgm ilike — names, codes, proper nouns
+    fts_columns: ClassVar[list[str]] = []  # english FTS — prose, notes, summaries
+
+    search_global: ClassVar[bool] = True
+    search_label_field: ClassVar[str]
+    search_entity_type: ClassVar[str]
+    search_detail_prefix: ClassVar[str]
+
+    # Set by __init_subclass__ on subclasses that declare trgm_columns / fts_columns.
+    # Typed as Any so search_filter can call .ilike() / .op() without narrowing.
+    search_trgm: ClassVar[Any]
+    search_vector: ClassVar[Any]
+
+    def __init_subclass__(cls, **kwargs: object) -> None:
+        super().__init_subclass__(**kwargs)
+
+        if cls.trgm_columns:
+            trgm_expr = " || ' ' || ".join(f"coalesce({c}, '')" for c in cls.trgm_columns)
+
+            @declared_attr
+            def search_trgm(c: Any) -> sa.Column[str]:
+                return sa.Column(sa.Text, sa.Computed(trgm_expr, persisted=True), nullable=True)
+
+            cls.search_trgm = search_trgm
+
+        if cls.fts_columns:
+            fts_expr = " || ' ' || ".join(f"coalesce({c}, '')" for c in cls.fts_columns)
+
+            @declared_attr
+            def search_vector(c: Any) -> sa.Column[Any]:
+                return sa.Column(
+                    TSVECTOR,
+                    sa.Computed(f"to_tsvector('english', {fts_expr})", persisted=True),
+                    nullable=True,
+                )
+
+            cls.search_vector = search_vector
+
+    @classmethod
+    def __declare_last__(cls) -> None:
+        if cls.trgm_columns and "search_trgm" in cls.__table__.c:
+            Index(
+                f"ix_{cls.__tablename__}_trgm",
+                cls.__table__.c.search_trgm,
+                postgresql_using="gin",
+                postgresql_ops={"search_trgm": "gin_trgm_ops"},
+            )
+        if cls.fts_columns and "search_vector" in cls.__table__.c:
+            Index(
+                f"ix_{cls.__tablename__}_search_vector",
+                cls.__table__.c.search_vector,
+                postgresql_using="gin",
+            )
 
     @classmethod
     def search_filter(cls, term: str) -> ColumnElement | None:
         if not term or not term.strip():
             return None
-        conditions = [getattr(cls, col).ilike(f"%{term}%") for col in cls.search_columns if hasattr(cls, col)]
+        conditions = []
+        if cls.trgm_columns and "search_trgm" in cls.__table__.c:
+            conditions.append(cls.__table__.c["search_trgm"].ilike(f"%{term}%"))
+        if cls.fts_columns and "search_vector" in cls.__table__.c:
+            conditions.append(cls.__table__.c["search_vector"].op("@@")(sa.func.websearch_to_tsquery("english", term)))
         return or_(*conditions) if conditions else None
+
+    def get_search_label(self) -> str:
+        return str(getattr(self, self.__class__.search_label_field, "") or "")
