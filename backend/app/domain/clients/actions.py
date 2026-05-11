@@ -21,7 +21,7 @@ class ClientActionKey(StrEnum):
 
 client_actions = action_group_factory(
     group_type=ActionGroupType.CLIENT_ACTIONS,
-    default_invalidation="list_Client",
+    default_invalidation="/clients",
     model_type=Client,
 )
 

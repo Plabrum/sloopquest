@@ -115,8 +115,8 @@ class StateMachine[E: Enum, M: BaseDBModel]:
 class StateMachineService:
     """Session-bound service. One instance per request (provided via Litestar DI)."""
 
-    def __init__(self, db_session: AsyncSession) -> None:
-        self.db_session = db_session
+    def __init__(self, transaction: AsyncSession) -> None:
+        self.transaction = transaction
 
     async def transition(
         self,
@@ -200,7 +200,7 @@ class StateMachineService:
             actor_id=actor_id,
             context=context,
         )
-        self.db_session.add(log)
+        self.transaction.add(log)
 
         # 4. on_enter
         target_state = machine.states[to]()
@@ -219,7 +219,7 @@ class StateMachineService:
     ) -> None:
         try:
             await emit_event(
-                session=self.db_session,
+                session=self.transaction,
                 event_type=EventType.STATE_CHANGED,
                 obj=obj,
                 user_id=actor_id if actor_id != SYSTEM_USER_ID else None,

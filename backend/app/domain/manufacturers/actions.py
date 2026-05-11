@@ -20,7 +20,7 @@ class ManufacturerActionKey(StrEnum):
 
 manufacturer_actions = action_group_factory(
     group_type=ActionGroupType.MANUFACTURER_ACTIONS,
-    default_invalidation="list_Manufacturer",
+    default_invalidation="/manufacturers",
     model_type=Manufacturer,
 )
 

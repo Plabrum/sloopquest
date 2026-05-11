@@ -7,5 +7,5 @@ from app.utils.deps import dep
 
 
 @dep("sm_service")
-def provide_sm_service(db_session: AsyncSession) -> StateMachineService:
-    return StateMachineService(db_session)
+def provide_sm_service(transaction: AsyncSession) -> StateMachineService:
+    return StateMachineService(transaction)

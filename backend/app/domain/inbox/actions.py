@@ -56,13 +56,13 @@ class MessageActionKey(StrEnum):
 
 email_thread_actions = action_group_factory(
     group_type=ActionGroupType.EMAIL_THREAD_ACTIONS,
-    default_invalidation="list_EmailThread",
+    default_invalidation="/email-threads",
     model_type=EmailThread,
 )
 
 message_actions = action_group_factory(
     group_type=ActionGroupType.MESSAGE_ACTIONS,
-    default_invalidation="list_Message",
+    default_invalidation="/messages",
     model_type=Message,
 )
 

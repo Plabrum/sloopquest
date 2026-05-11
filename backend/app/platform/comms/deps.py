@@ -6,5 +6,5 @@ from app.utils.deps import dep
 
 
 @dep("email_service")
-async def provide_email_service(request: Request, db_session: AsyncSession) -> EmailService:
-    return EmailService(request.app.template_engine, db_session, request)  # type: ignore[arg-type]
+async def provide_email_service(request: Request, transaction: AsyncSession) -> EmailService:
+    return EmailService(request.app.template_engine, transaction, request)  # type: ignore[arg-type]

@@ -30,7 +30,7 @@ class SubscriptionActionKey(StrEnum):
 
 subscription_actions = action_group_factory(
     group_type=ActionGroupType.SUBSCRIPTION_ACTIONS,
-    default_invalidation="list_Subscription",
+    default_invalidation="/subscriptions",
     model_type=Subscription,
 )
 

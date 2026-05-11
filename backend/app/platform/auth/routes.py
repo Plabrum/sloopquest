@@ -40,7 +40,7 @@ async def request_magic_link(
     data: MagicLinkRequestBody,
     request: Request,
     auth_service: AuthService,
-    db_session: AsyncSession,
+    transaction: AsyncSession,
 ) -> dict[str, str]:
     """Request a magic link. In dev, demo@sloopquest.com addresses log in instantly."""
     email = data.email.strip().lower()
@@ -48,7 +48,7 @@ async def request_magic_link(
 
     if config.IS_DEV and domain == _DEMO_EMAIL_DOMAIN and local.startswith(_DEMO_EMAIL_PREFIX):
         user = (
-            await db_session.execute(select(User).where(User.email == email, User.organization_id == _DEMO_ORG_ID))
+            await transaction.execute(select(User).where(User.email == email, User.organization_id == _DEMO_ORG_ID))
         ).scalar_one_or_none()
         if user is not None:
             request.set_session({"user_id": int(user.id)})

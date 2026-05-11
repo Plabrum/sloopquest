@@ -43,7 +43,7 @@ class SurveyActionKey(StrEnum):
 
 survey_actions = action_group_factory(
     group_type=ActionGroupType.SURVEY_ACTIONS,
-    default_invalidation="list_Survey",
+    default_invalidation="/surveys",
     model_type=Survey,
 )
 
@@ -306,7 +306,7 @@ class SurveyTemplateActionKey(StrEnum):
 
 survey_template_actions = action_group_factory(
     group_type=ActionGroupType.SURVEY_TEMPLATE_ACTIONS,
-    default_invalidation="list_SurveyTemplate",
+    default_invalidation="/survey-templates",
     model_type=SurveyTemplate,
 )
 

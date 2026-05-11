@@ -20,7 +20,7 @@ class PartActionKey(StrEnum):
 
 part_actions = action_group_factory(
     group_type=ActionGroupType.PART_ACTIONS,
-    default_invalidation="list_Part",
+    default_invalidation="/parts",
     model_type=Part,
 )
 

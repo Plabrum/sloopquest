@@ -25,7 +25,7 @@ class ReportActionKey(StrEnum):
 
 report_actions = action_group_factory(
     group_type=ActionGroupType.REPORT_ACTIONS,
-    default_invalidation="list_Report",
+    default_invalidation="/reports",
     model_type=Report,
 )
 

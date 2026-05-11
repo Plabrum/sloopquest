@@ -39,7 +39,7 @@ class InvoiceActionKey(StrEnum):
 
 invoice_actions = action_group_factory(
     group_type=ActionGroupType.INVOICE_ACTIONS,
-    default_invalidation="list_Invoice",
+    default_invalidation="/invoices",
     model_type=Invoice,
 )
 

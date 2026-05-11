@@ -31,7 +31,7 @@ class VesselActionKey(StrEnum):
 
 vessel_actions = action_group_factory(
     group_type=ActionGroupType.VESSEL_ACTIONS,
-    default_invalidation="list_Vessel",
+    default_invalidation="/vessels",
     model_type=Vessel,
 )
 

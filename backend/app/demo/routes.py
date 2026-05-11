@@ -40,7 +40,7 @@ def _requires_dev(connection: ASGIConnection, _: BaseRouteHandler) -> None:
 async def switch_role(
     data: SwitchRoleBody,
     request: Request,
-    db_session: AsyncSession,
+    transaction: AsyncSession,
 ) -> MeResponse:
     """Set the session to a demo user by role. Dev only."""
     try:
@@ -53,7 +53,7 @@ async def switch_role(
         raise NotFoundException(f"No demo user for role: {role}")
 
     user = (
-        await db_session.execute(select(User).where(User.email == email, User.organization_id == DEMO_ORG_ID))
+        await transaction.execute(select(User).where(User.email == email, User.organization_id == DEMO_ORG_ID))
     ).scalar_one_or_none()
 
     if user is None:

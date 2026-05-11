@@ -77,7 +77,7 @@ def session() -> MagicMock:
 
 @pytest.fixture
 def service(session: MagicMock) -> StateMachineService:
-    return StateMachineService(db_session=session)
+    return StateMachineService(transaction=session)
 
 
 async def test_valid_transition_logs_and_advances(service: StateMachineService, session: MagicMock) -> None:
