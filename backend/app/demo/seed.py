@@ -54,7 +54,6 @@ _SURVEY_STATES: list[SurveyState] = [
     SurveyState.in_draft,
     SurveyState.in_review,
     SurveyState.delivered,
-    SurveyState.paid,
     SurveyState.cancelled,
 ]
 
@@ -70,14 +69,6 @@ _STATE_PATHS: dict[SurveyState, list[SurveyState]] = {
         SurveyState.in_draft,
         SurveyState.in_review,
         SurveyState.delivered,
-    ],
-    SurveyState.paid: [
-        SurveyState.scheduled,
-        SurveyState.in_field,
-        SurveyState.in_draft,
-        SurveyState.in_review,
-        SurveyState.delivered,
-        SurveyState.paid,
     ],
     SurveyState.cancelled: [SurveyState.cancelled],
 }
@@ -214,18 +205,18 @@ async def seed_demo_org(session: AsyncSession) -> Organization:
     logger.info("Created state transition logs")
 
     # ── 8. Invoices ───────────────────────────────────────────────────────────
-    invoiced_states = {SurveyState.delivered, SurveyState.paid}
+    invoiced_states = {SurveyState.delivered}
     for survey, survey_state in zip(surveys, _SURVEY_STATES):
         if survey_state not in invoiced_states:
             continue
         client = clients[surveys.index(survey) % len(clients)]
-        invoice_state = InvoiceState.paid if survey_state == SurveyState.paid else InvoiceState.sent
+        invoice_state = InvoiceState.paid
         invoice = InvoiceFactory.build(
             organization_id=org.id,
             survey_id=survey.id,
             client_id=client.id,
             state=invoice_state,
-            invoice_number=f"INV-{1000 + surveys.index(survey)}",
+            identifier=f"INV-{100001 + surveys.index(survey)}",
             issued_at=now - timedelta(days=10),
             due_at=now + timedelta(days=20),
             subtotal_cents=75000,
@@ -245,15 +236,11 @@ async def seed_demo_org(session: AsyncSession) -> Organization:
     logger.info("Created invoices")
 
     # ── 9. Reports ────────────────────────────────────────────────────────────
-    reported_states = {SurveyState.in_review, SurveyState.delivered, SurveyState.paid}
+    reported_states = {SurveyState.in_review, SurveyState.delivered}
     for survey, survey_state in zip(surveys, _SURVEY_STATES):
         if survey_state not in reported_states:
             continue
-        report_state = (
-            ReportState.released
-            if survey_state in (SurveyState.delivered, SurveyState.paid)
-            else ReportState.ready_for_review
-        )
+        report_state = ReportState.released if survey_state == SurveyState.delivered else ReportState.ready_for_review
         session.add(
             ReportFactory.build(
                 organization_id=org.id,
@@ -386,7 +373,7 @@ async def seed_demo_org(session: AsyncSession) -> Organization:
             size_h=2,
             query={
                 "resource": ResourceType.INVOICES.value,
-                "columns": ["invoice_number", "state", "total_cents"],
+                "columns": ["identifier", "state", "total_cents"],
                 "limit": 5,
                 "filters": [],
             },

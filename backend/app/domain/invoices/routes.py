@@ -25,7 +25,7 @@ def _to_line_item(item: InvoiceLineItem) -> InvoiceLineItemSchema:
 def _to_list_item(invoice: Invoice, user: User) -> InvoiceListItem:
     return InvoiceListItem(
         id=invoice.id,
-        invoice_number=invoice.invoice_number,
+        identifier=invoice.identifier,
         state=invoice.state,
         survey_id=invoice.survey_id,
         client_id=invoice.client_id,
@@ -39,7 +39,7 @@ def _to_list_item(invoice: Invoice, user: User) -> InvoiceListItem:
 def _to_detail(invoice: Invoice, user: User) -> InvoiceDetail:
     return InvoiceDetail(
         id=invoice.id,
-        invoice_number=invoice.invoice_number,
+        identifier=invoice.identifier,
         state=invoice.state,
         survey_id=invoice.survey_id,
         client_id=invoice.client_id,
@@ -52,6 +52,7 @@ def _to_detail(invoice: Invoice, user: User) -> InvoiceDetail:
         notes=invoice.notes,
         stripe_payment_intent_id=invoice.stripe_payment_intent_id,
         stripe_client_secret=invoice.stripe_client_secret,
+        access_token=invoice.access_token,
         line_items=[_to_line_item(li) for li in invoice.line_items],
         created_at=invoice.created_at,
         updated_at=invoice.updated_at,
@@ -64,8 +65,8 @@ _config = CRUDConfig(
     to_detail=_to_detail,
     detail_load_options=[selectinload(Invoice.line_items)],
     filterable_columns={"state", "survey_id", "client_id", "issued_at", "due_at", "created_at"},
-    sortable_columns={"invoice_number", "issued_at", "due_at", "total_cents", "created_at"},
-    label_field="invoice_number",
+    sortable_columns={"identifier", "issued_at", "due_at", "total_cents", "created_at"},
+    label_field="identifier",
     data_fields=[
         FieldConfig("total_cents", "Total", FieldType.CENTS),
         FieldConfig("subtotal_cents", "Subtotal", FieldType.CENTS),

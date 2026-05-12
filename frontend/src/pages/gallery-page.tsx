@@ -33,6 +33,8 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
+import { StatusBadge } from "@/components/status-badge";
+import type { StatusVariant } from "@/lib/status-colors";
 import { useState } from "react";
 import { useTheme } from "@/lib/theme";
 import { MetricBarChart } from "@/components/data-display/metric-bar-chart";
@@ -143,6 +145,10 @@ export function GalleryPage() {
             <Badge variant="outline">Outline</Badge>
             <Badge variant="destructive">Destructive</Badge>
           </div>
+        </Section>
+
+        <Section title="Status Badges">
+          <StatusBadgeMatrix />
         </Section>
 
         <Section title="Inputs">
@@ -332,6 +338,121 @@ export function GalleryPage() {
           </div>
         </Section>
 
+      </div>
+    </div>
+  );
+}
+
+const STATUS_VARIANTS: { variant: StatusVariant; sample: string }[] = [
+  { variant: "active", sample: "active" },
+  { variant: "pending", sample: "pending" },
+  { variant: "warning", sample: "warning" },
+  { variant: "danger", sample: "danger" },
+  { variant: "neutral", sample: "neutral" },
+  { variant: "info", sample: "info" },
+];
+
+const REAL_STATES = [
+  "draft",
+  "sent",
+  "paid",
+  "void",
+  "refunded",
+  "in_review",
+  "in_draft",
+  "scheduled",
+  "completed",
+];
+
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="grid grid-cols-[120px_1fr] items-center gap-4">
+      <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+        {label}
+      </span>
+      <div className="flex flex-wrap items-center gap-2">{children}</div>
+    </div>
+  );
+}
+
+function StatusBadgeMatrix() {
+  return (
+    <div className="space-y-6">
+      <div className="space-y-3 rounded-lg border bg-card p-4">
+        <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          On card surface
+        </h3>
+        <Row label="Subtle · default">
+          {STATUS_VARIANTS.map((s) => (
+            <StatusBadge key={s.variant} status={s.sample} />
+          ))}
+        </Row>
+        <Row label="Subtle · sm">
+          {STATUS_VARIANTS.map((s) => (
+            <StatusBadge key={s.variant} status={s.sample} size="sm" />
+          ))}
+        </Row>
+        <Row label="Subtle · no dot">
+          {STATUS_VARIANTS.map((s) => (
+            <StatusBadge key={s.variant} status={s.sample} showDot={false} />
+          ))}
+        </Row>
+        <Row label="Solid · default">
+          {STATUS_VARIANTS.map((s) => (
+            <StatusBadge key={s.variant} status={s.sample} tone="solid" />
+          ))}
+        </Row>
+        <Row label="Solid · sm">
+          {STATUS_VARIANTS.map((s) => (
+            <StatusBadge key={s.variant} status={s.sample} tone="solid" size="sm" />
+          ))}
+        </Row>
+      </div>
+
+      <div className="space-y-3 rounded-lg border border-sidebar-border bg-sidebar p-4 text-sidebar-foreground">
+        <h3 className="text-xs font-semibold uppercase tracking-widest text-sidebar-foreground/60">
+          On sidebar (dark topbar) surface
+        </h3>
+        <Row label="Subtle">
+          {STATUS_VARIANTS.map((s) => (
+            <StatusBadge key={s.variant} status={s.sample} />
+          ))}
+        </Row>
+        <Row label="Solid">
+          {STATUS_VARIANTS.map((s) => (
+            <StatusBadge key={s.variant} status={s.sample} tone="solid" />
+          ))}
+        </Row>
+        <Row label="In context">
+          <div className="flex items-center gap-3 text-sm font-bold">
+            <span>Survey</span>
+            <StatusBadge status="in_review" tone="solid" showDot={false} />
+          </div>
+          <div className="flex items-center gap-3 text-sm font-bold">
+            <span>Invoice INV-042</span>
+            <StatusBadge status="sent" tone="solid" showDot={false} />
+          </div>
+          <div className="flex items-center gap-3 text-sm font-bold">
+            <span>Quote Q-007</span>
+            <StatusBadge status="draft" tone="solid" showDot={false} />
+          </div>
+        </Row>
+      </div>
+
+      <div className="space-y-3 rounded-lg border bg-card p-4">
+        <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          Real domain values (auto-mapped)
+        </h3>
+        <Row label="Subtle">
+          {REAL_STATES.map((s) => (
+            <StatusBadge key={s} status={s} />
+          ))}
+        </Row>
+        <Row label="Solid">
+          {REAL_STATES.map((s) => (
+            <StatusBadge key={s} status={s} tone="solid" showDot={false} />
+          ))}
+        </Row>
       </div>
     </div>
   );

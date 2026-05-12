@@ -16,7 +16,6 @@ function ReportDetailContent() {
   return (
     <PageTopBar
       title={data.title ?? "Report"}
-      breadcrumbSegments={[{ label: "Reports", href: "/reports" }]}
       actions={
         <ActionsMenu
           actions={actionsData?.actions ?? []}
@@ -58,7 +57,7 @@ export function ReportDetailPage() {
   return (
     <Suspense
       fallback={
-        <PageTopBar title="Report" breadcrumbSegments={[{ label: "Reports", href: "/reports" }]}>
+        <PageTopBar title="Report">
           <div className="p-6">
             <Skeleton className="h-64 rounded-2xl" />
           </div>

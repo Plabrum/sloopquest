@@ -7,20 +7,29 @@ import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.domain.reports.enums import ReportState
+from app.platform.base.rls_mixins import OrgScopedMixin
 from app.platform.base.search import SearchMixin
+from app.platform.sequences.enums import SequenceType
+from app.platform.sequences.mixins import SequenceMixin
 from app.platform.state_machine.models import StateMachineMixin
 from app.utils.sqids import Sqid, SqidType
 
 
 class Report(
+    OrgScopedMixin,
     SearchMixin,
+    SequenceMixin(sequence_type=SequenceType.report_identifier, prefix="R"),
     StateMachineMixin(state_enum=ReportState, initial_state=ReportState.draft),
 ):
-    trgm_columns = ["title"]
+    trgm_columns = ["identifier", "title"]
     fts_columns = ["summary"]
-    search_label_field = "title"
+    search_label_field = "identifier"
     search_entity_type = "report"
     search_detail_prefix = "/reports"
+
+    def get_search_label(self) -> str:
+        return self.identifier or self.title or str(self.id)
+
     __tablename__ = "reports"
 
     organization_id: Mapped[int] = mapped_column(

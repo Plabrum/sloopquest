@@ -5,12 +5,11 @@ import {
   authenticatedLayoutRoute,
 } from "@/router/layout.routes";
 import { authRoute, magicLinkVerifyRoute, galleryRoute } from "@/router/public.routes";
+import { payInvoiceRoute } from "@/router/payment.routes";
 import {
   indexRoute,
   searchRoute,
   inboxRoute,
-  crmLayoutRoute,
-  crmIndexRoute,
   clientsListRoute,
   vesselsListRoute,
   quotesListRoute,
@@ -20,8 +19,6 @@ import {
   surveyRoute,
   surveyTemplatesListRoute,
   surveyTemplateRoute,
-  moneyLayoutRoute,
-  moneyIndexRoute,
   invoicesListRoute,
   subscriptionsRoute,
   invoiceRoute,
@@ -36,28 +33,22 @@ import {
 const devRoutes = galleryRoute ? [galleryRoute] : [];
 
 const routeTree = rootRoute.addChildren([
-  publicLayoutRoute.addChildren([authRoute, magicLinkVerifyRoute, ...devRoutes]),
+  publicLayoutRoute.addChildren([authRoute, magicLinkVerifyRoute, payInvoiceRoute, ...devRoutes]),
   authenticatedLayoutRoute.addChildren([
     indexRoute,
     searchRoute,
     inboxRoute,
-    crmLayoutRoute.addChildren([
-      crmIndexRoute,
-      clientsListRoute,
-      vesselsListRoute,
-      quotesListRoute,
-    ]),
+    clientsListRoute,
+    vesselsListRoute,
+    quotesListRoute,
     clientRoute,
     vesselRoute,
     surveysListRoute,
     surveyRoute,
     surveyTemplatesListRoute,
     surveyTemplateRoute,
-    moneyLayoutRoute.addChildren([
-      moneyIndexRoute,
-      invoicesListRoute,
-      subscriptionsRoute,
-    ]),
+    invoicesListRoute,
+    subscriptionsRoute,
     invoiceRoute,
     pricingGuideRoute,
     reportsRoute,

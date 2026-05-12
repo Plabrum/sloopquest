@@ -6,12 +6,13 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.domain.addresses.models import Address
 from app.domain.clients.enums import ClientType
 from app.platform.base.models import BaseDBModel
+from app.platform.base.rls_mixins import OrgScopedMixin
 from app.platform.base.search import SearchMixin
 from app.utils.sqids import Sqid, SqidType
 from app.utils.textenum import TextEnum
 
 
-class Client(SearchMixin, BaseDBModel):
+class Client(OrgScopedMixin, SearchMixin, BaseDBModel):
     trgm_columns = ["display_name", "email", "first_name", "last_name", "company_name"]
     search_label_field = "display_name"
     search_entity_type = "client"

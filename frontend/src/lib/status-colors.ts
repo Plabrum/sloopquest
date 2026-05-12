@@ -118,3 +118,12 @@ export const statusDotClasses: Record<StatusVariant, string> = {
   neutral: "bg-[#8B8178]",
   info: "bg-[#5B8DB8]",
 };
+
+export const statusSolidClasses: Record<StatusVariant, string> = {
+  active: "bg-[#7A9E87] text-[#0F1B14]",
+  pending: "bg-[#D4A853] text-[#1F1608]",
+  warning: "bg-[#E8913A] text-[#1F0F04]",
+  danger: "bg-[#C75450] text-[#1F0A09]",
+  neutral: "bg-[#C9C2B8] text-[#1A1814]",
+  info: "bg-[#5B8DB8] text-[#0A1620]",
+};

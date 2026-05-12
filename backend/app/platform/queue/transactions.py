@@ -37,7 +37,19 @@ async def task_transaction(
             if role_type == TaskRoleType.USER:
                 if user_id is None:
                     raise ValueError("user_id is required for TaskRoleType.USER")
+                # Bypass RLS briefly so we can resolve the user's org for scoping.
+                await session.execute(text("SET LOCAL app.is_system_mode = true"))
+                org_id_row = (
+                    await session.execute(
+                        text("SELECT organization_id FROM users WHERE id = :uid"),
+                        {"uid": user_id},
+                    )
+                ).scalar_one_or_none()
+                if org_id_row is None:
+                    raise ValueError(f"User {user_id} not found")
+                await session.execute(text("SET LOCAL app.is_system_mode = false"))
                 await session.execute(text("SET LOCAL app.user_id = :uid"), {"uid": user_id})
+                await session.execute(text("SET LOCAL app.organization_id = :oid"), {"oid": org_id_row})
             else:
                 await session.execute(text("SET LOCAL app.is_system_mode = true"))
 

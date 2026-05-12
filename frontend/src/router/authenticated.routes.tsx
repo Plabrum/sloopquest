@@ -1,7 +1,5 @@
 import { createRoute } from "@tanstack/react-router";
 import { authenticatedLayoutRoute } from "@/router/layout.routes";
-import { CrmLayout } from "@/layouts/crm-layout";
-import { MoneyLayout } from "@/layouts/money-layout";
 import { DashboardPage } from "@/pages/dashboard-page";
 import { InboxPage } from "@/pages/inbox/inbox-page";
 import { SurveysListPage } from "@/pages/surveys/surveys-list-page";
@@ -21,8 +19,6 @@ import { SearchPage } from "@/pages/search/search-page";
 import { SettingsPage } from "@/pages/settings/settings-page";
 import { BillingPage } from "@/pages/settings/billing-page";
 import { ConnectOnboardingPage } from "@/pages/settings/connect-onboarding-page";
-import { CrmDashboardPage } from "@/pages/crm/crm-dashboard-page";
-import { MoneyDashboardPage } from "@/pages/money/money-dashboard-page";
 import { QuotesListPage } from "@/pages/crm/quotes-list-page";
 import { PricingGuideDetailPage } from "@/pages/pricing-guides/pricing-guide-detail-page";
 
@@ -59,22 +55,9 @@ export const inboxRoute = createRoute({
   component: InboxPage,
 });
 
-// CRM workspace
-export const crmLayoutRoute = createRoute({
-  getParentRoute: () => authenticatedLayoutRoute,
-  path: "/crm",
-  component: CrmLayout,
-});
-
-export const crmIndexRoute = createRoute({
-  getParentRoute: () => crmLayoutRoute,
-  path: "/",
-  component: CrmDashboardPage,
-});
-
 export const clientsListRoute = createRoute({
-  getParentRoute: () => crmLayoutRoute,
-  path: "/clients",
+  getParentRoute: () => authenticatedLayoutRoute,
+  path: "/crm/clients",
   validateSearch: (search: Record<string, unknown>) => ({
     q: typeof search.q === "string" ? search.q : "",
   }),
@@ -82,8 +65,8 @@ export const clientsListRoute = createRoute({
 });
 
 export const vesselsListRoute = createRoute({
-  getParentRoute: () => crmLayoutRoute,
-  path: "/vessels",
+  getParentRoute: () => authenticatedLayoutRoute,
+  path: "/crm/vessels",
   validateSearch: (search: Record<string, unknown>) => ({
     q: typeof search.q === "string" ? search.q : "",
   }),
@@ -91,12 +74,11 @@ export const vesselsListRoute = createRoute({
 });
 
 export const quotesListRoute = createRoute({
-  getParentRoute: () => crmLayoutRoute,
-  path: "/quotes",
+  getParentRoute: () => authenticatedLayoutRoute,
+  path: "/crm/quotes",
   component: QuotesListPage,
 });
 
-// CRM detail routes (flat under authenticated layout)
 export const clientRoute = createRoute({
   getParentRoute: () => authenticatedLayoutRoute,
   path: "/clients/$clientId",
@@ -156,32 +138,18 @@ export const reportRoute = createRoute({
   component: ReportDetailPage,
 });
 
-// Money workspace
-export const moneyLayoutRoute = createRoute({
-  getParentRoute: () => authenticatedLayoutRoute,
-  path: "/money",
-  component: MoneyLayout,
-});
-
-export const moneyIndexRoute = createRoute({
-  getParentRoute: () => moneyLayoutRoute,
-  path: "/",
-  component: MoneyDashboardPage,
-});
-
 export const invoicesListRoute = createRoute({
-  getParentRoute: () => moneyLayoutRoute,
-  path: "/invoices",
+  getParentRoute: () => authenticatedLayoutRoute,
+  path: "/money/invoices",
   component: InvoicesListPage,
 });
 
 export const subscriptionsRoute = createRoute({
-  getParentRoute: () => moneyLayoutRoute,
-  path: "/subscriptions",
+  getParentRoute: () => authenticatedLayoutRoute,
+  path: "/money/subscriptions",
   component: SubscriptionsPage,
 });
 
-// Money detail routes (flat under authenticated layout)
 export const invoiceRoute = createRoute({
   getParentRoute: () => authenticatedLayoutRoute,
   path: "/invoices/$invoiceId",

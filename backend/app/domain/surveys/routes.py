@@ -38,12 +38,29 @@ def _to_survey_list_item(survey: Survey, user: User) -> SurveyListItem:
 
 
 def _to_survey_detail(survey: Survey, user: User) -> SurveyDetail:
+    template_ref = (
+        EntityRef(
+            id=survey.template.id,
+            label=survey.template.name,
+            href=f"/survey-templates/{survey.template.id}",
+        )
+        if survey.template is not None
+        else None
+    )
     return SurveyDetail(
         id=survey.id,
         state=survey.state,
-        vessel_id=survey.vessel_id,
-        assigned_surveyor_id=survey.assigned_surveyor_id,
-        template_id=survey.template_id,
+        vessel=EntityRef(
+            id=survey.vessel_id,
+            label=survey.vessel.name,
+            href=f"/vessels/{survey.vessel_id}",
+        ),
+        surveyor=EntityRef(
+            id=survey.assigned_surveyor_id,
+            label=survey.assigned_surveyor.name,
+            href=f"/users/{survey.assigned_surveyor_id}",
+        ),
+        template=template_ref,
         form_response=survey.form_response,
     )
 
@@ -53,6 +70,11 @@ _survey_config = CRUDConfig(
     to_list_item=_to_survey_list_item,
     to_detail=_to_survey_detail,
     list_load_options=[joinedload(Survey.vessel), joinedload(Survey.assigned_surveyor)],
+    detail_load_options=[
+        joinedload(Survey.vessel),
+        joinedload(Survey.assigned_surveyor),
+        joinedload(Survey.template),
+    ],
     filterable_columns={"state", "vessel_id", "assigned_surveyor_id", "created_at"},
     sortable_columns={"created_at"},
     label_field="state",

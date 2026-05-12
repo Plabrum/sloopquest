@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import type { ActionExecutionResponse } from "@/lib/actions/types";
 
 type NavigateFunction = (options: { to: string }) => void;
@@ -42,5 +43,14 @@ export function handleActionResult(
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  } else if ("text" in response.action_result) {
+    const { text, toast: toastMessage } = response.action_result as {
+      text: string;
+      toast?: string | null;
+    };
+    void navigator.clipboard.writeText(text);
+    if (toastMessage) {
+      toast.success(toastMessage);
+    }
   }
 }

@@ -12,6 +12,7 @@ from app.platform.actions.base import BaseObjectAction, BaseTopLevelAction, Empt
 from app.platform.actions.deps import ActionDeps
 from app.platform.actions.enums import ActionGroupType, ActionIcon
 from app.platform.actions.schemas import ActionExecutionResponse
+from app.platform.sequences.service import assign_identifier_if_missing
 
 
 class ReportActionKey(StrEnum):
@@ -108,6 +109,7 @@ class SubmitReportForReview(BaseObjectAction[Report, EmptyActionData]):
     async def execute(
         cls, obj: Report, data: EmptyActionData, transaction: AsyncSession, deps: ActionDeps
     ) -> ActionExecutionResponse:
+        await assign_identifier_if_missing(transaction, obj)
         await deps.sm_service.transition(report_state_machine, obj, ReportState.ready_for_review, actor=deps.user)
         return ActionExecutionResponse(message="Report submitted for review")
 

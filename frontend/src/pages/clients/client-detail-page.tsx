@@ -16,7 +16,6 @@ function ClientDetailContent() {
   return (
     <PageTopBar
       title={data.display_name}
-      breadcrumbSegments={[{ label: "Clients", href: "/crm/clients" }]}
       actions={
         <ActionsMenu
           actions={actionsData?.actions ?? []}
@@ -53,7 +52,7 @@ export function ClientDetailPage() {
   return (
     <Suspense
       fallback={
-        <PageTopBar title="Client" breadcrumbSegments={[{ label: "Clients", href: "/crm/clients" }]}>
+        <PageTopBar title="Client">
           <div className="p-6">
             <Skeleton className="h-64 rounded-2xl" />
           </div>

@@ -4,9 +4,10 @@ import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.platform.base.models import BaseDBModel
+from app.platform.base.rls_mixins import OrgScopedMixin
 
 
-class PaymentMethod(BaseDBModel):
+class PaymentMethod(OrgScopedMixin, BaseDBModel):
     __tablename__ = "payment_methods"
 
     organization_id: Mapped[int] = mapped_column(

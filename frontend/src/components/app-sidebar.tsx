@@ -36,19 +36,15 @@ interface SubNavItem {
   icon: LucideIcon;
 }
 
-interface WorkspaceNavItem {
-  title: string;
-  url: string;
-  icon: LucideIcon;
-  children?: SubNavItem[];
-}
+type WorkspaceNavItem =
+  | { title: string; url: string; icon: LucideIcon; children?: undefined }
+  | { title: string; icon: LucideIcon; children: SubNavItem[]; url?: undefined };
 
 const WORKSPACE_ITEMS: WorkspaceNavItem[] = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Search", url: "/search", icon: Search },
   {
     title: "CRM",
-    url: "/crm",
     icon: Users,
     children: [
       { title: "Clients", url: "/crm/clients", icon: Users },
@@ -59,7 +55,6 @@ const WORKSPACE_ITEMS: WorkspaceNavItem[] = [
   { title: "Surveys", url: "/surveys", icon: ClipboardList },
   {
     title: "Money",
-    url: "/money",
     icon: DollarSign,
     children: [
       { title: "Invoices", url: "/money/invoices", icon: Receipt },
@@ -80,6 +75,17 @@ function useIsActive(url: string) {
   });
 }
 
+function useAnyChildActive(children: SubNavItem[]) {
+  return useRouterState({
+    select: (s) => {
+      const path = s.location.pathname;
+      return children.some(
+        (c) => path === c.url || path.startsWith(`${c.url}/`),
+      );
+    },
+  });
+}
+
 function SubNavLink({ item }: { item: SubNavItem }) {
   const isActive = useIsActive(item.url);
   return (
@@ -94,12 +100,15 @@ function SubNavLink({ item }: { item: SubNavItem }) {
   );
 }
 
-function WorkspaceNavLink({ item }: { item: WorkspaceNavItem }) {
+function WorkspaceLeafLink({
+  item,
+}: {
+  item: Extract<WorkspaceNavItem, { url: string }>;
+}) {
   const isActive = useIsActive(item.url);
-
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton asChild tooltip={item.title} isActive={isActive && !item.children} className="h-9">
+      <SidebarMenuButton asChild tooltip={item.title} isActive={isActive} className="h-9">
         <Link to={item.url}>
           <item.icon className={cn("size-5", isActive ? "opacity-100" : "opacity-70")} />
           <span className="font-medium group-data-[collapsible=icon]:hidden">
@@ -107,7 +116,28 @@ function WorkspaceNavLink({ item }: { item: WorkspaceNavItem }) {
           </span>
         </Link>
       </SidebarMenuButton>
-      {item.children && isActive && (
+    </SidebarMenuItem>
+  );
+}
+
+function WorkspaceGroup({
+  item,
+}: {
+  item: Extract<WorkspaceNavItem, { children: SubNavItem[] }>;
+}) {
+  const expanded = useAnyChildActive(item.children);
+  const firstChildUrl = item.children[0].url;
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild tooltip={item.title} isActive={expanded} className="h-9">
+        <Link to={firstChildUrl}>
+          <item.icon className={cn("size-5", expanded ? "opacity-100" : "opacity-70")} />
+          <span className="font-medium group-data-[collapsible=icon]:hidden">
+            {item.title}
+          </span>
+        </Link>
+      </SidebarMenuButton>
+      {expanded && (
         <SidebarMenuSub className="group-data-[collapsible=icon]:hidden">
           {item.children.map((child) => (
             <SubNavLink key={child.url} item={child} />
@@ -116,6 +146,13 @@ function WorkspaceNavLink({ item }: { item: WorkspaceNavItem }) {
       )}
     </SidebarMenuItem>
   );
+}
+
+function WorkspaceNavLink({ item }: { item: WorkspaceNavItem }) {
+  if (item.children) {
+    return <WorkspaceGroup item={item} />;
+  }
+  return <WorkspaceLeafLink item={item} />;
 }
 
 export function AppSidebar({ user }: { user: { email?: string; name?: string } }) {
@@ -147,7 +184,7 @@ export function AppSidebar({ user }: { user: { email?: string; name?: string } }
         <div className="border-t border-sidebar-border/50 mx-4" />
         <SidebarMenu className="px-2 pt-2 group-data-[collapsible=icon]:px-0">
           {WORKSPACE_ITEMS.map((item) => (
-            <WorkspaceNavLink key={item.url} item={item} />
+            <WorkspaceNavLink key={item.url ?? item.title} item={item} />
           ))}
         </SidebarMenu>
         <div className="mt-auto px-2 group-data-[collapsible=icon]:px-0">

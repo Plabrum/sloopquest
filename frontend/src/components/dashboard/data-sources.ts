@@ -13,7 +13,7 @@ interface ResourceMeta {
 }
 
 const RESOURCE_META: Record<ResourceType, ResourceMeta> = {
-  invoices: { labelField: "invoice_number", subField: "state" },
+  invoices: { labelField: "identifier", subField: "state" },
   surveys:  { labelField: "id",             subField: "state" },
   vessels:  { labelField: "name",           subField: "hin" },
   reports:  { labelField: "title",          subField: "state" },

@@ -39,7 +39,7 @@ const ENTITY_LOADERS: Record<string, () => Promise<ComboboxOption[]>> = {
     listInvoice({ limit: 200 }).then((r) =>
       r.items.map((i) => ({
         value: i.id,
-        label: i.invoice_number ?? i.id,
+        label: i.identifier ?? i.id,
       })),
     ),
   Report: () =>

@@ -939,13 +939,7 @@ function prefixed(errors: FieldErrors, prefix: string): FieldErrors {
 
 export function ConnectOnboardingPage() {
   return (
-    <PageTopBar
-      title="Connect onboarding"
-      breadcrumbSegments={[
-        { label: "Settings", href: "/settings" },
-        { label: "Billing", href: "/settings/billing" },
-      ]}
-    >
+    <PageTopBar title="Connect onboarding">
       <div className="mx-auto flex max-w-3xl flex-col gap-4 p-6">
         <div className="text-sm text-muted-foreground">
           <Link to="/settings/billing" className="underline">

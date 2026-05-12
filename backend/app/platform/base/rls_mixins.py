@@ -1,57 +1,38 @@
 from typing import Any
 
-import sqlalchemy as sa
 from alembic_utils.pg_policy import PGPolicy
-from sqlalchemy.orm import Mapped, mapped_column
 
 from app.platform.base.models import BaseDBModel
 
 # Global registry for RLS policies — consumed by alembic env.py
 RLS_POLICY_REGISTRY: list[PGPolicy] = []
 
-# ── Policy SQL templates ─────────────────────────────────────────────────────
-#
-# The active user is communicated to Postgres via the session variable
-# `app.user_id` (set by `@with_transaction` in the queue layer and by a
-# Litestar middleware for request handlers). `app.is_system_mode` bypasses
-# RLS for trusted internal flows (migrations, system jobs).
-#
-# TODO: rewrite policy SQL for sloopquest scope hierarchy
-# Once the sloopquest scope hierarchy (org → vessel → survey, or similar) is
-# decided, the policy bodies below need to be rewritten to enforce that
-# hierarchy. The current bodies are placeholders that only check the system
-# mode escape hatch and the presence of a user id — they do NOT enforce
-# any membership relation.
+# Active scope is communicated to Postgres via session variables set by
+# `provide_transaction` (requests) and `task_transaction` (jobs):
+#   app.user_id          — current user
+#   app.organization_id  — current user's org (used for direct column matching)
+#   app.is_system_mode   — bypass for migrations and system jobs
 
 
-# TODO: rewrite policy SQL for sloopquest scope hierarchy
 ORG_ROOT_POLICY = """
     AS PERMISSIVE
     FOR ALL
     USING (
         NULLIF(current_setting('app.is_system_mode', true), '')::boolean IS TRUE
-        OR NULLIF(current_setting('app.user_id', true), '') IS NOT NULL
+        OR (NULLIF(current_setting('app.organization_id', true), '') IS NOT NULL
+            AND id = NULLIF(current_setting('app.organization_id', true), '')::int)
     )
 """
 
 
 def org_child_policy(table: str) -> str:
-    """Build the org-scoped child-table RLS policy with qualified columns.
-
-    Unqualified column references inside subqueries can silently resolve to
-    the subquery's own FROM, making the condition a self-comparison. Every
-    child-table policy must prefix `{table}.<column>` references.
-    """
-    # TODO: rewrite policy SQL for sloopquest scope hierarchy
     return f"""
     AS PERMISSIVE
     FOR ALL
     USING (
         NULLIF(current_setting('app.is_system_mode', true), '')::boolean IS TRUE
-        OR (
-            NULLIF(current_setting('app.user_id', true), '') IS NOT NULL
-            AND {table}.id IS NOT NULL
-        )
+        OR (NULLIF(current_setting('app.organization_id', true), '') IS NOT NULL
+            AND {table}.organization_id = NULLIF(current_setting('app.organization_id', true), '')::int)
     )
 """
 
@@ -126,13 +107,10 @@ class UserScopedMixin:
 
 
 class OrgScopedMixin:
-    """Applied to all child org-scoped data tables. Adds an organization_id FK."""
+    """Marker mixin: registers an org-scoped RLS policy on the table.
 
-    organization_id: Mapped[int] = mapped_column(
-        sa.ForeignKey("organizations.id", ondelete="RESTRICT"),
-        nullable=False,
-        index=True,
-    )
+    The model must declare its own `organization_id` column (FK to organizations.id).
+    """
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)

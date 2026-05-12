@@ -25,6 +25,7 @@ from app.config import Config
 from app.demo.routes import demo_router
 from app.domain.clients.routes import client_router
 from app.domain.inbox.routes import email_thread_router, message_router
+from app.domain.invoices.public_routes import public_invoice_router
 from app.domain.invoices.routes import invoice_router
 from app.domain.manufacturers.routes import manufacturer_router
 from app.domain.parts.routes import part_router
@@ -184,6 +185,7 @@ def create_app(
             survey_router,
             survey_template_router,
             invoice_router,
+            public_invoice_router,
             payment_method_router,
             pricing_guides_router,
             report_router,

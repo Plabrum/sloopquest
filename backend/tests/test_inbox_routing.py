@@ -369,6 +369,7 @@ def _action_deps_for(current_user: User) -> ActionDeps:
         task_queues=MagicMock(),
         sm_service=MagicMock(),
         billing=MagicMock(),
+        email=MagicMock(),
     )
 
 

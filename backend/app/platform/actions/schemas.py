@@ -55,7 +55,12 @@ class DownloadFileActionResult(BaseSchema, tag=ActionResultType.DOWNLOAD_FILE.va
     filename: str
 
 
-ActionResult = RedirectActionResult | DownloadFileActionResult
+class CopyToClipboardActionResult(BaseSchema, tag=ActionResultType.COPY_TO_CLIPBOARD.value):
+    text: str
+    toast: str | None = None
+
+
+ActionResult = RedirectActionResult | DownloadFileActionResult | CopyToClipboardActionResult
 
 
 class ActionExecutionResponse(BaseSchema):

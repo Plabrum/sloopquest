@@ -8,24 +8,34 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.domain.invoices.enums import InvoiceState
 from app.platform.base.models import BaseDBModel
+from app.platform.base.rls_mixins import OrgScopedMixin
 from app.platform.base.search import SearchMixin
+from app.platform.sequences.enums import SequenceType
+from app.platform.sequences.mixins import SequenceMixin
 from app.platform.state_machine.models import StateMachineMixin
 from app.utils.sqids import Sqid, SqidType
 
 
 class Invoice(
+    OrgScopedMixin,
     SearchMixin,
+    SequenceMixin(
+        sequence_type=SequenceType.invoice_identifier,
+        prefix="INV",
+        padding=6,
+        start_value=100_000,
+    ),
     StateMachineMixin(state_enum=InvoiceState, initial_state=InvoiceState.draft),
     BaseDBModel,
 ):
-    trgm_columns = ["invoice_number"]
+    trgm_columns = ["identifier"]
     fts_columns = ["notes"]
-    search_label_field = "invoice_number"
+    search_label_field = "identifier"
     search_entity_type = "invoice"
     search_detail_prefix = "/invoices"
 
     def get_search_label(self) -> str:
-        return self.invoice_number or str(self.id)
+        return self.identifier or str(self.id)
 
     __tablename__ = "invoices"
 
@@ -40,7 +50,6 @@ class Invoice(
     client_id: Mapped[Sqid] = mapped_column(
         SqidType, sa.ForeignKey("clients.id", ondelete="RESTRICT"), nullable=False, index=True
     )
-    invoice_number: Mapped[str | None] = mapped_column(sa.Text)
     issued_at: Mapped[datetime | None] = mapped_column(sa.DateTime(timezone=True))
     due_at: Mapped[datetime | None] = mapped_column(sa.DateTime(timezone=True))
     currency: Mapped[str] = mapped_column(sa.Text, server_default="USD")
@@ -50,6 +59,7 @@ class Invoice(
     notes: Mapped[str | None] = mapped_column(sa.Text)
     stripe_payment_intent_id: Mapped[str | None] = mapped_column(sa.Text)
     stripe_client_secret: Mapped[str | None] = mapped_column(sa.Text)
+    access_token: Mapped[str | None] = mapped_column(sa.Text, unique=True, index=True)
 
     line_items: Mapped[list[InvoiceLineItem]] = relationship(
         "InvoiceLineItem",
@@ -59,9 +69,14 @@ class Invoice(
     )
 
 
-class InvoiceLineItem(BaseDBModel):
+class InvoiceLineItem(OrgScopedMixin, BaseDBModel):
     __tablename__ = "invoice_line_items"
 
+    organization_id: Mapped[int] = mapped_column(
+        sa.ForeignKey("organizations.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
     invoice_id: Mapped[int] = mapped_column(
         sa.ForeignKey("invoices.id", ondelete="CASCADE"),
         nullable=False,

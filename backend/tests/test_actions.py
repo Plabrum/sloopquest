@@ -75,6 +75,7 @@ def _make_deps() -> ActionDeps:
         task_queues=MagicMock(),
         sm_service=MagicMock(),
         billing=MagicMock(),
+        email=MagicMock(),
     )
 
 

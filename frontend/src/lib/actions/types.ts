@@ -22,7 +22,15 @@ export interface DownloadFileActionResult {
   filename: string;
 }
 
-export type ActionResult = RedirectActionResult | DownloadFileActionResult;
+export interface CopyToClipboardActionResult {
+  text: string;
+  toast?: string | null;
+}
+
+export type ActionResult =
+  | RedirectActionResult
+  | DownloadFileActionResult
+  | CopyToClipboardActionResult;
 
 export interface ActionExecutionResponse {
   message?: string;

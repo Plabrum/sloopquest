@@ -38,9 +38,11 @@ def get_dependencies() -> dict[str, Any]:
 
 @dep("transaction")
 async def provide_transaction(db_session: AsyncSession, request: Request) -> AsyncGenerator[AsyncSession]:
-    """Provide a database transaction with `app.user_id` set so RLS policies evaluate."""
+    """Provide a database transaction with `app.user_id` and `app.organization_id` set so RLS policies evaluate."""
     async with db_session.begin():
         if request.scope.get("user") is not None:
             user_id = int(request.user.id)
+            organization_id = int(request.user.organization_id)
             await db_session.execute(text(f"SET LOCAL app.user_id = {user_id}"))
+            await db_session.execute(text(f"SET LOCAL app.organization_id = {organization_id}"))
         yield db_session

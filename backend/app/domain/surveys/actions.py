@@ -22,6 +22,7 @@ from app.platform.actions.enums import ActionGroupType, ActionIcon
 from app.platform.actions.schemas import ActionExecutionResponse
 from app.platform.form_dsl.interpreter import build_response_struct
 from app.platform.form_dsl.schema import FormDefinition
+from app.platform.sequences.service import assign_identifier_if_missing
 
 # ── Survey actions ─────────────────────────────────────────────────────────────
 
@@ -36,7 +37,6 @@ class SurveyActionKey(StrEnum):
     MOVE_TO_DRAFT = auto()
     SUBMIT_FOR_REVIEW = auto()
     DELIVER = auto()
-    MARK_PAID = auto()
     CANCEL = auto()
     SAVE_RESPONSE = auto()
 
@@ -120,7 +120,7 @@ class DeleteSurvey(BaseObjectAction[Survey, EmptyActionData]):
 class ScheduleSurvey(BaseObjectAction[Survey, EmptyActionData]):
     action_key = SurveyActionKey.SCHEDULE
     label = "Schedule"
-    icon = ActionIcon.CHECK
+    icon = ActionIcon.CALENDAR
     priority = 30
 
     @classmethod
@@ -131,6 +131,7 @@ class ScheduleSurvey(BaseObjectAction[Survey, EmptyActionData]):
     async def execute(
         cls, obj: Survey, data: EmptyActionData, transaction: AsyncSession, deps: ActionDeps
     ) -> ActionExecutionResponse:
+        await assign_identifier_if_missing(transaction, obj)
         await deps.sm_service.transition(survey_state_machine, obj, SurveyState.scheduled, actor=deps.user)
         return ActionExecutionResponse(message="Survey scheduled")
 
@@ -139,7 +140,7 @@ class ScheduleSurvey(BaseObjectAction[Survey, EmptyActionData]):
 class StartInspection(BaseObjectAction[Survey, EmptyActionData]):
     action_key = SurveyActionKey.START_INSPECTION
     label = "Start Inspection"
-    icon = ActionIcon.CHECK
+    icon = ActionIcon.PLAY
     priority = 31
 
     @classmethod
@@ -158,7 +159,7 @@ class StartInspection(BaseObjectAction[Survey, EmptyActionData]):
 class CompleteInspection(BaseObjectAction[Survey, EmptyActionData]):
     action_key = SurveyActionKey.COMPLETE_INSPECTION
     label = "Complete Inspection"
-    icon = ActionIcon.CHECK
+    icon = ActionIcon.CLIPBOARD
     priority = 32
 
     @classmethod
@@ -198,7 +199,7 @@ class SubmitForReview(BaseObjectAction[Survey, EmptyActionData]):
 class MoveToDraft(BaseObjectAction[Survey, EmptyActionData]):
     action_key = SurveyActionKey.MOVE_TO_DRAFT
     label = "Back to Draft"
-    icon = ActionIcon.EDIT
+    icon = ActionIcon.REWIND
     priority = 34
 
     @classmethod
@@ -232,25 +233,6 @@ class DeliverSurvey(BaseObjectAction[Survey, EmptyActionData]):
     ) -> ActionExecutionResponse:
         await deps.sm_service.transition(survey_state_machine, obj, SurveyState.delivered, actor=deps.user)
         return ActionExecutionResponse(message="Survey delivered")
-
-
-@survey_actions
-class MarkPaid(BaseObjectAction[Survey, EmptyActionData]):
-    action_key = SurveyActionKey.MARK_PAID
-    label = "Mark as Paid"
-    icon = ActionIcon.CHECK
-    priority = 36
-
-    @classmethod
-    def is_available(cls, obj: Survey, deps: ActionDeps) -> bool:
-        return survey_state_machine.can_transition(obj, SurveyState.paid, deps.user.role)
-
-    @classmethod
-    async def execute(
-        cls, obj: Survey, data: EmptyActionData, transaction: AsyncSession, deps: ActionDeps
-    ) -> ActionExecutionResponse:
-        await deps.sm_service.transition(survey_state_machine, obj, SurveyState.paid, actor=deps.user)
-        return ActionExecutionResponse(message="Survey marked as paid")
 
 
 @survey_actions

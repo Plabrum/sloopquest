@@ -15,8 +15,8 @@ function InvoiceDetailContent() {
 
   return (
     <PageTopBar
-      title={data.invoice_number ?? `Invoice ${invoiceId}`}
-      breadcrumbSegments={[{ label: "Invoices", href: "/money/invoices" }]}
+      title={data.identifier ?? `Invoice ${invoiceId}`}
+      state={data.state}
       actions={
         <ActionsMenu
           actions={actionsData?.actions ?? []}
@@ -30,8 +30,7 @@ function InvoiceDetailContent() {
       <div className="p-6">
         <KeyValueGrid
           items={[
-            { label: "Invoice #", value: data.invoice_number ?? "—" },
-            { label: "State", value: data.state },
+            { label: "Invoice #", value: data.identifier ?? "—" },
             { label: "Currency", value: data.currency },
             { label: "Subtotal", value: `$${(data.subtotal_cents / 100).toFixed(2)}` },
             { label: "Tax", value: `$${(data.tax_cents / 100).toFixed(2)}` },
@@ -50,7 +49,7 @@ export function InvoiceDetailPage() {
   return (
     <Suspense
       fallback={
-        <PageTopBar title="Invoice" breadcrumbSegments={[{ label: "Invoices", href: "/money/invoices" }]}>
+        <PageTopBar title="Invoice">
           <div className="p-6">
             <Skeleton className="h-64 rounded-2xl" />
           </div>

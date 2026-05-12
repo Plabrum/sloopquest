@@ -18,9 +18,9 @@ class SurveyListItem(BaseSchema):
 class SurveyDetail(BaseSchema):
     id: Sqid
     state: SurveyState
-    vessel_id: Sqid
-    assigned_surveyor_id: Sqid
-    template_id: Sqid | None
+    vessel: EntityRef
+    surveyor: EntityRef
+    template: EntityRef | None
     form_response: dict[str, Any] | None
 
 

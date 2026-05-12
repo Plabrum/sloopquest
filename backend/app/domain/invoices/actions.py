@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import logging
+import secrets
 from enum import StrEnum, auto
 
 from litestar.exceptions import NotFoundException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import config
+from app.domain.clients.models import Client
 from app.domain.invoices.enums import InvoiceState
 from app.domain.invoices.models import Invoice, InvoiceLineItem
 from app.domain.invoices.schemas import (
@@ -20,7 +23,8 @@ from app.domain.invoices.state_machine import invoice_state_machine
 from app.platform.actions.base import BaseObjectAction, BaseTopLevelAction, EmptyActionData, action_group_factory
 from app.platform.actions.deps import ActionDeps
 from app.platform.actions.enums import ActionGroupType, ActionIcon
-from app.platform.actions.schemas import ActionExecutionResponse
+from app.platform.actions.schemas import ActionExecutionResponse, CopyToClipboardActionResult
+from app.platform.sequences.service import assign_identifier_if_missing
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +40,7 @@ class InvoiceActionKey(StrEnum):
     UPDATE_LINE_ITEM = auto()
     REMOVE_LINE_ITEM = auto()
     REFUND = auto()
+    COPY_PAY_LINK = auto()
 
 
 invoice_actions = action_group_factory(
@@ -72,9 +77,9 @@ class CreateInvoice(BaseTopLevelAction[CreateInvoiceData]):
             organization_id=deps.user.organization_id,
             survey_id=data.survey_id,
             client_id=data.client_id,
-            invoice_number=data.invoice_number,
             due_at=data.due_at,
             notes=data.notes,
+            access_token=secrets.token_urlsafe(32),
         )
         transaction.add(invoice)
         await transaction.flush()
@@ -95,7 +100,6 @@ class UpdateInvoice(BaseObjectAction[Invoice, UpdateInvoiceData]):
     async def execute(
         cls, obj: Invoice, data: UpdateInvoiceData, transaction: AsyncSession, deps: ActionDeps
     ) -> ActionExecutionResponse:
-        obj.invoice_number = data.invoice_number
         obj.client_id = data.client_id
         obj.issued_at = data.issued_at
         obj.due_at = data.due_at
@@ -142,6 +146,9 @@ class SendInvoice(BaseObjectAction[Invoice, EmptyActionData]):
     async def execute(
         cls, obj: Invoice, data: EmptyActionData, transaction: AsyncSession, deps: ActionDeps
     ) -> ActionExecutionResponse:
+        if obj.access_token is None:
+            obj.access_token = secrets.token_urlsafe(32)
+        await assign_identifier_if_missing(transaction, obj)
         if (
             obj.stripe_payment_intent_id is None
             and obj.total_cents > 0
@@ -156,7 +163,46 @@ class SendInvoice(BaseObjectAction[Invoice, EmptyActionData]):
             obj.stripe_payment_intent_id = pi_id
             obj.stripe_client_secret = client_secret
         await deps.sm_service.transition(invoice_state_machine, obj, InvoiceState.sent, actor=deps.user)
+
+        client = (await transaction.execute(select(Client).where(Client.id == obj.client_id))).scalar_one_or_none()
+        if client is not None and client.email:
+            pay_url = f"{config.FRONTEND_ORIGIN.rstrip('/')}/pay/{obj.access_token}"
+            total_display = f"${obj.total_cents / 100:,.2f}"
+            due_at_display = obj.due_at.strftime("%B %-d, %Y") if obj.due_at else None
+            await deps.email.send_invoice_email(
+                user_id=deps.user.id,
+                to_email=client.email,
+                pay_url=pay_url,
+                invoice_number=obj.identifier,
+                organization_name=deps.organization.name,
+                total_display=total_display,
+                due_at_display=due_at_display,
+                reply_to=deps.user.email,
+            )
         return ActionExecutionResponse(message="Invoice sent")
+
+
+@invoice_actions
+class CopyPayLink(BaseObjectAction[Invoice, EmptyActionData]):
+    action_key = InvoiceActionKey.COPY_PAY_LINK
+    label = "Copy pay link"
+    icon = ActionIcon.LINK
+    priority = 32
+
+    @classmethod
+    def is_available(cls, obj: Invoice, deps: ActionDeps) -> bool:
+        return obj.access_token is not None
+
+    @classmethod
+    async def execute(
+        cls, obj: Invoice, data: EmptyActionData, transaction: AsyncSession, deps: ActionDeps
+    ) -> ActionExecutionResponse:
+        assert obj.access_token is not None
+        pay_url = f"{config.FRONTEND_ORIGIN.rstrip('/')}/pay/{obj.access_token}"
+        return ActionExecutionResponse(
+            message="",
+            action_result=CopyToClipboardActionResult(text=pay_url, toast="Pay link copied"),
+        )
 
 
 @invoice_actions

@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { QueryBoundary } from "@/components/query-boundary";
 import { WidgetSkeleton } from "./widget-skeleton";
 import { AreaChartWidget } from "./widgets/area-chart-widget";
 import { BarChartWidget } from "./widgets/bar-chart-widget";
@@ -6,6 +6,21 @@ import { StatNumberWidget } from "./widgets/stat-number-widget";
 import { ResourceTableWidget } from "./widgets/resource-table-widget";
 import { ChildListWidget } from "./widgets/child-list-widget";
 import type { WidgetRead } from "./types";
+
+function DefaultWidgetError({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="flex h-full min-h-28 flex-col items-center justify-center rounded-[var(--radius-lg)] border border-dashed border-border bg-card p-4 text-center">
+      <p className="text-sm font-medium text-foreground">Widget failed to load</p>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="mt-2 text-xs font-medium text-primary hover:underline"
+      >
+        Retry
+      </button>
+    </div>
+  );
+}
 
 function WidgetContent({ widget }: { widget: WidgetRead }) {
   switch (widget.type) {
@@ -67,9 +82,13 @@ export function DashboardRenderer({ widgets }: DashboardRendererProps) {
               gridRow: `span ${h}`,
             }}
           >
-            <Suspense fallback={<WidgetSkeleton cols={w} />}>
+            <QueryBoundary
+              resetKey={widget.id}
+              fallback={<WidgetSkeleton cols={w} />}
+              errorFallback={(_err, retry) => <DefaultWidgetError onRetry={retry} />}
+            >
               <WidgetContent widget={widget} />
-            </Suspense>
+            </QueryBoundary>
           </div>
         );
       })}

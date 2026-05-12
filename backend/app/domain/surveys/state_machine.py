@@ -58,13 +58,6 @@ class InReviewState(State[SurveyState, Survey]):
 
 class DeliveredState(State[SurveyState, Survey]):
     value = SurveyState.delivered
-    transitions = [
-        Transition(to=SurveyState.paid, roles=_staff),
-    ]
-
-
-class PaidState(State[SurveyState, Survey]):
-    value = SurveyState.paid
     transitions = []
 
 
@@ -83,7 +76,6 @@ survey_state_machine = StateMachine(
         SurveyState.in_draft: InDraftState,
         SurveyState.in_review: InReviewState,
         SurveyState.delivered: DeliveredState,
-        SurveyState.paid: PaidState,
         SurveyState.cancelled: CancelledState,
     },
 )

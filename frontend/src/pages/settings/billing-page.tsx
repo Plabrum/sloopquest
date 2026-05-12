@@ -217,10 +217,7 @@ export function BillingPage() {
   }, [search.onboarding, navigate]);
 
   return (
-    <PageTopBar
-      title="Billing"
-      breadcrumbSegments={[{ label: "Settings", href: "/settings" }]}
-    >
+    <PageTopBar title="Billing">
       <div className="mx-auto flex max-w-3xl flex-col gap-4 p-6">
         <Suspense fallback={<PageSkeleton />}>
           <SubscriptionSummary />

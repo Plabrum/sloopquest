@@ -8,13 +8,28 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.domain.quotes.enums import QuoteState
 from app.platform.base.models import BaseDBModel
+from app.platform.base.rls_mixins import OrgScopedMixin
+from app.platform.base.search import SearchMixin
+from app.platform.sequences.enums import SequenceType
+from app.platform.sequences.mixins import SequenceMixin
 from app.platform.state_machine.models import StateMachineMixin
 from app.utils.sqids import Sqid, SqidType
 
 
 class Quote(
+    OrgScopedMixin,
+    SearchMixin,
+    SequenceMixin(sequence_type=SequenceType.quote_identifier, prefix="Q"),
     StateMachineMixin(state_enum=QuoteState, initial_state=QuoteState.draft),
 ):
+    trgm_columns = ["identifier"]
+    search_label_field = "identifier"
+    search_entity_type = "quote"
+    search_detail_prefix = "/quotes"
+
+    def get_search_label(self) -> str:
+        return self.identifier or str(self.id)
+
     __tablename__ = "quotes"
 
     organization_id: Mapped[int] = mapped_column(
@@ -46,9 +61,14 @@ class Quote(
     organization: Mapped[Any] = relationship("Organization", foreign_keys=[organization_id], lazy="raise")
 
 
-class QuoteLineItem(BaseDBModel):
+class QuoteLineItem(OrgScopedMixin, BaseDBModel):
     __tablename__ = "quote_line_items"
 
+    organization_id: Mapped[int] = mapped_column(
+        sa.ForeignKey("organizations.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
     quote_id: Mapped[int] = mapped_column(
         sa.ForeignKey("quotes.id", ondelete="CASCADE"),
         nullable=False,

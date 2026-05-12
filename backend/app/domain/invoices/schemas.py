@@ -17,7 +17,7 @@ class InvoiceLineItemSchema(BaseSchema):
 
 class InvoiceListItem(BaseSchema):
     id: Sqid
-    invoice_number: str | None
+    identifier: str | None
     state: InvoiceState
     survey_id: Sqid
     client_id: Sqid
@@ -29,7 +29,7 @@ class InvoiceListItem(BaseSchema):
 
 class InvoiceDetail(BaseSchema):
     id: Sqid
-    invoice_number: str | None
+    identifier: str | None
     state: InvoiceState
     survey_id: Sqid
     client_id: Sqid
@@ -42,21 +42,42 @@ class InvoiceDetail(BaseSchema):
     notes: str | None
     stripe_payment_intent_id: str | None
     stripe_client_secret: str | None
+    access_token: str | None
     line_items: list[InvoiceLineItemSchema]
     created_at: datetime
     updated_at: datetime
 
 
+class PublicInvoiceLineItem(BaseSchema):
+    description: str
+    quantity: Decimal
+    unit_price_cents: int
+
+
+class PublicInvoiceDetail(BaseSchema):
+    id: Sqid
+    state: InvoiceState
+    identifier: str | None
+    currency: str
+    subtotal_cents: int
+    tax_cents: int
+    total_cents: int
+    issued_at: datetime | None
+    due_at: datetime | None
+    organization_name: str
+    stripe_connected_account_id: str | None
+    stripe_client_secret: str | None
+    line_items: list[PublicInvoiceLineItem]
+
+
 class CreateInvoiceData(BaseSchema):
     survey_id: Sqid
     client_id: Sqid
-    invoice_number: str | None = None
     due_at: datetime | None = None
     notes: str | None = None
 
 
 class UpdateInvoiceData(BaseSchema):
-    invoice_number: str | None
     client_id: Sqid
     issued_at: datetime | None
     due_at: datetime | None

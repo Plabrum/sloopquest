@@ -85,6 +85,34 @@ class EmailService:
         await dispatch_task(self.transaction, self.request, TaskName.SEND_EMAIL, message_id=record.id)
         return record.id
 
+    async def send_invoice_email(
+        self,
+        *,
+        user_id: int,
+        to_email: str,
+        pay_url: str,
+        invoice_number: str | None,
+        organization_name: str,
+        total_display: str,
+        due_at_display: str | None,
+        reply_to: str | None = None,
+    ) -> None:
+        subject = f"Invoice {invoice_number or ''} from {organization_name}".strip().replace("  ", " ")
+        await self.send_email(
+            user_id=user_id,
+            to=to_email,
+            subject=subject,
+            template_name="invoice_payment",
+            context={
+                "pay_url": pay_url,
+                "invoice_number": invoice_number or "",
+                "organization_name": organization_name,
+                "total_display": total_display,
+                "due_at_display": due_at_display or "",
+            },
+            reply_to=reply_to,
+        )
+
     async def send_magic_link_email(
         self,
         *,

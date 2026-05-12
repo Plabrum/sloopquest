@@ -4,10 +4,11 @@ import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.platform.base.models import BaseDBModel
+from app.platform.base.rls_mixins import OrgScopedMixin
 from app.platform.base.search import SearchMixin
 
 
-class Manufacturer(SearchMixin, BaseDBModel):
+class Manufacturer(OrgScopedMixin, SearchMixin, BaseDBModel):
     trgm_columns = ["name", "country"]
     search_label_field = "name"
     search_entity_type = "manufacturer"

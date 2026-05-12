@@ -28,6 +28,7 @@ class ActionResultType(StrEnum):
 
     REDIRECT = auto()
     DOWNLOAD_FILE = auto()
+    COPY_TO_CLIPBOARD = auto()
 
 
 class ActionIcon(StrEnum):
@@ -40,3 +41,8 @@ class ActionIcon(StrEnum):
     ADD = auto()
     CHECK = auto()
     X = auto()
+    LINK = auto()
+    CALENDAR = auto()
+    PLAY = auto()
+    CLIPBOARD = auto()
+    REWIND = auto()

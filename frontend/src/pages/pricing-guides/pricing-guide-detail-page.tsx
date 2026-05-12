@@ -24,7 +24,6 @@ function PricingGuideDetailContent() {
   return (
     <PageTopBar
       title={data.name}
-      breadcrumbSegments={[{ label: "Pricing Guides", href: "/settings?tab=pricing-guides" }]}
       actions={
         <ActionsMenu
           actions={actionsData?.actions ?? []}
@@ -89,10 +88,7 @@ export function PricingGuideDetailPage() {
   return (
     <Suspense
       fallback={
-        <PageTopBar
-          title="Pricing Guide"
-          breadcrumbSegments={[{ label: "Pricing Guides", href: "/settings?tab=pricing-guides" }]}
-        >
+        <PageTopBar title="Pricing Guide">
           <div className="p-6">
             <Skeleton className="h-64 rounded-2xl" />
           </div>

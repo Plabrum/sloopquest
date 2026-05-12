@@ -16,7 +16,6 @@ function SurveyTemplateDetailContent() {
   return (
     <PageTopBar
       title={data.name}
-      breadcrumbSegments={[{ label: "Survey Templates", href: "/survey-templates" }]}
       actions={
         <ActionsMenu
           actions={actionsData?.actions ?? []}
@@ -43,10 +42,7 @@ export function SurveyTemplateDetailPage() {
   return (
     <Suspense
       fallback={
-        <PageTopBar
-          title="Survey Template"
-          breadcrumbSegments={[{ label: "Survey Templates", href: "/survey-templates" }]}
-        >
+        <PageTopBar title="Survey Template">
           <div className="p-6">
             <Skeleton className="h-64 rounded-2xl" />
           </div>

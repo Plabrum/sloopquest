@@ -9,5 +9,4 @@ class SurveyState(Enum):
     in_draft = "in_draft"
     in_review = "in_review"
     delivered = "delivered"
-    paid = "paid"
     cancelled = "cancelled"

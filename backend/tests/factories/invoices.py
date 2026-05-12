@@ -15,7 +15,7 @@ fake = Faker()
 class InvoiceFactory(BaseFactory):
     __model__ = Invoice
 
-    invoice_number = None
+    identifier = None
     issued_at = None
     due_at = None
     currency = "USD"

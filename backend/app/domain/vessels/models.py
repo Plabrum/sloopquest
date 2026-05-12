@@ -17,12 +17,13 @@ from app.domain.vessels.enums import (
     VesselType,
 )
 from app.platform.base.models import BaseDBModel
+from app.platform.base.rls_mixins import OrgScopedMixin
 from app.platform.base.search import SearchMixin
 from app.utils.sqids import Sqid, SqidType
 from app.utils.textenum import TextEnum
 
 
-class Vessel(SearchMixin, BaseDBModel):
+class Vessel(OrgScopedMixin, SearchMixin, BaseDBModel):
     trgm_columns = ["name", "hin", "model"]
     search_label_field = "name"
     search_entity_type = "vessel"
@@ -83,9 +84,14 @@ class Vessel(SearchMixin, BaseDBModel):
     )
 
 
-class Engine(BaseDBModel):
+class Engine(OrgScopedMixin, BaseDBModel):
     __tablename__ = "engines"
 
+    organization_id: Mapped[int] = mapped_column(
+        sa.ForeignKey("organizations.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
     vessel_id: Mapped[int] = mapped_column(
         sa.ForeignKey("vessels.id", ondelete="CASCADE"),
         nullable=False,

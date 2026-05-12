@@ -16,7 +16,6 @@ function VesselDetailContent() {
   return (
     <PageTopBar
       title={data.name}
-      breadcrumbSegments={[{ label: "Vessels", href: "/crm/vessels" }]}
       actions={
         <ActionsMenu
           actions={actionsData?.actions ?? []}
@@ -56,7 +55,7 @@ export function VesselDetailPage() {
   return (
     <Suspense
       fallback={
-        <PageTopBar title="Vessel" breadcrumbSegments={[{ label: "Vessels", href: "/crm/vessels" }]}>
+        <PageTopBar title="Vessel">
           <div className="p-6">
             <Skeleton className="h-64 rounded-2xl" />
           </div>

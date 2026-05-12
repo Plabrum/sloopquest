@@ -8,11 +8,12 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.domain.pricing_guides.enums import PricingType
 from app.platform.base.models import BaseDBModel
+from app.platform.base.rls_mixins import OrgScopedMixin
 from app.utils.sqids import Sqid, SqidType
 from app.utils.textenum import TextEnum
 
 
-class PricingGuide(BaseDBModel):
+class PricingGuide(OrgScopedMixin, BaseDBModel):
     __tablename__ = "pricing_guides"
 
     organization_id: Mapped[int] = mapped_column(
@@ -37,9 +38,14 @@ class PricingGuide(BaseDBModel):
     organization: Mapped[Any] = relationship("Organization", foreign_keys=[organization_id], lazy="raise")
 
 
-class PricingTier(BaseDBModel):
+class PricingTier(OrgScopedMixin, BaseDBModel):
     __tablename__ = "pricing_tiers"
 
+    organization_id: Mapped[int] = mapped_column(
+        sa.ForeignKey("organizations.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
     guide_id: Mapped[int] = mapped_column(
         sa.ForeignKey("pricing_guides.id", ondelete="CASCADE"),
         nullable=False,

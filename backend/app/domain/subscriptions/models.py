@@ -7,11 +7,13 @@ import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.domain.subscriptions.enums import SubscriptionPlan, SubscriptionStatus
+from app.platform.base.rls_mixins import OrgScopedMixin
 from app.platform.state_machine.models import StateMachineMixin
 from app.utils.textenum import TextEnum
 
 
 class Subscription(
+    OrgScopedMixin,
     StateMachineMixin(state_enum=SubscriptionStatus, initial_state=SubscriptionStatus.trialing),
 ):
     __tablename__ = "subscriptions"
