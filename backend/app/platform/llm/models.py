@@ -29,6 +29,8 @@ class LLMThread(BaseDBModel):
     threadable_type: Mapped[str | None] = mapped_column(sa.Text, nullable=True, index=True)
     threadable_id: Mapped[int | None] = mapped_column(sa.Integer, nullable=True, index=True)
 
+    model: Mapped[str | None] = mapped_column(sa.Text, nullable=True)
+
     messages: Mapped[list[LLMMessage]] = relationship(
         "LLMMessage",
         back_populates="thread",

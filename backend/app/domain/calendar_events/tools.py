@@ -190,7 +190,11 @@ class CreateCalendarEventTool(SloopTool):
             "end_date": PropertySchema(type="string", description="End date (YYYY-MM-DD) — required when all_day."),
             "name": PropertySchema(type="string", description="Event title (optional)."),
             "description": PropertySchema(type="string", description="Event description (optional)."),
-            "attendees": PropertySchema(type="array", description="Attendee email addresses (optional)."),
+            "attendees": PropertySchema(
+                type="array",
+                description="Attendee email addresses (optional).",
+                items=PropertySchema(type="string"),
+            ),
             "address": PropertySchema(type="object", description="Event address (optional)."),
             "survey_id": PropertySchema(type="string", description="Linked survey SQID (optional)."),
             "client_id": PropertySchema(type="string", description="Linked client SQID (optional)."),

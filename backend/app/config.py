@@ -64,6 +64,8 @@ class Config:
     # ─── LLM ──────────────────────────────────────────────────────────────────
     ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
     USE_REAL_LLM: bool = os.getenv("USE_REAL_LLM", "").lower() in {"1", "true", "yes"}
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    OPENAI_REALTIME_MODEL: str = os.getenv("OPENAI_REALTIME_MODEL", "gpt-realtime-2025-08-28")
 
     @property
     def IS_DEV(self) -> bool:

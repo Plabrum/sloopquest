@@ -11,6 +11,7 @@ Example:
 
 import inspect
 from collections.abc import AsyncGenerator, Callable
+from contextlib import asynccontextmanager
 from typing import Any
 
 from litestar import Request
@@ -45,4 +46,22 @@ async def provide_transaction(db_session: AsyncSession, request: Request) -> Asy
             organization_id = int(request.user.organization_id)
             await db_session.execute(text(f"SET LOCAL app.user_id = {user_id}"))
             await db_session.execute(text(f"SET LOCAL app.organization_id = {organization_id}"))
+        yield db_session
+
+
+@asynccontextmanager
+async def rls_transaction(
+    db_session: AsyncSession, *, user_id: int, organization_id: int
+) -> AsyncGenerator[AsyncSession]:
+    """Short-lived RLS-scoped transaction for long-running handlers (e.g. WebSockets).
+
+    The request-scoped `transaction` dep wraps the entire request in a single
+    `db_session.begin()` context. WS handlers run for minutes and would either
+    hold one transaction open the whole time or break that context manager by
+    committing inside. Use this helper to wrap each unit of work in its own
+    short-lived transaction with RLS variables set.
+    """
+    async with db_session.begin():
+        await db_session.execute(text(f"SET LOCAL app.user_id = {user_id}"))
+        await db_session.execute(text(f"SET LOCAL app.organization_id = {organization_id}"))
         yield db_session

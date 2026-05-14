@@ -1,16 +1,20 @@
 """Build a per-request tool executor closure for the LLM agent loop."""
 
 import logging
+from collections.abc import Awaitable, Callable
 
 import msgspec
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.users.models import User
-from app.platform.llm.client import ToolExecutorFn
+from app.platform.llm.enums import MessageRole
 from app.platform.llm.registry import ToolContext, get_tool_class, serialize_tool_result
 from app.utils.sqids import sqid_dec_hook
 
 logger = logging.getLogger(__name__)
+
+ToolExecutorFn = Callable[[str, dict], Awaitable[tuple[str, bool]]]
+PersistToolMessageFn = Callable[[MessageRole, str], Awaitable[None]]
 
 
 def build_tool_executor(

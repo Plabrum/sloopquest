@@ -50,6 +50,7 @@ from app.platform.comms.webhook_routes import comms_webhook_router
 from app.platform.dashboard.routes import dashboard_router
 from app.platform.documents import document_router
 from app.platform.llm.routes import llm_router
+from app.platform.llm.voice_routes import voice_router
 from app.platform.media import local_files_router, media_router
 from app.platform.queue.config import queue_config
 from app.platform.threads import thread_handler, thread_router
@@ -196,6 +197,7 @@ def create_app(
             billing_router,
             connect_router,
             llm_router,
+            voice_router,
             search_router,
         ],
         plugins=plugins,

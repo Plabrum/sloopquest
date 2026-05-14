@@ -87,6 +87,7 @@ class LLMService:
             user_id=user_id,
             threadable_type=threadable_type,
             threadable_id=threadable_id,
+            model=self.llm_client.model,
         )
         user_msg = await create_message(self.transaction, thread_id=thread.id, role=MessageRole.USER, content=content)
 
@@ -155,6 +156,7 @@ class LLMService:
             user_id=int(user.id),
             threadable_type=threadable_type,
             threadable_id=threadable_id,
+            model=self.llm_client.model,
         )
         await create_message(self.transaction, thread_id=thread.id, role=MessageRole.USER, content=content)
         # Explicit commit: the request-scoped transaction has already exited by the time this

@@ -133,7 +133,11 @@ class AddWidgetTool(SloopTool):
             ),
             "time_range": PropertySchema(type="string", description=f"Time range. One of: {_TIME_RANGES}."),
             "granularity": PropertySchema(type="string", description=f"Chart granularity. One of: {_GRANULARITIES}."),
-            "columns": PropertySchema(type="array", description="Columns to show (for resource_table widgets)."),
+            "columns": PropertySchema(
+                type="array",
+                description="Columns to show (for resource_table widgets).",
+                items=PropertySchema(type="string"),
+            ),
             "limit": PropertySchema(type="integer", description="Row limit (for list/table widgets)."),
             "color": PropertySchema(
                 type="string", description=f"Accent color (for stat_number widgets). One of: {_WIDGET_COLORS}."
@@ -253,7 +257,11 @@ class UpdateWidgetTool(SloopTool):
             ),
             "time_range": PropertySchema(type="string", description=f"Time range. One of: {_TIME_RANGES}."),
             "granularity": PropertySchema(type="string", description=f"Chart granularity. One of: {_GRANULARITIES}."),
-            "columns": PropertySchema(type="array", description="Columns to show."),
+            "columns": PropertySchema(
+                type="array",
+                description="Columns to show.",
+                items=PropertySchema(type="string"),
+            ),
             "limit": PropertySchema(type="integer", description="Row limit."),
             "color": PropertySchema(type="string", description=f"Accent color. One of: {_WIDGET_COLORS}."),
             "href": PropertySchema(type="string", description="Link URL."),

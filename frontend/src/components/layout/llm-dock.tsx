@@ -80,7 +80,7 @@ export function LlmDock() {
 
   return (
     <>
-      <LlmMinimizedIcon isOpen={isOpen} onOpen={dock.openDock} />
+      <LlmMinimizedIcon isOpen={isOpen} />
       <aside
         role="complementary"
         aria-label="LLM assistant"

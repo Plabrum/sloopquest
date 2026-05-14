@@ -61,11 +61,13 @@ async def create_thread(
     user_id: int | None = None,
     threadable_type: str | None = None,
     threadable_id: int | None = None,
+    model: str | None = None,
 ) -> LLMThread:
     thread = LLMThread(
         user_id=user_id,
         threadable_type=threadable_type,
         threadable_id=threadable_id,
+        model=model,
     )
     db.add(thread)
     await db.flush()

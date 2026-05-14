@@ -71,6 +71,7 @@ class PropertySchema(Struct, omit_defaults=True):
     type: str
     description: str | None = None
     enum: list[str] | None = None
+    items: "PropertySchema | None" = None
 
 
 class InputSchema(Struct):
