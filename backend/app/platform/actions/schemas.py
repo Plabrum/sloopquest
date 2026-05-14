@@ -50,6 +50,7 @@ class ActionDTO(BaseSchema):
     confirmation_message: str | None = None
     should_redirect_to_parent: bool = False
     disabled_reason: DisabledReason | None = None
+    is_state_transition: bool = False
 
 
 class ActionExecutionRequest(BaseSchema):

@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, useCallback, useRef } from "react";
 import { MoreHorizontal, SquarePen, X } from "lucide-react";
 
 import {
@@ -11,8 +11,10 @@ import {
 import { LlmOrb } from "@/components/ui/loading-orb";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { useShortcut } from "@/lib/shortcuts";
 import { useLlmThreadsListThreadsHandlerSuspense } from "@/openapi/llm/llm";
 
+import { ComposerFocusContext } from "@/components/llm/composer";
 import { ConversationErrorBoundary } from "@/components/llm/conversation-error-boundary";
 import { LlmConversation } from "@/components/llm/llm-conversation";
 import { LlmThreadHistory } from "@/components/llm/llm-thread-history";
@@ -49,6 +51,26 @@ function ActiveThreadSubtitle({ threadId }: { threadId: string | null }) {
 export function LlmDock() {
   const dock = useLlmDockState();
   const isOpen = dock.mode === "docked";
+  const composerInputRef = useRef<HTMLInputElement>(null);
+
+  useShortcut({
+    id: "dock.toggle",
+    keys: "mod+shift+g",
+    scope: "global",
+    label: "Toggle LLM assistant",
+    allowInFields: true,
+    handler: dock.toggleDock,
+  });
+
+  useShortcut({
+    id: "dock.focus-composer",
+    keys: "mod+j",
+    scope: "global",
+    label: "Focus assistant composer",
+    allowInFields: true,
+    when: useCallback(() => isOpen, [isOpen]),
+    handler: useCallback(() => composerInputRef.current?.focus(), []),
+  });
 
   return (
     <>
@@ -131,10 +153,12 @@ export function LlmDock() {
                 </div>
               }
             >
-              <LlmConversation
-                threadId={dock.activeThreadId}
-                onThreadCreated={(id) => dock.setActiveThreadId(id)}
-              />
+              <ComposerFocusContext.Provider value={composerInputRef}>
+                <LlmConversation
+                  threadId={dock.activeThreadId}
+                  onThreadCreated={(id) => dock.setActiveThreadId(id)}
+                />
+              </ComposerFocusContext.Provider>
             </ConversationErrorBoundary>
           </div>
         )}

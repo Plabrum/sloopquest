@@ -23,6 +23,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from app.config import Config
 from app.demo.routes import demo_router
+from app.domain.calendar_events.routes import calendar_event_router
 from app.domain.clients.routes import client_router
 from app.domain.inbox.routes import email_thread_router, message_router
 from app.domain.invoices.public_routes import public_invoice_router
@@ -186,6 +187,7 @@ def create_app(
             survey_template_router,
             invoice_router,
             public_invoice_router,
+            calendar_event_router,
             payment_method_router,
             pricing_guides_router,
             report_router,

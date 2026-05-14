@@ -4,6 +4,7 @@ import { PanelLeftIcon } from "lucide-react";
 import { Slot } from "radix-ui";
 
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useShortcut } from "@/lib/shortcuts";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,21 +92,13 @@ function SidebarProvider({
     return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
   }, [isMobile, setOpen, setOpenMobile]);
 
-  // Adds a keyboard shortcut to toggle the sidebar.
-  React.useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        event.key === SIDEBAR_KEYBOARD_SHORTCUT &&
-        (event.metaKey || event.ctrlKey)
-      ) {
-        event.preventDefault();
-        toggleSidebar();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [toggleSidebar]);
+  useShortcut({
+    id: "global.sidebar-toggle",
+    keys: `mod+${SIDEBAR_KEYBOARD_SHORTCUT}`,
+    scope: "global",
+    label: "Toggle sidebar",
+    handler: toggleSidebar,
+  });
 
   // We add a state so that we can do data-state="expanded" or "collapsed".
   // This makes it easier to style the sidebar with Tailwind classes.

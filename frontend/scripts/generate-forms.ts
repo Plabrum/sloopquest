@@ -229,6 +229,17 @@ function inferFormField(
     };
   }
 
+  // Array of strings → comma-separated list field
+  if (schema.type === "array") {
+    return {
+      name: key,
+      component: "FormStringList",
+      label,
+      required,
+      placeholder,
+    };
+  }
+
   // Textarea (long text fields by name heuristic)
   if (/notes|description|background|diagnosis|reason/.test(key)) {
     return { name: key, component: "FormText", label, required, placeholder };

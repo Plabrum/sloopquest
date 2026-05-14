@@ -2,12 +2,7 @@ import { X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { FilterDefinition, FilterState } from "@/lib/resource-table-types";
-
-function humanize(s: string): string {
-  return s
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
-}
+import { humanize } from "@/lib/utils";
 
 function getFilterDisplayText(filter: FilterDefinition): string {
   const col = humanize(filter.column);

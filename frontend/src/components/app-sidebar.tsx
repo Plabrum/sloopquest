@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import type { LucideIcon } from "lucide-react";
 import {
+  CalendarDays,
   ClipboardList,
   DollarSign,
   FileText,
@@ -53,6 +54,7 @@ const WORKSPACE_ITEMS: WorkspaceNavItem[] = [
     ],
   },
   { title: "Surveys", url: "/surveys", icon: ClipboardList },
+  { title: "Calendar", url: "/calendar", icon: CalendarDays },
   {
     title: "Money",
     icon: DollarSign,

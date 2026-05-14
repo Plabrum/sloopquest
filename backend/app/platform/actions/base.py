@@ -52,6 +52,7 @@ class BaseAction[O: BaseDBModel, D: Struct](ABC):
     confirmation_message: ClassVar[str | None] = None
     should_redirect_to_parent: ClassVar[bool] = False
     is_hidden: ClassVar[bool] = False
+    is_state_transition: ClassVar[bool] = False
 
     # Form codegen hints (optional — defaults produce reasonable auto-inferred forms)
     form_field_order: ClassVar[list[str]] = []
@@ -273,6 +274,7 @@ class ActionGroup:
                     confirmation_message=action_class.confirmation_message,
                     should_redirect_to_parent=action_class.should_redirect_to_parent,
                     disabled_reason=disabled_reason,
+                    is_state_transition=action_class.is_state_transition,
                 )
             )
         return results

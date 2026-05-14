@@ -21,6 +21,7 @@ class ActionGroupType(StrEnum):
     WIDGET_ACTIONS = auto()
     PAYMENT_METHOD_ACTIONS = auto()
     PRICING_GUIDE_ACTIONS = auto()
+    CALENDAR_EVENT_ACTIONS = auto()
 
 
 class ActionResultType(StrEnum):

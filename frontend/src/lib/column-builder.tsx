@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { ColumnDefinition, FilterType } from "@/lib/resource-table-types";
+import { humanize } from "@/lib/utils";
 
 export type DisplayType =
   | "text"
@@ -39,10 +40,6 @@ interface ColumnEntry<T> {
   key: keyof T & string;
   displayType: DisplayType;
   config: ColumnConfig;
-}
-
-function humanize(s: string): string {
-  return s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 // Date-only strings (`YYYY-MM-DD`) shipped by the backend's `format: 'date'`

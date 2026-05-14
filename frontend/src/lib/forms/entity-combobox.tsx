@@ -1,6 +1,7 @@
 import * as React from "react";
 import { toast } from "sonner";
 import { Combobox, type ComboboxOption } from "@/components/ui/combobox";
+import { humanize } from "@/lib/utils";
 import { actionsActionGroupExecuteAction } from "@/openapi/actions/actions";
 import { ActionGroupType } from "@/openapi/litestarAPI.schemas";
 import { listClient } from "@/openapi/client/client";
@@ -28,7 +29,7 @@ const ENTITY_LOADERS: Record<string, () => Promise<ComboboxOption[]>> = {
     listSurvey({ limit: 200 }).then((r) =>
       r.items.map((s) => ({
         value: s.id,
-        label: `${s.vessel.label} — ${s.state}`,
+        label: `${s.vessel.label} — ${humanize(s.state)}`,
       })),
     ),
   SurveyTemplate: () =>

@@ -43,7 +43,10 @@ def test_app(test_config: TestConfig, db_session: AsyncSession) -> Litestar:
     async def provide_test_transaction(db_session: AsyncSession, request: Request) -> AsyncGenerator[AsyncSession]:
         user_id = request.session.get("user_id") if request.scope.get("session") else None
         if user_id:
+            user = await get_user_by_id(db_session, int(user_id))
             await db_session.execute(text(f"SET LOCAL app.user_id = {int(user_id)}"))
+            if user is not None:
+                await db_session.execute(text(f"SET LOCAL app.organization_id = {int(user.organization_id)}"))
             await db_session.execute(text("SET LOCAL app.is_system_mode = false"))
         yield db_session
         if user_id:

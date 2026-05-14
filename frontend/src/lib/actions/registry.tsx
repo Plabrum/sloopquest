@@ -7,6 +7,7 @@ import {
   SurveyTemplateCreateForm,
   SurveyTemplateUpdateForm,
 } from "@/openapi/actions/survey-template-forms";
+import { CalendarEventActionsCreateForm } from "@/openapi/actions/calendar-event-forms";
 
 export type ActionBodyUnion =
   | ActionsActionGroupExecuteActionBody
@@ -39,6 +40,7 @@ export const actionRegistry: ActionRegistry = {
   ...generatedRegistry,
   "survey_template_actions__create": { render: (p) => <SurveyTemplateCreateForm {...(p as Parameters<typeof SurveyTemplateCreateForm>[0])} /> },
   "survey_template_actions__update": { render: (p) => <SurveyTemplateUpdateForm {...(p as Parameters<typeof SurveyTemplateUpdateForm>[0])} /> },
+  "calendar_event_actions__create": { render: (p) => <CalendarEventActionsCreateForm {...(p as Parameters<typeof CalendarEventActionsCreateForm>[0])} /> },
 } as ActionRegistry;
 
 export function getActionRenderer(

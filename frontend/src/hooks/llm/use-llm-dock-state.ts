@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 
 export type DockMode = "minimized" | "docked";
 
@@ -10,16 +10,20 @@ export type LlmDockState = {
 export type LlmDockApi = LlmDockState & {
   openDock: () => void;
   closeDock: () => void;
+  toggleDock: () => void;
   setActiveThreadId: (id: string | null) => void;
 };
 
 export function useLlmDockState(): LlmDockApi {
   const [mode, setMode] = useState<DockMode>("minimized");
-  const [activeThreadId, setActiveThreadIdState] = useState<string | null>(null);
+  const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
 
-  const openDock = useCallback(() => setMode("docked"), []);
-  const closeDock = useCallback(() => setMode("minimized"), []);
-  const setActiveThreadId = useCallback((id: string | null) => setActiveThreadIdState(id), []);
-
-  return { mode, activeThreadId, openDock, closeDock, setActiveThreadId };
+  return {
+    mode,
+    activeThreadId,
+    openDock: () => setMode("docked"),
+    closeDock: () => setMode("minimized"),
+    toggleDock: () => setMode((prev) => (prev === "docked" ? "minimized" : "docked")),
+    setActiveThreadId,
+  };
 }

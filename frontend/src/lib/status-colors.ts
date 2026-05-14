@@ -6,6 +6,8 @@
  * using a stable hash (adding new enum values won't shift existing colors).
  */
 
+import { humanize } from "@/lib/utils";
+
 export type StatusVariant =
   | "active"
   | "pending"
@@ -40,12 +42,6 @@ function stableVariant(value: string): StatusVariant {
     hash = ((hash << 5) + hash + value.charCodeAt(i)) >>> 0;
   }
   return VARIANTS[hash % VARIANTS.length];
-}
-
-function humanize(status: string): string {
-  return status
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 type EnumObj = Record<string, string>;

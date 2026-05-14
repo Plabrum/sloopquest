@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import { cn, humanize } from "@/lib/utils";
 import type {
   BooleanFilter,
   ColumnDefinition,
@@ -27,9 +27,6 @@ import type {
   TextFilter,
 } from "@/lib/resource-table-types";
 
-function humanize(s: string): string {
-  return s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-}
 
 // ---------------------------------------------------------------------------
 // Per-type filter panels

@@ -22,6 +22,7 @@ export interface ActionDTO {
   confirmation_message?: string | null;
   icon?: string | null;
   disabled_reason?: DisabledReason | null;
+  is_state_transition?: boolean;
 }
 
 export interface RedirectActionResult {

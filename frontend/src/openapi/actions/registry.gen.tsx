@@ -19,6 +19,8 @@ import {
   PricingGuideActionsCreateForm,
   PricingGuideActionsUpdateForm,
   PricingGuideActionsAddTierForm,
+  CalendarEventActionsCreateForm,
+  CalendarEventActionsUpdateForm,
   UserActionsClaimInboxForm,
   ManufacturerActionsCreateForm,
   ManufacturerActionsUpdateForm,
@@ -83,6 +85,12 @@ export const generatedRegistry: Record<string, { render: (params: any) => ReactE
   },
   "pricing_guide_actions__add_tier": {
     render: (params) => <PricingGuideActionsAddTierForm {...params} />,
+  },
+  "calendar_event_actions__create": {
+    render: (params) => <CalendarEventActionsCreateForm {...params} />,
+  },
+  "calendar_event_actions__update": {
+    render: (params) => <CalendarEventActionsUpdateForm {...params} />,
   },
   "user_actions__claim_inbox": {
     render: (params) => <UserActionsClaimInboxForm {...params} />,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useSearchSearch } from "@/openapi/search/search";
 import {
@@ -11,6 +11,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { useShortcut } from "@/lib/shortcuts";
 
 const ENTITY_ICONS: Record<string, string> = {
   vessel: "⛵",
@@ -27,16 +28,14 @@ export function GlobalSearch() {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setOpen((prev) => !prev);
-      }
-    };
-    document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
-  }, []);
+  useShortcut({
+    id: "global.search",
+    keys: "mod+k",
+    scope: "global",
+    label: "Open global search",
+    allowInFields: true,
+    handler: useCallback(() => setOpen((prev) => !prev), []),
+  });
 
   const { data } = useSearchSearch(
     { q: query, limit: 10 },

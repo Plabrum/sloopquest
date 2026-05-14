@@ -3,6 +3,7 @@
  * Maps CRUD list operations (POST) to query hooks instead of mutations.
  */
 export const crudOperations: Record<string, { query: { useQuery: boolean } }> = {
+  list_CalendarEvent: { query: { useQuery: true } },
   list_Client: { query: { useQuery: true } },
   list_EmailThread: { query: { useQuery: true } },
   list_Message: { query: { useQuery: true } },

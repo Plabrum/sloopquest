@@ -95,5 +95,6 @@ async def transaction(db_session: AsyncSession, user) -> AsyncGenerator[AsyncSes
     Fixtures should be created via db_session before this takes effect.
     """
     await db_session.execute(text(f"SET LOCAL app.user_id = {int(user.id)}"))
+    await db_session.execute(text(f"SET LOCAL app.organization_id = {int(user.organization_id)}"))
     await db_session.execute(text("SET LOCAL app.is_system_mode = false"))
     yield db_session

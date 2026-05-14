@@ -3,7 +3,7 @@
  */
 import { createTypedForm } from "@/lib/forms/base";
 import type { GeneratedFormProps } from "@/lib/forms/types";
-import type { AddEngineData, AddLineItemData, AddPricingTierData, ClaimInboxData, ComposeData, CreateClientData, CreateInvoiceData, CreatePricingGuideData, CreateReportData, CreateSubscriptionData, CreateSurveyData, CreateSurveyTemplateData, CreateWidgetData, ForwardData, ManufacturerCreateData, ManufacturerUpdateData, PartCreateData, PartUpdateData, ReplyData, UpdateClientData, UpdateInvoiceData, UpdatePricingGuideData, UpdateReportData, UpdateSubscriptionData, UpdateSurveyData, UpdateSurveyTemplateData, UpdateWidgetData, VesselCreateData, VesselUpdateData } from "@/openapi/litestarAPI.schemas";
+import type { AddEngineData, AddLineItemData, AddPricingTierData, ClaimInboxData, ComposeData, CreateCalendarEventData, CreateClientData, CreateInvoiceData, CreatePricingGuideData, CreateReportData, CreateSubscriptionData, CreateSurveyData, CreateSurveyTemplateData, CreateWidgetData, ForwardData, ManufacturerCreateData, ManufacturerUpdateData, PartCreateData, PartUpdateData, ReplyData, UpdateCalendarEventData, UpdateClientData, UpdateInvoiceData, UpdatePricingGuideData, UpdateReportData, UpdateSubscriptionData, UpdateSurveyData, UpdateSurveyTemplateData, UpdateWidgetData, VesselCreateData, VesselUpdateData } from "@/openapi/litestarAPI.schemas";
 import { ClientType, EnginePosition, EngineType, FuelType, HullMaterial, PartCategory, PricingType, PropulsionType, RiggingType, SubscriptionPlan, VesselType, WidgetType } from "@/openapi/litestarAPI.schemas";
 
 // --- client_actions__create ---
@@ -168,7 +168,7 @@ export function EmailThreadActionsComposeForm(props: GeneratedFormProps<ComposeD
       defaultValues={props.defaultValues}
       isSubmitting={props.isSubmitting}
     >
-      <_email_thread_actions__compose.FormString name="to" label="To" required />
+      <_email_thread_actions__compose.FormStringList name="to" label="To" required />
       <_email_thread_actions__compose.FormString name="subject" label="Subject" required />
       <_email_thread_actions__compose.FormString name="body_text" label="Body Text" required />
       <_email_thread_actions__compose.FormString name="body_html" label="Body Html" />
@@ -208,7 +208,7 @@ export function MessageActionsForwardMessageForm(props: GeneratedFormProps<Forwa
       defaultValues={props.defaultValues}
       isSubmitting={props.isSubmitting}
     >
-      <_message_actions__forward_message.FormString name="to" label="To" required />
+      <_message_actions__forward_message.FormStringList name="to" label="To" required />
       <_message_actions__forward_message.FormString name="body_text" label="Body Text" required />
       <_message_actions__forward_message.FormString name="body_html" label="Body Html" />
     </_message_actions__forward_message.FormModal>
@@ -377,6 +377,58 @@ export function PricingGuideActionsAddTierForm(props: GeneratedFormProps<AddPric
   );
 }
 
+// --- calendar_event_actions__create ---
+const _calendar_event_actions__create = createTypedForm<CreateCalendarEventData>();
+
+export function CalendarEventActionsCreateForm(props: GeneratedFormProps<CreateCalendarEventData>) {
+  return (
+    <_calendar_event_actions__create.FormModal
+      isOpen={props.isOpen}
+      onClose={props.onClose}
+      title={props.actionLabel}
+      onSubmit={props.onSubmit}
+      defaultValues={props.defaultValues}
+      isSubmitting={props.isSubmitting}
+    >
+      <_calendar_event_actions__create.FormDatetime name="start" label="Start" required includeTime />
+      <_calendar_event_actions__create.FormDatetime name="end" label="End" required includeTime />
+      <_calendar_event_actions__create.FormCheckbox name="all_day" label="All Day" />
+      <_calendar_event_actions__create.FormString name="name" label="Name" />
+      <_calendar_event_actions__create.FormString name="address" label="Address" />
+      <_calendar_event_actions__create.FormText name="description" label="Description" />
+      <_calendar_event_actions__create.FormStringList name="attendees" label="Attendees" />
+      <_calendar_event_actions__create.FormEntityCombobox name="survey_id" label="Survey" modelName="Survey" />
+      <_calendar_event_actions__create.FormEntityCombobox name="client_id" label="Client" modelName="Client" />
+    </_calendar_event_actions__create.FormModal>
+  );
+}
+
+// --- calendar_event_actions__update ---
+const _calendar_event_actions__update = createTypedForm<UpdateCalendarEventData>();
+
+export function CalendarEventActionsUpdateForm(props: GeneratedFormProps<UpdateCalendarEventData>) {
+  return (
+    <_calendar_event_actions__update.FormModal
+      isOpen={props.isOpen}
+      onClose={props.onClose}
+      title={props.actionLabel}
+      onSubmit={props.onSubmit}
+      defaultValues={props.defaultValues}
+      isSubmitting={props.isSubmitting}
+    >
+      <_calendar_event_actions__update.FormDatetime name="start" label="Start" required includeTime />
+      <_calendar_event_actions__update.FormDatetime name="end" label="End" required includeTime />
+      <_calendar_event_actions__update.FormCheckbox name="all_day" label="All Day" required />
+      <_calendar_event_actions__update.FormString name="name" label="Name" />
+      <_calendar_event_actions__update.FormString name="address" label="Address" />
+      <_calendar_event_actions__update.FormText name="description" label="Description" />
+      <_calendar_event_actions__update.FormStringList name="attendees" label="Attendees" required />
+      <_calendar_event_actions__update.FormEntityCombobox name="survey_id" label="Survey" modelName="Survey" />
+      <_calendar_event_actions__update.FormEntityCombobox name="client_id" label="Client" modelName="Client" />
+    </_calendar_event_actions__update.FormModal>
+  );
+}
+
 // --- user_actions__claim_inbox ---
 const _user_actions__claim_inbox = createTypedForm<ClaimInboxData>();
 
@@ -530,7 +582,7 @@ export function SurveyTemplateActionsCreateForm(props: GeneratedFormProps<Create
       isSubmitting={props.isSubmitting}
     >
       <_survey_template_actions__create.FormString name="name" label="Name" required />
-      <_survey_template_actions__create.FormString name="tags" label="Tags" required />
+      <_survey_template_actions__create.FormStringList name="tags" label="Tags" required />
       <_survey_template_actions__create.FormString name="definition" label="Definition" required />
     </_survey_template_actions__create.FormModal>
   );
@@ -550,7 +602,7 @@ export function SurveyTemplateActionsUpdateForm(props: GeneratedFormProps<Update
       isSubmitting={props.isSubmitting}
     >
       <_survey_template_actions__update.FormString name="name" label="Name" required />
-      <_survey_template_actions__update.FormString name="tags" label="Tags" required />
+      <_survey_template_actions__update.FormStringList name="tags" label="Tags" required />
       <_survey_template_actions__update.FormString name="definition" label="Definition" required />
     </_survey_template_actions__update.FormModal>
   );

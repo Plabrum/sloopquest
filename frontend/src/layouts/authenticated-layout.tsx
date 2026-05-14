@@ -5,6 +5,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { useAuthMeMeSuspense } from "@/openapi/auth/auth";
 import { LlmDock } from "@/components/layout/llm-dock";
 import { QueryBoundary } from "@/components/query-boundary";
+import { ShortcutsCheatSheet } from "@/components/shortcuts-cheat-sheet";
 
 function AuthenticatedLayoutContent() {
   const { data: user } = useAuthMeMeSuspense();
@@ -30,6 +31,7 @@ function AuthenticatedLayoutContent() {
           </div>
           <LlmDock />
         </div>
+        <ShortcutsCheatSheet />
       </SidebarInset>
     </SidebarProvider>
   );

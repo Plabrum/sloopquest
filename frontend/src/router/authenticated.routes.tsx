@@ -21,6 +21,8 @@ import { BillingPage } from "@/pages/settings/billing-page";
 import { ConnectOnboardingPage } from "@/pages/settings/connect-onboarding-page";
 import { QuotesListPage } from "@/pages/crm/quotes-list-page";
 import { PricingGuideDetailPage } from "@/pages/pricing-guides/pricing-guide-detail-page";
+import { CalendarPage } from "@/pages/calendar/calendar-page";
+import { isCalendarView } from "@/components/calendar/types";
 
 export const indexRoute = createRoute({
   getParentRoute: () => authenticatedLayoutRoute,
@@ -186,6 +188,19 @@ export const pricingGuideRoute = createRoute({
     stringify: (p) => ({ guideId: p.guideId }),
   },
   component: PricingGuideDetailPage,
+});
+
+export const calendarRoute = createRoute({
+  getParentRoute: () => authenticatedLayoutRoute,
+  path: "/calendar",
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { view?: "month" | "week" | "day"; date?: string; event?: string } => ({
+    view: isCalendarView(search.view) ? search.view : undefined,
+    date: typeof search.date === "string" ? search.date : undefined,
+    event: typeof search.event === "string" ? search.event : undefined,
+  }),
+  component: CalendarPage,
 });
 
 export const settingsRoute = createRoute({

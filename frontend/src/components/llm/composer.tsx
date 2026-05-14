@@ -1,7 +1,11 @@
 import { Mic, Send } from "lucide-react";
-import { useRef } from "react";
+import { createContext, useContext, useRef } from "react";
 
 import { cn } from "@/lib/utils";
+
+export const ComposerFocusContext = createContext<React.RefObject<HTMLInputElement | null> | null>(
+  null,
+);
 
 type Props = {
   value: string;
@@ -11,6 +15,7 @@ type Props = {
   lastUserMessage?: string;
   variant?: "dock" | "fullscreen";
   placeholder?: string;
+  inputRef?: React.RefObject<HTMLInputElement | null>;
 };
 
 export function Composer({
@@ -21,8 +26,11 @@ export function Composer({
   lastUserMessage,
   variant = "dock",
   placeholder = "Send a message…",
+  inputRef: externalInputRef,
 }: Props) {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const internalInputRef = useRef<HTMLInputElement>(null);
+  const contextRef = useContext(ComposerFocusContext);
+  const inputRef = externalInputRef ?? contextRef ?? internalInputRef;
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter" && !e.shiftKey) {

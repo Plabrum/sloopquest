@@ -6,7 +6,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
+import { cn, humanize } from "@/lib/utils";
 
 export interface ComboboxOption {
   value: string;
@@ -32,13 +32,6 @@ export interface ComboboxProps {
   onCreateOption?: (value: string) => void;
   /** Label prefix for the create row. Defaults to "Create". */
   createLabel?: string;
-}
-
-function humanize(raw: string): string {
-  return raw
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase())
-    .trim();
 }
 
 export function Combobox({
@@ -124,7 +117,7 @@ export function Combobox({
           aria-expanded={open}
           disabled={disabled}
           className={cn(
-            "flex h-9 w-full items-center justify-between gap-2 rounded-[10px] border border-border bg-primary/[0.07] px-3 py-2 text-left text-sm text-foreground shadow-xs transition-colors hover:bg-primary/[0.1] focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+            "flex h-9 w-full items-center justify-between gap-2 rounded-md border border-border bg-primary/[0.07] px-3 py-2 text-left text-sm text-foreground shadow-xs transition-colors hover:bg-primary/[0.1] focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
             triggerClassName,
           )}
         >

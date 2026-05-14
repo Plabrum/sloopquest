@@ -31,6 +31,7 @@ export interface ActionDTO {
   confirmation_message?: ActionDTOConfirmationMessage;
   should_redirect_to_parent?: boolean;
   disabled_reason?: ActionDTODisabledReason;
+  is_state_transition?: boolean;
 }
 
 export type ActionExecutionResponseActionResult = RedirectActionResult | DownloadFileActionResult | CopyToClipboardActionResult | null;
@@ -69,6 +70,7 @@ export const ActionGroupType = {
   widget_actions: 'widget_actions',
   payment_method_actions: 'payment_method_actions',
   pricing_guide_actions: 'pricing_guide_actions',
+  calendar_event_actions: 'calendar_event_actions',
 } as const;
 
 export interface ActionListResponse {
@@ -140,6 +142,36 @@ export interface AddPricingTierData {
   pricing_type: PricingType;
   amount_cents?: AddPricingTierDataAmountCents;
   sort_order?: number;
+}
+
+export type AddressInputLine2 = string | null;
+
+export interface AddressInput {
+  line1: string;
+  city: string;
+  region: string;
+  postal_code: string;
+  line2?: AddressInputLine2;
+  country?: string;
+}
+
+export type AddressOutputLine2 = string | null;
+
+export type AddressOutputLat = number | null;
+
+export type AddressOutputLng = number | null;
+
+export interface AddressOutput {
+  /** SQID-encoded identifier */
+  id: string;
+  line1: string;
+  line2?: AddressOutputLine2;
+  city: string;
+  region: string;
+  postal_code: string;
+  country: string;
+  lat?: AddressOutputLat;
+  lng?: AddressOutputLng;
 }
 
 export type AggregationType = typeof AggregationType[keyof typeof AggregationType];
@@ -223,6 +255,71 @@ export interface BooleanFilter {
   column: string;
   value: boolean;
   type: 'boolean';
+}
+
+export type CalendarEventDetailName = string | null;
+
+export type CalendarEventDetailAddress = AddressOutput | null;
+
+export type CalendarEventDetailDescription = string | null;
+
+export type CalendarEventDetailSurveyId = string | null;
+
+export type CalendarEventDetailClientId = string | null;
+
+export interface CalendarEventDetail {
+  /** SQID-encoded identifier */
+  id: string;
+  state: CalendarEventState;
+  start: string;
+  end: string;
+  all_day: boolean;
+  name?: CalendarEventDetailName;
+  address?: CalendarEventDetailAddress;
+  description?: CalendarEventDetailDescription;
+  attendees: string[];
+  survey_id?: CalendarEventDetailSurveyId;
+  client_id?: CalendarEventDetailClientId;
+  created_at: string;
+  updated_at: string;
+}
+
+export type CalendarEventListItemName = string | null;
+
+export type CalendarEventListItemAddressLine1 = string | null;
+
+export type CalendarEventListItemSurveyId = string | null;
+
+export type CalendarEventListItemClientId = string | null;
+
+export interface CalendarEventListItem {
+  /** SQID-encoded identifier */
+  id: string;
+  state: CalendarEventState;
+  start: string;
+  end: string;
+  all_day: boolean;
+  name?: CalendarEventListItemName;
+  address_line1?: CalendarEventListItemAddressLine1;
+  survey_id?: CalendarEventListItemSurveyId;
+  client_id?: CalendarEventListItemClientId;
+  created_at: string;
+}
+
+export type CalendarEventState = typeof CalendarEventState[keyof typeof CalendarEventState];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CalendarEventState = {
+  tentative: 'tentative',
+  confirmed: 'confirmed',
+  completed: 'completed',
+  cancelled: 'cancelled',
+} as const;
+
+export interface CancelCalendarEventAction {
+  data: EmptyActionData;
+  action: 'calendar_event_actions__cancel';
 }
 
 export interface CancelSubscriptionAction {
@@ -324,6 +421,11 @@ export const ClientType = {
   broker: 'broker',
 } as const;
 
+export interface CompleteCalendarEventAction {
+  data: EmptyActionData;
+  action: 'calendar_event_actions__complete';
+}
+
 export interface CompleteInspectionAction {
   data: EmptyActionData;
   action: 'survey_actions__complete_inspection';
@@ -341,6 +443,11 @@ export interface ComposeData {
 export interface ComposeNewEmailAction {
   data: ComposeData;
   action: 'email_thread_actions__compose';
+}
+
+export interface ConfirmCalendarEventAction {
+  data: EmptyActionData;
+  action: 'calendar_event_actions__confirm';
 }
 
 export type ConnectAccountRequirementsResponseFutureRequirements = {[key: string]: unknown};
@@ -453,6 +560,33 @@ export interface CopyToClipboardActionResult {
   text: string;
   toast?: CopyToClipboardActionResultToast;
   type: 'copy_to_clipboard';
+}
+
+export interface CreateCalendarEventAction {
+  data: CreateCalendarEventData;
+  action: 'calendar_event_actions__create';
+}
+
+export type CreateCalendarEventDataName = string | null;
+
+export type CreateCalendarEventDataAddress = AddressInput | null;
+
+export type CreateCalendarEventDataDescription = string | null;
+
+export type CreateCalendarEventDataSurveyId = string | null;
+
+export type CreateCalendarEventDataClientId = string | null;
+
+export interface CreateCalendarEventData {
+  start: string;
+  end: string;
+  all_day?: boolean;
+  name?: CreateCalendarEventDataName;
+  address?: CreateCalendarEventDataAddress;
+  description?: CreateCalendarEventDataDescription;
+  attendees?: string[];
+  survey_id?: CreateCalendarEventDataSurveyId;
+  client_id?: CreateCalendarEventDataClientId;
 }
 
 export interface CreateClientAction {
@@ -648,6 +782,11 @@ export interface DateFilter {
   start?: DateFilterStart;
   finish?: DateFilterFinish;
   type: 'date';
+}
+
+export interface DeleteCalendarEventAction {
+  data: EmptyActionData;
+  action: 'calendar_event_actions__delete';
 }
 
 export interface DeleteClientAction {
@@ -1270,6 +1409,14 @@ export interface NumericalDataPoint {
 export interface NumericalTimeSeriesData {
   points: NumericalDataPoint[];
   type: 'numerical';
+}
+
+export interface PagedResponseAppDomainCalendarEventsSchemasCalendarEventListItem {
+  items: CalendarEventListItem[];
+  total: number;
+  offset: number;
+  limit: number;
+  has_more: boolean;
 }
 
 export interface PagedResponseAppDomainClientsSchemasClientListItem {
@@ -2141,6 +2288,33 @@ export interface UnarchiveThreadAction {
   action: 'email_thread_actions__unarchive_thread';
 }
 
+export interface UpdateCalendarEventAction {
+  data: UpdateCalendarEventData;
+  action: 'calendar_event_actions__update';
+}
+
+export type UpdateCalendarEventDataName = string | null;
+
+export type UpdateCalendarEventDataAddress = AddressInput | null;
+
+export type UpdateCalendarEventDataDescription = string | null;
+
+export type UpdateCalendarEventDataSurveyId = string | null;
+
+export type UpdateCalendarEventDataClientId = string | null;
+
+export interface UpdateCalendarEventData {
+  start: string;
+  end: string;
+  all_day: boolean;
+  name?: UpdateCalendarEventDataName;
+  address?: UpdateCalendarEventDataAddress;
+  description?: UpdateCalendarEventDataDescription;
+  attendees: string[];
+  survey_id?: UpdateCalendarEventDataSurveyId;
+  client_id?: UpdateCalendarEventDataClientId;
+}
+
 export interface UpdateClientAction {
   data: UpdateClientData;
   action: 'client_actions__update';
@@ -2811,7 +2985,7 @@ export type ActionsActionGroupListActions400 = {
   extra?: ActionsActionGroupListActions400Extra;
 };
 
-export type ActionsActionGroupExecuteActionBody = CreateClientAction | UpdateClientAction | DeleteClientAction | CreateVesselAction | UpdateVesselAction | DeleteVesselAction | AddEngineAction | UpdateEngineAction | RemoveEngineAction | ComposeNewEmailAction | ArchiveThreadAction | UnarchiveThreadAction | MarkThreadReadAction | MarkThreadUnreadAction | AttachToClientAction | AttachToSurveyAction | ReplyToThreadAction | MarkReadAction | MarkUnreadAction | ArchiveMessageAction | UnarchiveMessageAction | ResendMessageAction | ForwardMessageAction | CreateInvoiceAction | UpdateInvoiceAction | DeleteInvoiceAction | SendInvoiceAction | CopyPayLinkAction | MarkInvoicePaidAction | VoidInvoiceAction | RefundAction | AddLineItemAction | UpdateLineItemAction | RemoveLineItemAction | CreateSubscriptionAction | UpdateSubscriptionAction | PauseSubscriptionAction | ResumeSubscriptionAction | CancelSubscriptionAction | CreatePricingGuideAction | UpdatePricingGuideAction | DeletePricingGuideAction | AddPricingTierAction | UpdatePricingTierAction | RemovePricingTierAction | StartConnectOnboardingAction | ClaimInboxAction | CreateManufacturerAction | UpdateManufacturerAction | DeleteManufacturerAction | CreatePartAction | UpdatePartAction | DeletePartAction | CreateSurveyAction | UpdateSurveyAction | DeleteSurveyAction | ScheduleSurveyAction | StartInspectionAction | CompleteInspectionAction | SubmitForReviewAction | MoveToDraftAction | DeliverSurveyAction | CancelSurveyAction | SaveSurveyResponseAction | CreateSurveyTemplateAction | UpdateSurveyTemplateAction | DeleteSurveyTemplateAction | AttachPaymentMethodAction | SetDefaultPaymentMethodAction | RemovePaymentMethodAction | CreateReportAction | UpdateReportAction | DeleteReportAction | SubmitReportForReviewAction | DeliverWatermarkedAction | ReleaseReportAction | CreateWidgetAction | UpdateWidgetAction | DeleteWidgetAction;
+export type ActionsActionGroupExecuteActionBody = CreateClientAction | UpdateClientAction | DeleteClientAction | CreateVesselAction | UpdateVesselAction | DeleteVesselAction | AddEngineAction | UpdateEngineAction | RemoveEngineAction | ComposeNewEmailAction | ArchiveThreadAction | UnarchiveThreadAction | MarkThreadReadAction | MarkThreadUnreadAction | AttachToClientAction | AttachToSurveyAction | ReplyToThreadAction | MarkReadAction | MarkUnreadAction | ArchiveMessageAction | UnarchiveMessageAction | ResendMessageAction | ForwardMessageAction | CreateInvoiceAction | UpdateInvoiceAction | DeleteInvoiceAction | SendInvoiceAction | CopyPayLinkAction | MarkInvoicePaidAction | VoidInvoiceAction | RefundAction | AddLineItemAction | UpdateLineItemAction | RemoveLineItemAction | CreateSubscriptionAction | UpdateSubscriptionAction | PauseSubscriptionAction | ResumeSubscriptionAction | CancelSubscriptionAction | CreatePricingGuideAction | UpdatePricingGuideAction | DeletePricingGuideAction | AddPricingTierAction | UpdatePricingTierAction | RemovePricingTierAction | CreateCalendarEventAction | UpdateCalendarEventAction | ConfirmCalendarEventAction | CompleteCalendarEventAction | CancelCalendarEventAction | DeleteCalendarEventAction | StartConnectOnboardingAction | ClaimInboxAction | CreateManufacturerAction | UpdateManufacturerAction | DeleteManufacturerAction | CreatePartAction | UpdatePartAction | DeletePartAction | CreateSurveyAction | UpdateSurveyAction | DeleteSurveyAction | ScheduleSurveyAction | StartInspectionAction | CompleteInspectionAction | SubmitForReviewAction | MoveToDraftAction | DeliverSurveyAction | CancelSurveyAction | SaveSurveyResponseAction | CreateSurveyTemplateAction | UpdateSurveyTemplateAction | DeleteSurveyTemplateAction | AttachPaymentMethodAction | SetDefaultPaymentMethodAction | RemovePaymentMethodAction | CreateReportAction | UpdateReportAction | DeleteReportAction | SubmitReportForReviewAction | DeliverWatermarkedAction | ReleaseReportAction | CreateWidgetAction | UpdateWidgetAction | DeleteWidgetAction;
 
 export type ActionsActionGroupExecuteAction400ExtraAnyOf = {[key: string]: unknown};
 
@@ -2839,7 +3013,7 @@ export type ActionsActionGroupObjectIdListObjectActions400 = {
   extra?: ActionsActionGroupObjectIdListObjectActions400Extra;
 };
 
-export type ActionsActionGroupObjectIdExecuteObjectActionBody = CreateClientAction | UpdateClientAction | DeleteClientAction | CreateVesselAction | UpdateVesselAction | DeleteVesselAction | AddEngineAction | UpdateEngineAction | RemoveEngineAction | ComposeNewEmailAction | ArchiveThreadAction | UnarchiveThreadAction | MarkThreadReadAction | MarkThreadUnreadAction | AttachToClientAction | AttachToSurveyAction | ReplyToThreadAction | MarkReadAction | MarkUnreadAction | ArchiveMessageAction | UnarchiveMessageAction | ResendMessageAction | ForwardMessageAction | CreateInvoiceAction | UpdateInvoiceAction | DeleteInvoiceAction | SendInvoiceAction | CopyPayLinkAction | MarkInvoicePaidAction | VoidInvoiceAction | RefundAction | AddLineItemAction | UpdateLineItemAction | RemoveLineItemAction | CreateSubscriptionAction | UpdateSubscriptionAction | PauseSubscriptionAction | ResumeSubscriptionAction | CancelSubscriptionAction | CreatePricingGuideAction | UpdatePricingGuideAction | DeletePricingGuideAction | AddPricingTierAction | UpdatePricingTierAction | RemovePricingTierAction | StartConnectOnboardingAction | ClaimInboxAction | CreateManufacturerAction | UpdateManufacturerAction | DeleteManufacturerAction | CreatePartAction | UpdatePartAction | DeletePartAction | CreateSurveyAction | UpdateSurveyAction | DeleteSurveyAction | ScheduleSurveyAction | StartInspectionAction | CompleteInspectionAction | SubmitForReviewAction | MoveToDraftAction | DeliverSurveyAction | CancelSurveyAction | SaveSurveyResponseAction | CreateSurveyTemplateAction | UpdateSurveyTemplateAction | DeleteSurveyTemplateAction | AttachPaymentMethodAction | SetDefaultPaymentMethodAction | RemovePaymentMethodAction | CreateReportAction | UpdateReportAction | DeleteReportAction | SubmitReportForReviewAction | DeliverWatermarkedAction | ReleaseReportAction | CreateWidgetAction | UpdateWidgetAction | DeleteWidgetAction;
+export type ActionsActionGroupObjectIdExecuteObjectActionBody = CreateClientAction | UpdateClientAction | DeleteClientAction | CreateVesselAction | UpdateVesselAction | DeleteVesselAction | AddEngineAction | UpdateEngineAction | RemoveEngineAction | ComposeNewEmailAction | ArchiveThreadAction | UnarchiveThreadAction | MarkThreadReadAction | MarkThreadUnreadAction | AttachToClientAction | AttachToSurveyAction | ReplyToThreadAction | MarkReadAction | MarkUnreadAction | ArchiveMessageAction | UnarchiveMessageAction | ResendMessageAction | ForwardMessageAction | CreateInvoiceAction | UpdateInvoiceAction | DeleteInvoiceAction | SendInvoiceAction | CopyPayLinkAction | MarkInvoicePaidAction | VoidInvoiceAction | RefundAction | AddLineItemAction | UpdateLineItemAction | RemoveLineItemAction | CreateSubscriptionAction | UpdateSubscriptionAction | PauseSubscriptionAction | ResumeSubscriptionAction | CancelSubscriptionAction | CreatePricingGuideAction | UpdatePricingGuideAction | DeletePricingGuideAction | AddPricingTierAction | UpdatePricingTierAction | RemovePricingTierAction | CreateCalendarEventAction | UpdateCalendarEventAction | ConfirmCalendarEventAction | CompleteCalendarEventAction | CancelCalendarEventAction | DeleteCalendarEventAction | StartConnectOnboardingAction | ClaimInboxAction | CreateManufacturerAction | UpdateManufacturerAction | DeleteManufacturerAction | CreatePartAction | UpdatePartAction | DeletePartAction | CreateSurveyAction | UpdateSurveyAction | DeleteSurveyAction | ScheduleSurveyAction | StartInspectionAction | CompleteInspectionAction | SubmitForReviewAction | MoveToDraftAction | DeliverSurveyAction | CancelSurveyAction | SaveSurveyResponseAction | CreateSurveyTemplateAction | UpdateSurveyTemplateAction | DeleteSurveyTemplateAction | AttachPaymentMethodAction | SetDefaultPaymentMethodAction | RemovePaymentMethodAction | CreateReportAction | UpdateReportAction | DeleteReportAction | SubmitReportForReviewAction | DeliverWatermarkedAction | ReleaseReportAction | CreateWidgetAction | UpdateWidgetAction | DeleteWidgetAction;
 
 export type ActionsActionGroupObjectIdExecuteObjectAction400ExtraAnyOf = {[key: string]: unknown};
 
@@ -3359,6 +3533,32 @@ export type PublicInvoicesAccessTokenGetPublicInvoice400 = {
   status_code: number;
   detail: string;
   extra?: PublicInvoicesAccessTokenGetPublicInvoice400Extra;
+};
+
+export type CalendarEventsIdDetailHandler400ExtraAnyOf = {[key: string]: unknown};
+
+export type CalendarEventsIdDetailHandler400Extra = null | CalendarEventsIdDetailHandler400ExtraAnyOf | unknown[];
+
+/**
+ * Validation Exception
+ */
+export type CalendarEventsIdDetailHandler400 = {
+  status_code: number;
+  detail: string;
+  extra?: CalendarEventsIdDetailHandler400Extra;
+};
+
+export type ListCalendarEvent400ExtraAnyOf = {[key: string]: unknown};
+
+export type ListCalendarEvent400Extra = null | ListCalendarEvent400ExtraAnyOf | unknown[];
+
+/**
+ * Validation Exception
+ */
+export type ListCalendarEvent400 = {
+  status_code: number;
+  detail: string;
+  extra?: ListCalendarEvent400Extra;
 };
 
 export type PaymentMethodsIdDetailHandler400ExtraAnyOf = {[key: string]: unknown};

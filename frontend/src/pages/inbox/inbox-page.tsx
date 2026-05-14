@@ -27,7 +27,7 @@ export function InboxPage() {
   const setThread = (id: string | undefined) => {
     navigate({
       to: "/inbox",
-      search: (prev) => ({ ...prev, thread: id }),
+      search: () => ({ view: view === "all" ? undefined : view, thread: id }),
       replace: true,
     });
   };

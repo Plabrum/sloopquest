@@ -600,6 +600,58 @@ export function createTypedForm<TFieldValues extends FieldValues>() {
     );
   }
 
+  function FormStringList<N extends Name<Path<TFieldValues>>>(
+    props: BaseFieldProps<TFieldValues, N>,
+  ) {
+    const { name, label, placeholder, required, className, description, id } = props;
+    const { control } = useFormContext<TFieldValues>();
+    const htmlId = id ?? String(name);
+
+    return (
+      <div className={className}>
+        {label && (
+          <Label htmlFor={htmlId}>
+            {label} {required ? "*" : null}
+          </Label>
+        )}
+        <Controller
+          name={name}
+          control={control}
+          rules={{
+            validate: (value) => {
+              if (!required) return true;
+              const arr = Array.isArray(value) ? value : [];
+              return arr.length > 0 || requiredMessage(required);
+            },
+          }}
+          render={({ field }) => {
+            const arr = Array.isArray(field.value) ? (field.value as string[]) : [];
+            return (
+              <Input
+                id={htmlId}
+                className="mt-1"
+                placeholder={placeholder ?? "Comma-separated"}
+                defaultValue={arr.join(", ")}
+                onBlur={field.onBlur}
+                onChange={(e) => {
+                  const parts = e.target.value
+                    .split(",")
+                    .map((s) => s.trim())
+                    .filter(Boolean);
+                  field.onChange(parts);
+                }}
+              />
+            );
+          }}
+        />
+        {description ? (
+          <p className="text-muted-foreground mt-1 text-xs">{description}</p>
+        ) : null}
+        <FieldError name={String(name)} />
+      </div>
+    );
+  }
+
   function FormEntityCombobox<N extends Name<Path<TFieldValues>>>(
     props: BaseFieldProps<TFieldValues, N> & {
       modelName: string;
@@ -724,19 +776,19 @@ export function createTypedForm<TFieldValues extends FieldValues>() {
         open={isOpen}
         onOpenChange={(open) => !open && !isSubmitting && onClose()}
       >
-        <DialogContent className="flex max-h-[90vh] max-w-[480px] flex-col gap-6 rounded-2xl bg-background p-8">
+        <DialogContent className="flex max-h-[90vh] max-w-[480px] flex-col gap-6 rounded-lg bg-background p-8">
           <DialogHeader className="gap-2">
-            <DialogTitle className="font-serif text-[22px] font-bold text-[#1C1A18]">
+            <DialogTitle className="font-display text-2xl font-normal tracking-tight text-foreground">
               {title}
             </DialogTitle>
             {subTitle && (
-              <DialogDescription className="text-sm text-[#8A847D]">
+              <DialogDescription className="text-sm text-muted-foreground">
                 {subTitle}
               </DialogDescription>
             )}
           </DialogHeader>
 
-          <div className="h-px bg-[#D4CCC2]" />
+          <div className="h-px bg-border" />
 
           <Form
             onSubmit={onSubmit}
@@ -744,11 +796,11 @@ export function createTypedForm<TFieldValues extends FieldValues>() {
             className="flex min-h-0 flex-1 flex-col"
             mode="onSubmit"
           >
-            <div className="flex-1 overflow-y-auto rounded-xl border border-[#D4CCC2] bg-card p-4 shadow-sm space-y-4 [&_input]:bg-primary/[0.07] [&_textarea]:bg-primary/[0.07] [&_[role=combobox]]:bg-primary/[0.07] [&_[data-slot=popover-trigger]]:bg-primary/[0.07]">
+            <div className="flex-1 overflow-y-auto rounded-md border border-border bg-card p-4 shadow-sm space-y-4 [&_input]:bg-primary/[0.07] [&_textarea]:bg-primary/[0.07] [&_[role=combobox]]:bg-primary/[0.07] [&_[data-slot=popover-trigger]]:bg-primary/[0.07] [&_[data-slot=select-trigger]]:bg-primary/[0.07] [&_[data-slot=select-trigger]]:w-full">
               {children}
             </div>
 
-            <div className="h-px bg-[#D4CCC2] mt-6" />
+            <div className="h-px bg-border mt-6" />
 
             <DialogFooter className="mb-0 flex-shrink-0 justify-end gap-3 pt-6">
               <Button
@@ -756,15 +808,10 @@ export function createTypedForm<TFieldValues extends FieldValues>() {
                 variant="outline"
                 onClick={onClose}
                 disabled={isSubmitting}
-                className="rounded-[10px] border-border bg-card px-5 py-2.5 text-sm font-semibold text-muted-foreground"
               >
                 Discard
               </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="gap-1.5 rounded-[10px] bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary/90"
-              >
+              <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Saving..." : submitText}
               </Button>
             </DialogFooter>
@@ -811,11 +858,11 @@ export function createTypedForm<TFieldValues extends FieldValues>() {
           className={cn("flex h-full w-full flex-col gap-0 p-0", width)}
         >
           <SheetHeader className="border-b border-border px-6 py-4">
-            <SheetTitle className="font-serif text-[20px] font-bold text-[#1C1A18]">
+            <SheetTitle className="font-display text-xl font-normal tracking-tight text-foreground">
               {title}
             </SheetTitle>
             {subTitle && (
-              <SheetDescription className="text-sm text-[#8A847D]">
+              <SheetDescription className="text-sm text-muted-foreground">
                 {subTitle}
               </SheetDescription>
             )}
@@ -837,15 +884,10 @@ export function createTypedForm<TFieldValues extends FieldValues>() {
                 variant="outline"
                 onClick={onClose}
                 disabled={isSubmitting}
-                className="rounded-[10px] border-border bg-card px-5 py-2.5 text-sm font-semibold text-muted-foreground"
               >
                 Discard
               </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="gap-1.5 rounded-[10px] bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary/90"
-              >
+              <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Saving..." : submitText}
               </Button>
             </div>
@@ -865,6 +907,7 @@ export function createTypedForm<TFieldValues extends FieldValues>() {
     FormDatetime,
     FormTime,
     FormCheckbox,
+    FormStringList,
     FormCombobox,
     FormEntityCombobox,
     FormCustom,
