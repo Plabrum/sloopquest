@@ -195,10 +195,16 @@ export const calendarRoute = createRoute({
   path: "/calendar",
   validateSearch: (
     search: Record<string, unknown>,
-  ): { view?: "month" | "week" | "day"; date?: string; event?: string } => ({
+  ): {
+    view?: "month" | "week" | "day";
+    date?: string;
+    event?: string;
+    creating?: boolean;
+  } => ({
     view: isCalendarView(search.view) ? search.view : undefined,
     date: typeof search.date === "string" ? search.date : undefined,
     event: typeof search.event === "string" ? search.event : undefined,
+    creating: search.creating === true ? true : undefined,
   }),
   component: CalendarPage,
 });

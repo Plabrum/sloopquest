@@ -47,8 +47,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { EntityCombobox } from "@/lib/forms/entity-combobox";
 import { cn } from "@/lib/utils";
+
+export interface FormDateRangeValue {
+  startDate: string | undefined;
+  endDate: string | undefined;
+}
 
 type BaseFieldProps<
   TFieldValues extends FieldValues,
@@ -541,6 +547,53 @@ export function createTypedForm<TFieldValues extends FieldValues>() {
     );
   }
 
+  function FormDateRange<N extends Name<Path<TFieldValues>>>(
+    props: BaseFieldProps<TFieldValues, N>,
+  ) {
+    const { name, label, placeholder, required, className, description, id } = props;
+    const { control } = useFormContext<TFieldValues>();
+    const htmlId = id ?? String(name);
+
+    return (
+      <div className={className}>
+        {label && (
+          <Label htmlFor={htmlId}>
+            {label} {required ? "*" : null}
+          </Label>
+        )}
+        <Controller
+          name={name}
+          control={control}
+          rules={{
+            required: requiredMessage(required),
+            validate: (v) => {
+              if (!required) return true;
+              const range = v as FormDateRangeValue | undefined;
+              return (range?.startDate && range?.endDate) || requiredMessage(required) || true;
+            },
+          }}
+          render={({ field }) => {
+            const range = (field.value ?? { startDate: undefined, endDate: undefined }) as FormDateRangeValue;
+            return (
+              <div className="mt-1">
+                <DateRangePicker
+                  startDate={range.startDate}
+                  endDate={range.endDate}
+                  onChange={(next) => field.onChange(next)}
+                  placeholder={placeholder}
+                />
+              </div>
+            );
+          }}
+        />
+        {description ? (
+          <p className="text-muted-foreground mt-1 text-xs">{description}</p>
+        ) : null}
+        <FieldError name={String(name)} />
+      </div>
+    );
+  }
+
   function FormCheckbox<N extends Name<Path<TFieldValues>>>(
     props: BaseFieldProps<TFieldValues, N>,
   ) {
@@ -905,6 +958,7 @@ export function createTypedForm<TFieldValues extends FieldValues>() {
     FormText,
     FormSelect,
     FormDatetime,
+    FormDateRange,
     FormTime,
     FormCheckbox,
     FormStringList,

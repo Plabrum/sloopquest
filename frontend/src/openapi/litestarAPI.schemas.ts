@@ -257,6 +257,14 @@ export interface BooleanFilter {
   type: 'boolean';
 }
 
+export type CalendarEventDetailStart = string | null;
+
+export type CalendarEventDetailEnd = string | null;
+
+export type CalendarEventDetailStartDate = string | null;
+
+export type CalendarEventDetailEndDate = string | null;
+
 export type CalendarEventDetailName = string | null;
 
 export type CalendarEventDetailAddress = AddressOutput | null;
@@ -271,8 +279,10 @@ export interface CalendarEventDetail {
   /** SQID-encoded identifier */
   id: string;
   state: CalendarEventState;
-  start: string;
-  end: string;
+  start?: CalendarEventDetailStart;
+  end?: CalendarEventDetailEnd;
+  start_date?: CalendarEventDetailStartDate;
+  end_date?: CalendarEventDetailEndDate;
   all_day: boolean;
   name?: CalendarEventDetailName;
   address?: CalendarEventDetailAddress;
@@ -283,6 +293,14 @@ export interface CalendarEventDetail {
   created_at: string;
   updated_at: string;
 }
+
+export type CalendarEventListItemStart = string | null;
+
+export type CalendarEventListItemEnd = string | null;
+
+export type CalendarEventListItemStartDate = string | null;
+
+export type CalendarEventListItemEndDate = string | null;
 
 export type CalendarEventListItemName = string | null;
 
@@ -296,8 +314,10 @@ export interface CalendarEventListItem {
   /** SQID-encoded identifier */
   id: string;
   state: CalendarEventState;
-  start: string;
-  end: string;
+  start?: CalendarEventListItemStart;
+  end?: CalendarEventListItemEnd;
+  start_date?: CalendarEventListItemStartDate;
+  end_date?: CalendarEventListItemEndDate;
   all_day: boolean;
   name?: CalendarEventListItemName;
   address_line1?: CalendarEventListItemAddressLine1;
@@ -567,6 +587,14 @@ export interface CreateCalendarEventAction {
   action: 'calendar_event_actions__create';
 }
 
+export type CreateCalendarEventDataStart = string | null;
+
+export type CreateCalendarEventDataEnd = string | null;
+
+export type CreateCalendarEventDataStartDate = string | null;
+
+export type CreateCalendarEventDataEndDate = string | null;
+
 export type CreateCalendarEventDataName = string | null;
 
 export type CreateCalendarEventDataAddress = AddressInput | null;
@@ -578,9 +606,11 @@ export type CreateCalendarEventDataSurveyId = string | null;
 export type CreateCalendarEventDataClientId = string | null;
 
 export interface CreateCalendarEventData {
-  start: string;
-  end: string;
   all_day?: boolean;
+  start?: CreateCalendarEventDataStart;
+  end?: CreateCalendarEventDataEnd;
+  start_date?: CreateCalendarEventDataStartDate;
+  end_date?: CreateCalendarEventDataEndDate;
   name?: CreateCalendarEventDataName;
   address?: CreateCalendarEventDataAddress;
   description?: CreateCalendarEventDataDescription;
@@ -2293,6 +2323,14 @@ export interface UpdateCalendarEventAction {
   action: 'calendar_event_actions__update';
 }
 
+export type UpdateCalendarEventDataStart = string | null;
+
+export type UpdateCalendarEventDataEnd = string | null;
+
+export type UpdateCalendarEventDataStartDate = string | null;
+
+export type UpdateCalendarEventDataEndDate = string | null;
+
 export type UpdateCalendarEventDataName = string | null;
 
 export type UpdateCalendarEventDataAddress = AddressInput | null;
@@ -2304,9 +2342,11 @@ export type UpdateCalendarEventDataSurveyId = string | null;
 export type UpdateCalendarEventDataClientId = string | null;
 
 export interface UpdateCalendarEventData {
-  start: string;
-  end: string;
   all_day: boolean;
+  start?: UpdateCalendarEventDataStart;
+  end?: UpdateCalendarEventDataEnd;
+  start_date?: UpdateCalendarEventDataStartDate;
+  end_date?: UpdateCalendarEventDataEndDate;
   name?: UpdateCalendarEventDataName;
   address?: UpdateCalendarEventDataAddress;
   description?: UpdateCalendarEventDataDescription;

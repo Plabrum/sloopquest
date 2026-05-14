@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from datetime import UTC, datetime, timedelta
+from datetime import date, datetime
 from enum import StrEnum, auto
 
 from litestar.exceptions import ValidationException
@@ -41,13 +41,24 @@ calendar_event_actions = action_group_factory(
 )
 
 
-def _validate_window(start: datetime, end: datetime, all_day: bool) -> tuple[datetime, datetime]:
+def _validate_window(
+    start: datetime | None,
+    end: datetime | None,
+    start_date: date | None,
+    end_date: date | None,
+    all_day: bool,
+) -> tuple[datetime | None, datetime | None, date | None, date | None]:
+    if all_day:
+        if start_date is None or end_date is None:
+            raise ValidationException("start_date and end_date are required when all_day is true")
+        if end_date < start_date:
+            raise ValidationException("end_date must be on or after start_date")
+        return None, None, start_date, end_date
+    if start is None or end is None:
+        raise ValidationException("start and end are required when all_day is false")
     if end <= start:
         raise ValidationException("end must be after start")
-    if all_day:
-        start = start.astimezone(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
-        end = end.astimezone(UTC).replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
-    return start, end
+    return start, end, None, None
 
 
 def _validate_attendees(attendees: list[str]) -> list[str]:
@@ -96,13 +107,17 @@ class CreateCalendarEvent(BaseTopLevelAction[CreateCalendarEventData]):
     async def execute(
         cls, data: CreateCalendarEventData, transaction: AsyncSession, deps: ActionDeps
     ) -> ActionExecutionResponse:
-        start, end = _validate_window(data.start, data.end, data.all_day)
+        start, end, start_date, end_date = _validate_window(
+            data.start, data.end, data.start_date, data.end_date, data.all_day
+        )
         attendees = _validate_attendees(list(data.attendees))
         address_id = await _upsert_address(transaction, None, data.address)
         event = CalendarEvent(
             organization_id=deps.user.organization_id,
             start=start,
             end=end,
+            start_date=start_date,
+            end_date=end_date,
             all_day=data.all_day,
             name=data.name,
             address_id=address_id,
@@ -131,11 +146,15 @@ class UpdateCalendarEvent(BaseObjectAction[CalendarEvent, UpdateCalendarEventDat
     async def execute(
         cls, obj: CalendarEvent, data: UpdateCalendarEventData, transaction: AsyncSession, deps: ActionDeps
     ) -> ActionExecutionResponse:
-        start, end = _validate_window(data.start, data.end, data.all_day)
+        start, end, start_date, end_date = _validate_window(
+            data.start, data.end, data.start_date, data.end_date, data.all_day
+        )
         attendees = _validate_attendees(list(data.attendees))
         address_id = await _upsert_address(transaction, obj.address, data.address)
         obj.start = start
         obj.end = end
+        obj.start_date = start_date
+        obj.end_date = end_date
         obj.all_day = data.all_day
         obj.name = data.name
         obj.address_id = address_id

@@ -78,7 +78,7 @@ export function MonthView({ anchor, events, onSelectDay, onSelectEvent }: Props)
                       eventStateClasses[event.state],
                     )}
                   >
-                    {!event.all_day && (
+                    {!event.all_day && event.start && (
                       <span className="mr-1 font-medium">
                         {format(parseISO(event.start), "HH:mm")}
                       </span>
@@ -98,8 +98,8 @@ export function MonthView({ anchor, events, onSelectDay, onSelectEvent }: Props)
 function groupEventsByDay(events: CalendarEventListItem[]): Map<string, CalendarEventListItem[]> {
   const map = new Map<string, CalendarEventListItem[]>();
   for (const event of events) {
-    const start = parseISO(event.start);
-    const end = parseISO(event.end);
+    const start = event.all_day ? parseISO(event.start_date!) : parseISO(event.start!);
+    const end = event.all_day ? parseISO(event.end_date!) : parseISO(event.end!);
     const cursor = new Date(start);
     cursor.setHours(0, 0, 0, 0);
     while (cursor <= end) {

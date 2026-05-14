@@ -390,9 +390,11 @@ export function CalendarEventActionsCreateForm(props: GeneratedFormProps<CreateC
       defaultValues={props.defaultValues}
       isSubmitting={props.isSubmitting}
     >
-      <_calendar_event_actions__create.FormDatetime name="start" label="Start" required includeTime />
-      <_calendar_event_actions__create.FormDatetime name="end" label="End" required includeTime />
       <_calendar_event_actions__create.FormCheckbox name="all_day" label="All Day" />
+      <_calendar_event_actions__create.FormDatetime name="start" label="Start" includeTime />
+      <_calendar_event_actions__create.FormDatetime name="end" label="End" includeTime />
+      <_calendar_event_actions__create.FormDatetime name="start_date" label="Start Date" />
+      <_calendar_event_actions__create.FormDatetime name="end_date" label="End Date" />
       <_calendar_event_actions__create.FormString name="name" label="Name" />
       <_calendar_event_actions__create.FormString name="address" label="Address" />
       <_calendar_event_actions__create.FormText name="description" label="Description" />
@@ -416,9 +418,11 @@ export function CalendarEventActionsUpdateForm(props: GeneratedFormProps<UpdateC
       defaultValues={props.defaultValues}
       isSubmitting={props.isSubmitting}
     >
-      <_calendar_event_actions__update.FormDatetime name="start" label="Start" required includeTime />
-      <_calendar_event_actions__update.FormDatetime name="end" label="End" required includeTime />
       <_calendar_event_actions__update.FormCheckbox name="all_day" label="All Day" required />
+      <_calendar_event_actions__update.FormDatetime name="start" label="Start" includeTime />
+      <_calendar_event_actions__update.FormDatetime name="end" label="End" includeTime />
+      <_calendar_event_actions__update.FormDatetime name="start_date" label="Start Date" />
+      <_calendar_event_actions__update.FormDatetime name="end_date" label="End Date" />
       <_calendar_event_actions__update.FormString name="name" label="Name" />
       <_calendar_event_actions__update.FormString name="address" label="Address" />
       <_calendar_event_actions__update.FormText name="description" label="Description" />

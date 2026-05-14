@@ -21,7 +21,7 @@ interface Props {
 }
 
 const badgeBase =
-  "inline-flex items-center gap-2 rounded-md px-3 py-1 text-xs font-medium uppercase leading-none tracking-wide";
+  "inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium uppercase leading-none tracking-wide";
 
 export function StateTransitionSelect({
   currentState,
@@ -55,7 +55,7 @@ export function StateTransitionSelect({
             <DropdownMenuItem
               key={a.action}
               onSelect={() => onSelect(a)}
-              className="p-0 focus:bg-transparent"
+              className="p-0 focus:bg-transparent data-[highlighted]:bg-transparent"
             >
               <span
                 className={cn(

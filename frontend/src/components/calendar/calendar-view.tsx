@@ -16,9 +16,9 @@ export function CalendarView({ view, anchor, onSelectDay, onSelectEvent }: Props
   const { start, end } = getVisibleRange(view, anchor);
   const { data } = useListCalendarEventSuspense({
     filters: [
-      { type: "date", column: "start", start: start.toISOString(), finish: end.toISOString() },
+      { type: "date", column: "effective_start", start: start.toISOString(), finish: end.toISOString() },
     ],
-    sorts: [{ column: "start", direction: "asc" }],
+    sorts: [{ column: "effective_start", direction: "asc" }],
     limit: 500,
   });
   const events = data.items;

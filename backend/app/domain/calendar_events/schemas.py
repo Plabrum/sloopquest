@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date as date_type, datetime
 from decimal import Decimal
 
 from app.domain.calendar_events.enums import CalendarEventState
@@ -30,8 +30,10 @@ class AddressOutput(BaseSchema):
 class CalendarEventListItem(BaseSchema):
     id: Sqid
     state: CalendarEventState
-    start: datetime
-    end: datetime
+    start: datetime | None
+    end: datetime | None
+    start_date: date_type | None
+    end_date: date_type | None
     all_day: bool
     name: str | None
     address_line1: str | None
@@ -41,9 +43,11 @@ class CalendarEventListItem(BaseSchema):
 
 
 class CreateCalendarEventData(BaseSchema):
-    start: datetime
-    end: datetime
     all_day: bool = False
+    start: datetime | None = None
+    end: datetime | None = None
+    start_date: date_type | None = None
+    end_date: date_type | None = None
     name: str | None = None
     address: AddressInput | None = None
     description: str | None = None
@@ -53,9 +57,11 @@ class CreateCalendarEventData(BaseSchema):
 
 
 class UpdateCalendarEventData(BaseSchema):
-    start: datetime
-    end: datetime
     all_day: bool
+    start: datetime | None
+    end: datetime | None
+    start_date: date_type | None
+    end_date: date_type | None
     name: str | None
     address: AddressInput | None
     description: str | None
@@ -67,8 +73,10 @@ class UpdateCalendarEventData(BaseSchema):
 class CalendarEventDetail(BaseSchema):
     id: Sqid
     state: CalendarEventState
-    start: datetime
-    end: datetime
+    start: datetime | None
+    end: datetime | None
+    start_date: date_type | None
+    end_date: date_type | None
     all_day: bool
     name: str | None
     address: AddressOutput | None

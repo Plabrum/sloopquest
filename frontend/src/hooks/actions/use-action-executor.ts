@@ -218,6 +218,7 @@ export function useActionExecutor({
     confirmAction,
     cancelAction,
     executeWithData,
+    executeAction,
     renderActionForm,
   };
 }

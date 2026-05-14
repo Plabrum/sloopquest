@@ -7,17 +7,15 @@ import {
   format,
   parseISO,
 } from "date-fns";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { PageTopBar } from "@/components/layout/page-topbar";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CalendarView } from "@/components/calendar/calendar-view";
 import { CalendarSkeleton } from "@/components/calendar/calendar-skeleton";
+import { EventCreatePanel } from "@/components/calendar/event-create-panel";
 import { EventDetailPanel } from "@/components/calendar/event-detail-sheet";
 import { isCalendarView, type CalendarView as CalendarViewType } from "@/components/calendar/types";
-import { TopLevelActions } from "@/components/object-list/top-level-actions";
-import { getListCalendarEventQueryKey } from "@/openapi/calendar-events/calendar-events";
 import { calendarRoute } from "@/router/authenticated.routes";
 
 const ISO_DAY = "yyyy-MM-dd";
@@ -25,7 +23,6 @@ const ISO_DAY = "yyyy-MM-dd";
 export function CalendarPage() {
   const search = calendarRoute.useSearch();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   const view: CalendarViewType = isCalendarView(search.view) ? search.view : "month";
   const anchor = useMemo(
@@ -36,33 +33,62 @@ export function CalendarPage() {
   const setView = (next: CalendarViewType) =>
     navigate({
       to: "/calendar",
-      search: () => ({ view: next, date: search.date, event: search.event }),
+      search: () => ({
+        view: next,
+        date: search.date,
+        event: search.event,
+        creating: search.creating,
+      }),
       replace: true,
     });
 
   const setAnchor = (next: Date) =>
     navigate({
       to: "/calendar",
-      search: () => ({ view: search.view, date: format(next, ISO_DAY), event: search.event }),
+      search: () => ({
+        view: search.view,
+        date: format(next, ISO_DAY),
+        event: search.event,
+        creating: search.creating,
+      }),
       replace: true,
     });
 
   const setEvent = (id: string | undefined) =>
     navigate({
       to: "/calendar",
-      search: () => ({ view: search.view, date: search.date, event: id }),
+      search: () => ({
+        view: search.view,
+        date: search.date,
+        event: id,
+        creating: undefined,
+      }),
+      replace: true,
+    });
+
+  const setCreating = (value: boolean) =>
+    navigate({
+      to: "/calendar",
+      search: () => ({
+        view: search.view,
+        date: search.date,
+        event: value ? undefined : search.event,
+        creating: value ? true : undefined,
+      }),
       replace: true,
     });
 
   const setViewAndAnchor = (nextView: CalendarViewType, nextDate: Date) =>
     navigate({
       to: "/calendar",
-      search: () => ({ view: nextView, date: format(nextDate, ISO_DAY), event: search.event }),
+      search: () => ({
+        view: nextView,
+        date: format(nextDate, ISO_DAY),
+        event: search.event,
+        creating: search.creating,
+      }),
       replace: true,
     });
-
-  const invalidateList = () =>
-    queryClient.invalidateQueries({ queryKey: getListCalendarEventQueryKey() });
 
   const shift = (direction: 1 | -1) => {
     if (view === "month") setAnchor(addMonths(anchor, direction));
@@ -80,10 +106,10 @@ export function CalendarPage() {
     <PageTopBar
       title="Calendar"
       actions={
-        <TopLevelActions
-          actionGroup="calendar_event_actions"
-          onInvalidate={invalidateList}
-        />
+        <Button size="sm" onClick={() => setCreating(true)}>
+          <Plus className="size-4" />
+          New event
+        </Button>
       }
     >
       <div className="flex min-h-0 flex-1">
@@ -122,7 +148,20 @@ export function CalendarPage() {
           </Suspense>
         </div>
 
-        {search.event && (
+        {search.creating && (
+          <aside className="w-[22rem] shrink-0 border-l border-border bg-card">
+            <EventCreatePanel
+              initialStart={anchor}
+              onClose={() => setCreating(false)}
+              onCreated={(id) => {
+                setCreating(false);
+                setEvent(id);
+              }}
+            />
+          </aside>
+        )}
+
+        {!search.creating && search.event && (
           <aside className="w-[22rem] shrink-0 border-l border-border bg-card">
             <EventDetailPanel eventId={search.event} onClose={() => setEvent(undefined)} />
           </aside>

@@ -10,6 +10,8 @@ export const calendarEventColumnDefs = createColumnBuilder<CalendarEventListItem
   .status("state", { header: "State", filterable: true, options: Object.values(CalendarEventState) })
   .datetime("start", { header: "Start", sortable: true, filterable: true, hideOnMobile: true })
   .datetime("end", { header: "End", sortable: true, filterable: true, hideOnMobile: true })
+  .date("start_date", { header: "Start Date" })
+  .date("end_date", { header: "End Date" })
   .boolean("all_day", { header: "All Day" })
   .text("name", { header: "Name" })
   .text("address_line1", { header: "Address Line1" })

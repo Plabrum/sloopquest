@@ -103,6 +103,8 @@ async def test_update_happy_path(db_session: AsyncSession, user) -> None:
     data = UpdateCalendarEventData(
         start=new_start,
         end=new_end,
+        start_date=None,
+        end_date=None,
         all_day=False,
         name="Hauled survey",
         address=None,
@@ -130,6 +132,8 @@ async def test_update_rejects_end_le_start(db_session: AsyncSession, user) -> No
     data = UpdateCalendarEventData(
         start=start,
         end=start,
+        start_date=None,
+        end_date=None,
         all_day=False,
         name=None,
         address=None,
@@ -184,6 +188,8 @@ async def test_update_clears_address(db_session: AsyncSession, user) -> None:
     data = UpdateCalendarEventData(
         start=start,
         end=end,
+        start_date=None,
+        end_date=None,
         all_day=False,
         name=None,
         address=None,

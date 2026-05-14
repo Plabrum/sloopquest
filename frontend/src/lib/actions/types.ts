@@ -48,6 +48,7 @@ export interface ActionExecutionResponse {
   message?: string;
   invalidate_queries?: string[] | null;
   action_result?: ActionResult | null;
+  created_id?: string | null;
 }
 
 /** Object-level actions — performed on a specific object instance. */

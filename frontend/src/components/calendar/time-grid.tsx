@@ -120,8 +120,9 @@ function DayColumn({
         <div key={h} className="border-t border-border/60" style={{ height: HOUR_PX }} />
       ))}
       {events.map((event) => {
-        const start = parseISO(event.start);
-        const end = parseISO(event.end);
+        // Timed events only — `start`/`end` are non-null when all_day is false.
+        const start = parseISO(event.start!);
+        const end = parseISO(event.end!);
         const { clampedStart, clampedEnd } = clampToVisibleHours(start, end, day);
         if (clampedEnd <= clampedStart) return null;
         const top = (minutesFromDayStart(clampedStart) / 60) * HOUR_PX;
@@ -155,8 +156,18 @@ function DayColumn({
 }
 
 function spansDay(event: CalendarEventListItem, day: Date): boolean {
-  const start = parseISO(event.start);
-  const end = parseISO(event.end);
+  if (event.all_day) {
+    // Date-only comparison (no TZ math).
+    const startDate = parseISO(event.start_date!);
+    const endDate = parseISO(event.end_date!);
+    return (
+      isSameDay(startDate, day) ||
+      isSameDay(endDate, day) ||
+      (startDate < day && endDate > day)
+    );
+  }
+  const start = parseISO(event.start!);
+  const end = parseISO(event.end!);
   if (isSameDay(start, day) || isSameDay(end, day)) return true;
   return start < day && end > day;
 }

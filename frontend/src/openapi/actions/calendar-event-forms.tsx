@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { addMinutes } from "date-fns";
-import { Plus, X } from "lucide-react";
+import { AddressFields } from "@/components/calendar/address-fields";
 import { createTypedForm } from "@/lib/forms/base";
-import { Button } from "@/components/ui/button";
 import type { GeneratedFormProps } from "@/lib/forms/types";
 import type {
   AddressInput,
@@ -18,12 +17,6 @@ interface CreateFormValues {
   attendees: string[];
   survey_id: string | null;
   client_id: string | null;
-  address_line1: string | null;
-  address_line2: string | null;
-  address_city: string | null;
-  address_region: string | null;
-  address_postal_code: string | null;
-  address_country: string | null;
 }
 
 const _create = createTypedForm<CreateFormValues>();
@@ -40,26 +33,10 @@ const DURATION_OPTIONS: { value: string; label: string }[] = [
   { value: "480", label: "8 hours" },
 ];
 
-function buildAddress(values: CreateFormValues): AddressInput | null {
-  const line1 = values.address_line1?.trim();
-  const city = values.address_city?.trim();
-  const region = values.address_region?.trim();
-  const postal = values.address_postal_code?.trim();
-  if (!line1 && !city && !region && !postal) return null;
-  return {
-    line1: line1 ?? "",
-    line2: values.address_line2?.trim() || null,
-    city: city ?? "",
-    region: region ?? "",
-    postal_code: postal ?? "",
-    country: values.address_country?.trim() || "US",
-  };
-}
-
 export function CalendarEventActionsCreateForm(
   props: GeneratedFormProps<CreateCalendarEventData>,
 ) {
-  const [showAddress, setShowAddress] = useState(false);
+  const [address, setAddress] = useState<AddressInput | null>(null);
 
   const handleSubmit = (values: CreateFormValues) => {
     const start = new Date(values.start);
@@ -70,7 +47,7 @@ export function CalendarEventActionsCreateForm(
       end: end.toISOString(),
       all_day: values.all_day,
       name: values.name || null,
-      address: showAddress ? buildAddress(values) : null,
+      address,
       description: values.description || null,
       attendees: values.attendees ?? [],
       survey_id: values.survey_id || null,
@@ -89,7 +66,6 @@ export function CalendarEventActionsCreateForm(
         duration_minutes: "60",
         all_day: false,
         attendees: [],
-        address_country: "US",
       }}
     >
       <_create.FormString name="name" label="Name" />
@@ -105,43 +81,7 @@ export function CalendarEventActionsCreateForm(
       <_create.FormStringList name="attendees" label="Attendees" />
       <_create.FormEntityCombobox name="survey_id" label="Survey" modelName="Survey" />
       <_create.FormEntityCombobox name="client_id" label="Client" modelName="Client" />
-
-      {showAddress ? (
-        <div className="space-y-2 rounded-md border border-border p-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Address</span>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowAddress(false)}
-            >
-              <X className="size-4" />
-              Remove
-            </Button>
-          </div>
-          <_create.FormString name="address_line1" label="Street" />
-          <_create.FormString name="address_line2" label="Apt, suite, etc." />
-          <div className="grid grid-cols-2 gap-2">
-            <_create.FormString name="address_city" label="City" />
-            <_create.FormString name="address_region" label="State/Region" />
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <_create.FormString name="address_postal_code" label="Postal code" />
-            <_create.FormString name="address_country" label="Country" />
-          </div>
-        </div>
-      ) : (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => setShowAddress(true)}
-        >
-          <Plus className="size-4" />
-          Add address
-        </Button>
-      )}
+      <AddressFields value={address} onChange={setAddress} />
     </_create.FormSheet>
   );
 }
