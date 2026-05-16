@@ -5,6 +5,7 @@ import { BarChartWidget } from "./widgets/bar-chart-widget";
 import { StatNumberWidget } from "./widgets/stat-number-widget";
 import { ResourceTableWidget } from "./widgets/resource-table-widget";
 import { ChildListWidget } from "./widgets/child-list-widget";
+import { KanbanWidget } from "./widgets/kanban-widget";
 import type { WidgetRead } from "./types";
 
 function DefaultWidgetError({ onRetry }: { onRetry: () => void }) {
@@ -34,6 +35,8 @@ function WidgetContent({ widget }: { widget: WidgetRead }) {
       return <ResourceTableWidget widget={widget} />;
     case "child_list":
       return <ChildListWidget widget={widget} />;
+    case "kanban":
+      return <KanbanWidget widget={widget} />;
     default:
       return null;
   }

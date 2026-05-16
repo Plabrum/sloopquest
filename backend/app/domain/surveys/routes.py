@@ -94,11 +94,7 @@ survey_router = Router(path="/surveys", route_handlers=[_survey_controller], tag
 
 
 def _to_template_list_item(template: SurveyTemplate, user: User) -> SurveyTemplateListItem:
-    return SurveyTemplateListItem(
-        id=template.id,
-        name=template.name,
-        tags=template.tags,
-    )
+    return SurveyTemplateListItem(id=template.id, name=template.name, tags=template.tags)
 
 
 def _to_template_detail(template: SurveyTemplate, user: User) -> SurveyTemplateDetail:

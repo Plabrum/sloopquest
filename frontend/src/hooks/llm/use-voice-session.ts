@@ -18,6 +18,7 @@ export type VoiceSessionState =
   | "idle"
   | "connecting"
   | "listening"
+  | "user_speaking"
   | "speaking"
   | "error";
 
@@ -107,31 +108,57 @@ export function useVoiceSession() {
         }
       };
 
+      let audioChunkCount = 0;
       ws.onmessage = (event) => {
         if (event.data instanceof ArrayBuffer) {
-          setState("speaking");
+          if (audioChunkCount === 0) {
+            console.debug("[voice] first assistant audio chunk received");
+          }
+          audioChunkCount += 1;
           playerNode.port.postMessage(event.data, [event.data]);
           return;
         }
         try {
           const msg = JSON.parse(event.data as string);
           if (msg.type === "invalidate" && Array.isArray(msg.keys)) {
+            console.debug("[voice] invalidate keys:", msg.keys);
             for (const key of msg.keys) {
               queryClient.invalidateQueries({ queryKey: [key] });
             }
+          } else if (msg.type === "voice_event") {
+            console.debug(`[voice] event: ${msg.event} (audio_chunks=${audioChunkCount})`);
+            // Server-side VAD and response lifecycle drive icon state. We
+            // ignore audio chunks for state transitions because chunks
+            // arrive throughout an assistant turn — boundary events give
+            // us clean start/end edges.
+            if (msg.event === "user_speech_started") setState("user_speaking");
+            else if (msg.event === "user_speech_stopped") setState("listening");
+            else if (msg.event === "assistant_speech_started") setState("speaking");
+            else if (msg.event === "assistant_speech_ended") {
+              audioChunkCount = 0;
+              setState("listening");
+            } else if (msg.event === "session_ended") {
+              console.debug("[voice] session ended by model");
+              stop();
+            }
           }
-        } catch {
-          // ignore
+        } catch (err) {
+          console.warn("[voice] non-JSON text frame:", event.data, err);
         }
       };
 
-      ws.onopen = () => setState("listening");
-      ws.onerror = () => {
+      ws.onopen = () => {
+        console.debug("[voice] WS open");
+        setState("listening");
+      };
+      ws.onerror = (err) => {
+        console.error("[voice] WS error:", err);
         toast.error("Voice connection failed");
         setState("error");
         stop();
       };
-      ws.onclose = () => {
+      ws.onclose = (ev) => {
+        console.debug(`[voice] WS close code=${ev.code} reason=${ev.reason}`);
         if (refs.current.ws === ws) {
           stop();
         }

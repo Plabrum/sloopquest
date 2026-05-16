@@ -48,28 +48,16 @@ from tests.factories.vessels import EngineFactory, VesselFactory  # noqa: E402
 
 # Survey states spread across the pipeline so the demo shows all stages
 _SURVEY_STATES: list[SurveyState] = [
-    SurveyState.inquiry,
     SurveyState.scheduled,
-    SurveyState.in_field,
     SurveyState.in_draft,
-    SurveyState.in_review,
     SurveyState.delivered,
     SurveyState.cancelled,
 ]
 
 _STATE_PATHS: dict[SurveyState, list[SurveyState]] = {
-    SurveyState.inquiry: [],
-    SurveyState.scheduled: [SurveyState.scheduled],
-    SurveyState.in_field: [SurveyState.scheduled, SurveyState.in_field],
-    SurveyState.in_draft: [SurveyState.scheduled, SurveyState.in_field, SurveyState.in_draft],
-    SurveyState.in_review: [SurveyState.scheduled, SurveyState.in_field, SurveyState.in_draft, SurveyState.in_review],
-    SurveyState.delivered: [
-        SurveyState.scheduled,
-        SurveyState.in_field,
-        SurveyState.in_draft,
-        SurveyState.in_review,
-        SurveyState.delivered,
-    ],
+    SurveyState.scheduled: [],
+    SurveyState.in_draft: [SurveyState.in_draft],
+    SurveyState.delivered: [SurveyState.in_draft, SurveyState.delivered],
     SurveyState.cancelled: [SurveyState.cancelled],
 }
 
@@ -186,7 +174,7 @@ async def seed_demo_org(session: AsyncSession) -> Organization:
     # ── 7. State transition logs ──────────────────────────────────────────────
     for survey, survey_state in zip(surveys, _SURVEY_STATES):
         path = _STATE_PATHS.get(survey_state, [])
-        prev = SurveyState.inquiry
+        prev = SurveyState.scheduled
         base_time = now - timedelta(days=60)
         for step_i, next_state in enumerate(path):
             session.add(
@@ -236,7 +224,7 @@ async def seed_demo_org(session: AsyncSession) -> Organization:
     logger.info("Created invoices")
 
     # ── 9. Reports ────────────────────────────────────────────────────────────
-    reported_states = {SurveyState.in_review, SurveyState.delivered}
+    reported_states = {SurveyState.in_draft, SurveyState.delivered}
     for survey, survey_state in zip(surveys, _SURVEY_STATES):
         if survey_state not in reported_states:
             continue
@@ -400,8 +388,8 @@ async def seed_demo_org(session: AsyncSession) -> Organization:
     logger.info("Created dashboard with %d starter widgets", len(starter_widgets))
 
     # ── 11. Email threads + messages ──────────────────────────────────────────
-    inquiry_survey = next(s for s, st in zip(surveys, _SURVEY_STATES) if st == SurveyState.inquiry)
     scheduled_survey = next(s for s, st in zip(surveys, _SURVEY_STATES) if st == SurveyState.scheduled)
+    draft_survey = next(s for s, st in zip(surveys, _SURVEY_STATES) if st == SurveyState.in_draft)
     delivered_survey = next(s for s, st in zip(surveys, _SURVEY_STATES) if st == SurveyState.delivered)
     whitfield = clients[0]
     insurance = clients[2]
@@ -409,7 +397,7 @@ async def seed_demo_org(session: AsyncSession) -> Organization:
     thread_a = EmailThread(
         user_id=admin.id,
         subject="Pre-purchase survey inquiry — 1985 Catalina 30",
-        survey_id=inquiry_survey.id,
+        survey_id=draft_survey.id,
     )
     thread_b = EmailThread(
         user_id=admin.id,

@@ -9,6 +9,9 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.users.models import User
+from app.platform.actions.deps import ActionDeps
+from app.platform.actions.registry import ActionRegistry
+from app.platform.actions.schemas import ActionableDetail, ActionableList
 from app.platform.auth.guards import requires_session
 from app.platform.base.filters import apply_filter, apply_sorts
 from app.platform.base.models import BaseDBModel
@@ -34,7 +37,7 @@ class CRUDRegistry(BaseRegistry[type, CRUDEntry]):
 
 
 @dataclass
-class CRUDConfig[ModelT: BaseDBModel, ListT: Struct, DetailT: Struct]:
+class CRUDConfig[ModelT: BaseDBModel, ListT: ActionableList, DetailT: ActionableDetail]:
     """Declarative configuration for a resource's read endpoints."""
 
     model: type[ModelT]
@@ -83,7 +86,7 @@ class CRUDConfig[ModelT: BaseDBModel, ListT: Struct, DetailT: Struct]:
     data_timestamp_field: str = "created_at"
 
 
-def make_crud_controller[ModelT: BaseDBModel, ListT: Struct, DetailT: Struct](
+def make_crud_controller[ModelT: BaseDBModel, ListT: ActionableList, DetailT: ActionableDetail](
     path: str,
     config: CRUDConfig[ModelT, ListT, DetailT],
 ) -> type[Controller]:
@@ -110,12 +113,17 @@ def make_crud_controller[ModelT: BaseDBModel, ListT: Struct, DetailT: Struct](
     detail_hints = get_type_hints(config.to_detail)
     detail_type = detail_hints.get("return", Struct)
 
+    # The action group is resolved lazily at request time — at controller-build
+    # time the action registry may not yet be populated, since domain routes
+    # are imported before the action router in factory.py.
+
     @post("/", guards=list_guards, tags=[model_name.lower()], status_code=200, operation_id=f"list_{model_name}")
     async def list_handler(
         self,
         data: ListRequest,
         user: User,
         transaction: AsyncSession,
+        action_deps: ActionDeps | None = None,
     ) -> PagedResponse:
         # Clamp limit and offset
         limit = max(1, min(data.limit, 200))
@@ -162,6 +170,12 @@ def make_crud_controller[ModelT: BaseDBModel, ListT: Struct, DetailT: Struct](
 
         items = [config.to_list_item(row, user) for row in rows]
 
+        if action_deps is not None:
+            action_group = ActionRegistry().find_by_model(model)
+            if action_group is not None:
+                for item, row in zip(items, rows, strict=True):
+                    item.actions = action_group.get_available_actions(action_deps, row)
+
         return PagedResponse(
             items=items,
             total=total,
@@ -178,6 +192,7 @@ def make_crud_controller[ModelT: BaseDBModel, ListT: Struct, DetailT: Struct](
         id: Sqid,
         user: User,
         transaction: AsyncSession,
+        action_deps: ActionDeps | None = None,
     ) -> Struct:
         detail_conditions = [model.id == id, scope_col == getattr(user, scope_value_attr)]
         query = select(model).where(*detail_conditions)
@@ -191,7 +206,12 @@ def make_crud_controller[ModelT: BaseDBModel, ListT: Struct, DetailT: Struct](
         if obj is None:
             raise NotFoundException()
 
-        return config.to_detail(obj, user)
+        detail = config.to_detail(obj, user)
+        if action_deps is not None:
+            action_group = ActionRegistry().find_by_model(model)
+            if action_group is not None:
+                detail.actions = action_group.get_available_actions(action_deps, obj)
+        return detail
 
     detail_handler.fn.__annotations__["return"] = detail_type
 

@@ -30,3 +30,9 @@ class ActionRegistry(
 
     def register_action(self, action_key: str, action_class: type["BaseAction"]) -> None:
         self._flat_registry[action_key] = action_class
+
+    def find_by_model(self, model: type) -> "ActionGroup | None":
+        for group in self._registry.values():
+            if group.model_type is model:
+                return group
+        return None

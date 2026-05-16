@@ -50,7 +50,9 @@ class ActionDTO(BaseSchema):
     confirmation_message: str | None = None
     should_redirect_to_parent: bool = False
     disabled_reason: DisabledReason | None = None
-    is_state_transition: bool = False
+    # When set, the action transitions its object to this state value.
+    # Frontends derive `is_state_transition` as `target_state is not None`.
+    target_state: str | None = None
 
 
 class ActionExecutionRequest(BaseSchema):
@@ -86,6 +88,21 @@ class ActionExecutionResponse(BaseSchema):
 
 class ActionListResponse(BaseSchema):
     actions: list[ActionDTO]
+
+
+# CRUD list and detail schemas inherit from these so the `actions` field is part
+# of every resource's read contract — the CRUD layer hydrates it at request time.
+# `kw_only=True` lets subclasses declare required fields without ordering issues.
+class Actionable(BaseSchema, kw_only=True):
+    actions: list[ActionDTO] = []
+
+
+class ActionableList(Actionable):
+    pass
+
+
+class ActionableDetail(Actionable):
+    pass
 
 
 # --- Helper functions for Action union generation -------------------------------

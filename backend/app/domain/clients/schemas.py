@@ -1,11 +1,12 @@
 from datetime import datetime
 
 from app.domain.clients.enums import ClientType
+from app.platform.actions.schemas import ActionableDetail, ActionableList
 from app.platform.base.schemas import BaseSchema
 from app.utils.sqids import Sqid
 
 
-class ClientListItem(BaseSchema):
+class ClientListItem(ActionableList):
     id: Sqid
     client_type: ClientType
     display_name: str
@@ -14,7 +15,7 @@ class ClientListItem(BaseSchema):
     created_at: datetime
 
 
-class ClientDetail(BaseSchema):
+class ClientDetail(ActionableDetail):
     id: Sqid
     client_type: ClientType
     display_name: str

@@ -2,6 +2,7 @@ from datetime import date as date_type, datetime
 from decimal import Decimal
 
 from app.domain.calendar_events.enums import CalendarEventState
+from app.platform.actions.schemas import ActionableDetail, ActionableList
 from app.platform.base.schemas import BaseSchema
 from app.utils.sqids import Sqid
 
@@ -27,7 +28,7 @@ class AddressOutput(BaseSchema):
     lng: Decimal | None
 
 
-class CalendarEventListItem(BaseSchema):
+class CalendarEventListItem(ActionableList):
     id: Sqid
     state: CalendarEventState
     start: datetime | None
@@ -70,7 +71,7 @@ class UpdateCalendarEventData(BaseSchema):
     client_id: Sqid | None
 
 
-class CalendarEventDetail(BaseSchema):
+class CalendarEventDetail(ActionableDetail):
     id: Sqid
     state: CalendarEventState
     start: datetime | None

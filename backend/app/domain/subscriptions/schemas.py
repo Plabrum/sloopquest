@@ -1,11 +1,12 @@
 from datetime import datetime
 
 from app.domain.subscriptions.enums import SubscriptionPlan, SubscriptionStatus
+from app.platform.actions.schemas import ActionableDetail, ActionableList
 from app.platform.base.schemas import BaseSchema
 from app.utils.sqids import Sqid
 
 
-class SubscriptionListItem(BaseSchema):
+class SubscriptionListItem(ActionableList):
     id: Sqid
     plan: SubscriptionPlan
     state: SubscriptionStatus
@@ -14,7 +15,7 @@ class SubscriptionListItem(BaseSchema):
     created_at: datetime
 
 
-class SubscriptionDetail(BaseSchema):
+class SubscriptionDetail(ActionableDetail):
     id: Sqid
     plan: SubscriptionPlan
     state: SubscriptionStatus

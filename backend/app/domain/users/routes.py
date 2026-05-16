@@ -4,13 +4,14 @@ from litestar import Router, get
 
 from app.domain.users.models import User
 from app.domain.users.service import UserService
+from app.platform.actions.schemas import ActionableDetail, ActionableList
 from app.platform.auth.guards import requires_session
 from app.platform.base.crud import CRUDConfig, make_crud_controller
 from app.platform.base.schemas import BaseSchema
 from app.utils.sqids import Sqid
 
 
-class UserListItem(BaseSchema):
+class UserListItem(ActionableList, ActionableDetail):
     id: Sqid
     name: str
     email: str

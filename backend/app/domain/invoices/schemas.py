@@ -2,6 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 
 from app.domain.invoices.enums import InvoiceState
+from app.platform.actions.schemas import ActionableDetail, ActionableList
 from app.platform.base.schemas import BaseSchema
 from app.utils.sqids import Sqid
 
@@ -15,7 +16,7 @@ class InvoiceLineItemSchema(BaseSchema):
     created_at: datetime
 
 
-class InvoiceListItem(BaseSchema):
+class InvoiceListItem(ActionableList):
     id: Sqid
     identifier: str | None
     state: InvoiceState
@@ -27,7 +28,7 @@ class InvoiceListItem(BaseSchema):
     created_at: datetime
 
 
-class InvoiceDetail(BaseSchema):
+class InvoiceDetail(ActionableDetail):
     id: Sqid
     identifier: str | None
     state: InvoiceState

@@ -10,6 +10,7 @@ from app.domain.vessels.enums import (
     RiggingType,
     VesselType,
 )
+from app.platform.actions.schemas import ActionableDetail, ActionableList
 from app.platform.base.schemas import BaseSchema
 from app.utils.sqids import Sqid
 
@@ -28,7 +29,7 @@ class EngineSchema(BaseSchema):
     created_at: datetime
 
 
-class VesselListItem(BaseSchema):
+class VesselListItem(ActionableList):
     id: Sqid
     name: str
     vessel_type: VesselType | None
@@ -38,7 +39,7 @@ class VesselListItem(BaseSchema):
     created_at: datetime
 
 
-class VesselDetail(BaseSchema):
+class VesselDetail(ActionableDetail):
     id: Sqid
     name: str
     hin: str | None

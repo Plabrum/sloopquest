@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from app.domain.pricing_guides.enums import PricingType
+from app.platform.actions.schemas import ActionableDetail, ActionableList
 from app.platform.base.schemas import BaseSchema
 from app.utils.sqids import Sqid
 
@@ -17,14 +18,14 @@ class PricingTierOutput(BaseSchema):
     sort_order: int
 
 
-class PricingGuideListItem(BaseSchema):
+class PricingGuideListItem(ActionableList):
     id: Sqid
     name: str
     is_active: bool
     created_at: datetime
 
 
-class PricingGuideDetail(BaseSchema):
+class PricingGuideDetail(ActionableDetail):
     id: Sqid
     name: str
     is_active: bool

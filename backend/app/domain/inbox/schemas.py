@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from app.platform.actions.schemas import ActionableDetail, ActionableList
 from app.platform.base.schemas import BaseSchema
 from app.platform.comms.enums import MessageDirection, MessageState
 from app.utils.sqids import Sqid
@@ -14,7 +15,7 @@ class AttachmentRef(BaseSchema):
     s3_key: str | None = None
 
 
-class ThreadListItem(BaseSchema):
+class ThreadListItem(ActionableList):
     id: Sqid
     subject: str | None
     latest_from: str | None
@@ -27,7 +28,7 @@ class ThreadListItem(BaseSchema):
     survey_id: Sqid | None
 
 
-class ThreadDetail(BaseSchema):
+class ThreadDetail(ActionableDetail):
     id: Sqid
     subject: str | None
     latest_from: str | None
@@ -39,7 +40,7 @@ class ThreadDetail(BaseSchema):
     survey_id: Sqid | None
 
 
-class MessageListItem(BaseSchema):
+class MessageListItem(ActionableList):
     id: Sqid
     email_thread_id: Sqid | None
     direction: MessageDirection
@@ -53,7 +54,7 @@ class MessageListItem(BaseSchema):
     archived_at: datetime | None
 
 
-class MessageDetail(BaseSchema):
+class MessageDetail(ActionableDetail):
     id: Sqid
     email_thread_id: Sqid | None
     direction: MessageDirection

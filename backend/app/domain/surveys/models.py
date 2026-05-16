@@ -40,7 +40,7 @@ class Survey(
     OrgScopedMixin,
     SearchMixin,
     SequenceMixin(sequence_type=SequenceType.survey_identifier, prefix="SUR"),
-    StateMachineMixin(state_enum=SurveyState, initial_state=SurveyState.inquiry),
+    StateMachineMixin(state_enum=SurveyState, initial_state=SurveyState.scheduled),
 ):
     trgm_columns = ["identifier"]
     search_label_field = "identifier"

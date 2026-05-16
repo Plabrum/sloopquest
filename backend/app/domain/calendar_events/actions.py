@@ -171,7 +171,7 @@ class ConfirmCalendarEvent(BaseObjectAction[CalendarEvent, EmptyActionData]):
     label = "Confirmed"
     icon = ActionIcon.CHECK
     priority = 30
-    is_state_transition = True
+    target_state = CalendarEventState.confirmed
 
     @classmethod
     def is_available(cls, obj: CalendarEvent, deps: ActionDeps) -> bool:
@@ -193,7 +193,7 @@ class CompleteCalendarEvent(BaseObjectAction[CalendarEvent, EmptyActionData]):
     label = "Completed"
     icon = ActionIcon.CHECK
     priority = 31
-    is_state_transition = True
+    target_state = CalendarEventState.completed
 
     @classmethod
     def is_available(cls, obj: CalendarEvent, deps: ActionDeps) -> bool:
@@ -216,7 +216,7 @@ class CancelCalendarEvent(BaseObjectAction[CalendarEvent, EmptyActionData]):
     icon = ActionIcon.X
     priority = 85
     confirmation_message = "Cancel this calendar event?"
-    is_state_transition = True
+    target_state = CalendarEventState.cancelled
 
     @classmethod
     def is_available(cls, obj: CalendarEvent, deps: ActionDeps) -> bool:

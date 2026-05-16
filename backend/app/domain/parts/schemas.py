@@ -1,11 +1,12 @@
 from datetime import datetime
 
 from app.domain.parts.enums import PartCategory
+from app.platform.actions.schemas import ActionableDetail, ActionableList
 from app.platform.base.schemas import BaseSchema
 from app.utils.sqids import Sqid
 
 
-class PartListItem(BaseSchema):
+class PartListItem(ActionableList):
     id: Sqid
     name: str
     part_number: str | None
@@ -14,7 +15,7 @@ class PartListItem(BaseSchema):
     created_at: datetime
 
 
-class PartDetail(BaseSchema):
+class PartDetail(ActionableDetail):
     id: Sqid
     name: str
     part_number: str | None

@@ -33,11 +33,7 @@ class SurveyActionKey(StrEnum):
     CREATE = auto()
     UPDATE = auto()
     DELETE = auto()
-    SCHEDULE = auto()
-    START_INSPECTION = auto()
-    COMPLETE_INSPECTION = auto()
-    MOVE_TO_DRAFT = auto()
-    SUBMIT_FOR_REVIEW = auto()
+    START_DRAFT = auto()
     DELIVER = auto()
     CANCEL = auto()
     SAVE_RESPONSE = auto()
@@ -108,7 +104,7 @@ class DeleteSurvey(BaseObjectAction[Survey, EmptyActionData]):
 
     @classmethod
     def is_available(cls, obj: Survey, deps: ActionDeps) -> bool:
-        return obj.state in {SurveyState.inquiry, SurveyState.cancelled}
+        return obj.state in {SurveyState.scheduled, SurveyState.cancelled}
 
     @classmethod
     async def execute(
@@ -119,103 +115,24 @@ class DeleteSurvey(BaseObjectAction[Survey, EmptyActionData]):
 
 
 @survey_actions
-class ScheduleSurvey(BaseObjectAction[Survey, EmptyActionData]):
-    action_key = SurveyActionKey.SCHEDULE
-    label = "Schedule"
-    icon = ActionIcon.CALENDAR
+class StartDraft(BaseObjectAction[Survey, EmptyActionData]):
+    action_key = SurveyActionKey.START_DRAFT
+    label = "Start Draft"
+    icon = ActionIcon.PLAY
     priority = 30
+    target_state = SurveyState.in_draft
 
     @classmethod
     def is_available(cls, obj: Survey, deps: ActionDeps) -> bool:
-        return survey_state_machine.can_transition(obj, SurveyState.scheduled, deps.user.role)
+        return survey_state_machine.can_transition(obj, SurveyState.in_draft, deps.user.role)
 
     @classmethod
     async def execute(
         cls, obj: Survey, data: EmptyActionData, transaction: AsyncSession, deps: ActionDeps
     ) -> ActionExecutionResponse:
         await assign_identifier_if_missing(transaction, obj)
-        await deps.sm_service.transition(survey_state_machine, obj, SurveyState.scheduled, actor=deps.user)
-        return ActionExecutionResponse(message="Survey scheduled")
-
-
-@survey_actions
-class StartInspection(BaseObjectAction[Survey, EmptyActionData]):
-    action_key = SurveyActionKey.START_INSPECTION
-    label = "Start Inspection"
-    icon = ActionIcon.PLAY
-    priority = 31
-
-    @classmethod
-    def is_available(cls, obj: Survey, deps: ActionDeps) -> bool:
-        return survey_state_machine.can_transition(obj, SurveyState.in_field, deps.user.role)
-
-    @classmethod
-    async def execute(
-        cls, obj: Survey, data: EmptyActionData, transaction: AsyncSession, deps: ActionDeps
-    ) -> ActionExecutionResponse:
-        await deps.sm_service.transition(survey_state_machine, obj, SurveyState.in_field, actor=deps.user)
-        return ActionExecutionResponse(message="Inspection started")
-
-
-@survey_actions
-class CompleteInspection(BaseObjectAction[Survey, EmptyActionData]):
-    action_key = SurveyActionKey.COMPLETE_INSPECTION
-    label = "Complete Inspection"
-    icon = ActionIcon.CLIPBOARD
-    priority = 32
-
-    @classmethod
-    def is_available(cls, obj: Survey, deps: ActionDeps) -> bool:
-        return obj.state == SurveyState.in_field and survey_state_machine.can_transition(
-            obj, SurveyState.in_draft, deps.user.role
-        )
-
-    @classmethod
-    async def execute(
-        cls, obj: Survey, data: EmptyActionData, transaction: AsyncSession, deps: ActionDeps
-    ) -> ActionExecutionResponse:
         await deps.sm_service.transition(survey_state_machine, obj, SurveyState.in_draft, actor=deps.user)
-        return ActionExecutionResponse(message="Inspection complete, survey in draft")
-
-
-@survey_actions
-class SubmitForReview(BaseObjectAction[Survey, EmptyActionData]):
-    action_key = SurveyActionKey.SUBMIT_FOR_REVIEW
-    label = "Submit for Review"
-    icon = ActionIcon.SEND
-    priority = 33
-
-    @classmethod
-    def is_available(cls, obj: Survey, deps: ActionDeps) -> bool:
-        return survey_state_machine.can_transition(obj, SurveyState.in_review, deps.user.role)
-
-    @classmethod
-    async def execute(
-        cls, obj: Survey, data: EmptyActionData, transaction: AsyncSession, deps: ActionDeps
-    ) -> ActionExecutionResponse:
-        await deps.sm_service.transition(survey_state_machine, obj, SurveyState.in_review, actor=deps.user)
-        return ActionExecutionResponse(message="Survey submitted for review")
-
-
-@survey_actions
-class MoveToDraft(BaseObjectAction[Survey, EmptyActionData]):
-    action_key = SurveyActionKey.MOVE_TO_DRAFT
-    label = "Back to Draft"
-    icon = ActionIcon.REWIND
-    priority = 34
-
-    @classmethod
-    def is_available(cls, obj: Survey, deps: ActionDeps) -> bool:
-        return obj.state == SurveyState.in_review and survey_state_machine.can_transition(
-            obj, SurveyState.in_draft, deps.user.role
-        )
-
-    @classmethod
-    async def execute(
-        cls, obj: Survey, data: EmptyActionData, transaction: AsyncSession, deps: ActionDeps
-    ) -> ActionExecutionResponse:
-        await deps.sm_service.transition(survey_state_machine, obj, SurveyState.in_draft, actor=deps.user)
-        return ActionExecutionResponse(message="Survey moved back to draft")
+        return ActionExecutionResponse(message="Survey moved to draft")
 
 
 @survey_actions
@@ -224,6 +141,7 @@ class DeliverSurvey(BaseObjectAction[Survey, EmptyActionData]):
     label = "Deliver Survey"
     icon = ActionIcon.SEND
     priority = 35
+    target_state = SurveyState.delivered
 
     @classmethod
     def is_available(cls, obj: Survey, deps: ActionDeps) -> bool:
@@ -244,6 +162,7 @@ class CancelSurvey(BaseObjectAction[Survey, EmptyActionData]):
     icon = ActionIcon.X
     priority = 85
     confirmation_message = "Are you sure you want to cancel this survey?"
+    target_state = SurveyState.cancelled
 
     @classmethod
     def is_available(cls, obj: Survey, deps: ActionDeps) -> bool:

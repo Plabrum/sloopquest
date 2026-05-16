@@ -9,13 +9,13 @@ import sqlalchemy as sa
 from litestar import Controller, Litestar
 from litestar.di import Provide
 from litestar.testing import AsyncTestClient
-from msgspec import Struct
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.domain.users.models import User
 from app.domain.users.roles import Role
 from app.platform.actions.registry import ActionRegistry
+from app.platform.actions.schemas import ActionableDetail, ActionableList
 from app.platform.base.crud import CRUDConfig, _crud_metadata, make_crud_controller
 from app.platform.base.filters import TextFilter, apply_filter
 from app.platform.base.models import BaseDBModel
@@ -36,12 +36,12 @@ class _Vessel(SearchMixin):
     # tests/test_search.py against Postgres.
 
 
-class VesselListItem(Struct):
+class VesselListItem(ActionableList):
     id: int
     name: str
 
 
-class VesselDetail(Struct):
+class VesselDetail(ActionableDetail):
     id: int
     name: str
 
@@ -167,12 +167,18 @@ def _build_app(session_factory: async_sessionmaker[AsyncSession], extra_routes: 
     async def provide_action_registry() -> ActionRegistry:
         return ActionRegistry()
 
+    async def provide_action_deps() -> None:
+        # CRUD requests it as a dep, but _Vessel has no registered action
+        # group, so the handler never actually reads it.
+        return None
+
     return Litestar(
         route_handlers=[ctl, *extra_routes],
         dependencies={
             "transaction": Provide(provide_transaction),
             "user": Provide(provide_user),
             "action_registry": Provide(provide_action_registry),
+            "action_deps": Provide(provide_action_deps),
         },
         middleware=[_AuthMiddleware],
         debug=True,

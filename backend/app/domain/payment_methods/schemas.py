@@ -1,10 +1,11 @@
 from datetime import datetime
 
+from app.platform.actions.schemas import ActionableDetail, ActionableList
 from app.platform.base.schemas import BaseSchema
 from app.utils.sqids import Sqid
 
 
-class PaymentMethodListItem(BaseSchema):
+class PaymentMethodListItem(ActionableList):
     id: Sqid
     brand: str
     last4: str
@@ -14,7 +15,7 @@ class PaymentMethodListItem(BaseSchema):
     created_at: datetime
 
 
-class PaymentMethodDetail(BaseSchema):
+class PaymentMethodDetail(ActionableDetail):
     id: Sqid
     stripe_payment_method_id: str
     brand: str

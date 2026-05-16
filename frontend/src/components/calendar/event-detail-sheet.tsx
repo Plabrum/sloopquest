@@ -92,9 +92,9 @@ function EventDetailContent({ eventId, onClose }: { eventId: string; onClose: ()
   };
 
   const allActions = actionsData?.actions ?? [];
-  const transitionActions = allActions.filter((a) => a.is_state_transition);
+  const transitionActions = allActions.filter((a) => a.target_state != null);
   const otherActions = allActions.filter(
-    (a) => !a.is_state_transition && !a.action.endsWith("__update"),
+    (a) => a.target_state == null && !a.action.endsWith("__update"),
   );
 
   const handleTransition = (action: ActionDTO) => {

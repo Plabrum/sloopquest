@@ -22,19 +22,22 @@ export interface ActionDTO {
   confirmation_message?: string | null;
   icon?: string | null;
   disabled_reason?: DisabledReason | null;
-  is_state_transition?: boolean;
+  target_state?: string | null;
 }
 
 export interface RedirectActionResult {
+  type: "redirect";
   path: string;
 }
 
 export interface DownloadFileActionResult {
+  type: "download_file";
   url: string;
   filename: string;
 }
 
 export interface CopyToClipboardActionResult {
+  type: "copy_to_clipboard";
   text: string;
   toast?: string | null;
 }

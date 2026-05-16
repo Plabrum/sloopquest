@@ -1,11 +1,12 @@
 from datetime import datetime
 
 from app.domain.reports.enums import ReportState
+from app.platform.actions.schemas import ActionableDetail, ActionableList
 from app.platform.base.schemas import BaseSchema
 from app.utils.sqids import Sqid
 
 
-class ReportListItem(BaseSchema):
+class ReportListItem(ActionableList):
     id: Sqid
     state: ReportState
     survey_id: Sqid
@@ -13,7 +14,7 @@ class ReportListItem(BaseSchema):
     created_at: datetime
 
 
-class ReportDetail(BaseSchema):
+class ReportDetail(ActionableDetail):
     id: Sqid
     state: ReportState
     survey_id: Sqid

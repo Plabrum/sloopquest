@@ -7,6 +7,7 @@ class WidgetType(StrEnum):
     STAT_NUMBER = auto()
     RESOURCE_TABLE = auto()
     CHILD_LIST = auto()
+    KANBAN = auto()
 
 
 class ResourceType(StrEnum):

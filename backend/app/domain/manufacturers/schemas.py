@@ -1,17 +1,18 @@
 from datetime import datetime
 
+from app.platform.actions.schemas import ActionableDetail, ActionableList
 from app.platform.base.schemas import BaseSchema
 from app.utils.sqids import Sqid
 
 
-class ManufacturerListItem(BaseSchema):
+class ManufacturerListItem(ActionableList):
     id: Sqid
     name: str
     country: str | None
     created_at: datetime
 
 
-class ManufacturerDetail(BaseSchema):
+class ManufacturerDetail(ActionableDetail):
     id: Sqid
     name: str
     country: str | None
