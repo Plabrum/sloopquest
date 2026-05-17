@@ -3,7 +3,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { StateMachineKanban } from "@/components/kanban/state-machine-kanban";
 import { StatusBadge } from "@/components/status-badge";
-import { useResourceList } from "@/components/dashboard/data-sources";
+import {
+  findColumn,
+  getPrimaryColumn,
+  getSubColumn,
+  useResourceList,
+} from "@/components/dashboard/data-sources";
+import type { ColumnDefinition } from "@/lib/resource-table-types";
+import { humanize } from "@/lib/utils";
 import type { FilterDefinition } from "@/components/dashboard/types";
 import { useActionsActionGroupObjectIdExecuteObjectAction } from "@/openapi/actions/actions";
 import {
@@ -90,7 +97,7 @@ function ResourceKanbanInner({
     <StateMachineKanban<ResourceRow, string>
       rows={rows}
       getId={(r) => r.id}
-      getName={(r) => formatCell(r[stateMachine.column])}
+      getName={(r) => String(r[stateMachine.column] ?? "")}
       getState={(r) => String(r[stateMachine.column] ?? "")}
       states={visibleStates}
       renderCard={(r) => (
@@ -105,14 +112,15 @@ function ResourceKanbanInner({
           }
         >
           {cols.length === 0 ? (
-            <DefaultCardBody row={r} stateColumn={stateMachine.column} />
+            <DefaultCardBody row={r} resource={resource} stateColumn={stateMachine.column} />
           ) : (
-            cols.map((col) => (
+            cols.map((col, idx) => (
               <CardField
                 key={col}
-                column={col}
-                value={r[col]}
-                isState={col === stateMachine.column}
+                resource={resource}
+                row={r}
+                columnKey={col}
+                isPrimary={idx === 0}
               />
             ))
           )}
@@ -151,18 +159,22 @@ function ResourceKanbanInner({
 
 function DefaultCardBody({
   row,
+  resource,
   stateColumn,
 }: {
   row: ResourceRow;
+  resource: ResourceType;
   stateColumn: string;
 }) {
-  const stateValue = String(row[stateColumn] ?? "");
+  const primary = getPrimaryColumn(resource);
+  const sub = getSubColumn(resource);
+  const subKey = sub?.key === stateColumn ? stateColumn : sub?.key;
   return (
     <>
-      <div className="text-sm font-medium">{formatCell(row.id)}</div>
-      {stateValue && (
+      <div className="text-sm font-medium">{renderCardValue(primary, row)}</div>
+      {subKey && row[subKey] != null && (
         <div className="pt-1">
-          <StatusBadge status={stateValue} />
+          <StatusBadge status={String(row[subKey])} size="sm" />
         </div>
       )}
     </>
@@ -170,36 +182,53 @@ function DefaultCardBody({
 }
 
 function CardField({
-  column,
-  value,
-  isState,
+  resource,
+  row,
+  columnKey,
+  isPrimary,
 }: {
-  column: string;
-  value: unknown;
-  isState: boolean;
+  resource: ResourceType;
+  row: ResourceRow;
+  columnKey: string;
+  isPrimary: boolean;
 }) {
-  if (isState) {
-    const s = String(value ?? "");
-    return s ? (
+  const col = findColumn(resource, columnKey);
+  if (!col || row[columnKey] == null) return null;
+  const isStatus = col.displayType === "status" || col.displayType === "enum";
+  if (isStatus) {
+    return (
       <div className="pt-1">
-        <StatusBadge status={s} />
+        <StatusBadge status={String(row[columnKey])} size="sm" />
       </div>
-    ) : null;
+    );
   }
   return (
-    <div className="text-muted-foreground text-xs">
-      <span className="sr-only">{column}: </span>
-      {formatCell(value)}
+    <div className={isPrimary ? "text-sm font-medium" : "text-muted-foreground text-xs"}>
+      <span className="sr-only">{col.header}: </span>
+      {renderCardValue(col, row)}
     </div>
   );
 }
 
-function formatCell(value: unknown): string {
+// Card-appropriate rendering: extract the display string without the Link
+// wrappers the table renderer adds (the card itself is already a button).
+function renderCardValue(
+  col: ColumnDefinition<Record<string, unknown>>,
+  row: ResourceRow,
+): string {
+  const value = row[col.key];
   if (value == null) return "";
-  if (typeof value === "object" && "label" in value) {
-    return String((value as { label: unknown }).label ?? "");
+  switch (col.displayType) {
+    case "entity":
+      return typeof value === "object" && value && "label" in value
+        ? String((value as { label: unknown }).label ?? "")
+        : String(value);
+    case "enum":
+    case "status":
+      return humanize(String(value));
+    default:
+      return String(value);
   }
-  return String(value);
 }
 
 function applyColumnRules(

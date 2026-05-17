@@ -42,7 +42,7 @@ export function SurveysListPage() {
           />
         ) : (
           <Suspense>
-            <ResourceKanban resource="surveys" />
+            <ResourceKanban resource="surveys" cardColumns={["vessel", "surveyor", "state"]} />
           </Suspense>
         )}
       </div>

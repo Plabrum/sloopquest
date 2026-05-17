@@ -81,6 +81,8 @@ export interface ColumnDefinition<T> {
   key: string;
   header: string;
   render: (item: T) => React.ReactNode;
+  /** Semantic display category used by widgets to pick a primary/sub column. */
+  displayType: ColumnDisplayType;
   sortable?: boolean;
   className?: string;
   hideOnMobile?: boolean;
@@ -89,6 +91,18 @@ export interface ColumnDefinition<T> {
   /** For enum filters: the available values to choose from. */
   filterOptions?: string[];
 }
+
+export type ColumnDisplayType =
+  | "text"
+  | "enum"
+  | "status"
+  | "date"
+  | "datetime"
+  | "number"
+  | "currency"
+  | "boolean"
+  | "duration"
+  | "entity";
 
 /** Aggregate filter state passed to/from ResourceTable */
 export interface FilterState {

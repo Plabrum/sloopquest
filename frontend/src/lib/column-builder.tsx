@@ -1,18 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import type { ColumnDefinition, FilterType } from "@/lib/resource-table-types";
+import { StatusBadge } from "@/components/status-badge";
+import type {
+  ColumnDefinition,
+  ColumnDisplayType,
+  FilterType,
+} from "@/lib/resource-table-types";
 import { humanize } from "@/lib/utils";
 
-export type DisplayType =
-  | "text"
-  | "enum"
-  | "status"
-  | "date"
-  | "datetime"
-  | "number"
-  | "currency"
-  | "boolean"
-  | "duration"
-  | "entity";
+export type DisplayType = ColumnDisplayType;
 
 const DISPLAY_TO_FILTER: Record<DisplayType, FilterType | undefined> = {
   text: "text",
@@ -92,6 +87,7 @@ function defaultRenderer<T>(entry: ColumnEntry<T>): (item: T) => React.ReactNode
 
     switch (displayType) {
       case "status":
+        return <StatusBadge status={String(value)} size="sm" />;
       case "enum":
         return <span className="block truncate">{humanize(String(value))}</span>;
       case "date":
@@ -210,6 +206,7 @@ export class ColumnBuilder<T> {
     return this.entries.map((entry) => ({
       key: entry.key,
       header: entry.config.header,
+      displayType: entry.displayType,
       sortable: entry.config.sortable,
       className: entry.config.className,
       hideOnMobile: entry.config.hideOnMobile,

@@ -1,5 +1,5 @@
 import type { WidgetRead } from "../types";
-import { getResourceMeta, useResourceList } from "../data-sources";
+import { getPrimaryColumn, getSubColumn, useResourceList } from "../data-sources";
 
 export function ChildListWidget({ widget }: { widget: WidgetRead }) {
   const { data } = useResourceList(
@@ -9,7 +9,8 @@ export function ChildListWidget({ widget }: { widget: WidgetRead }) {
   );
 
   const items = data.items ?? [];
-  const { labelField, subField } = getResourceMeta(widget.query.resource);
+  const primary = getPrimaryColumn(widget.query.resource);
+  const sub = getSubColumn(widget.query.resource);
 
   return (
     <div className="rounded-[var(--radius-lg)] border border-border bg-card overflow-hidden">
@@ -27,13 +28,11 @@ export function ChildListWidget({ widget }: { widget: WidgetRead }) {
               key={String(item.id ?? i)}
               className="flex items-center justify-between px-5 py-2.5 transition-colors hover:bg-muted/30"
             >
-              <p className="truncate text-sm">
-                {String(item[labelField] ?? item.id ?? "—")}
-              </p>
-              {item[subField] !== undefined && item[subField] !== null && (
-                <span className="ml-3 shrink-0 text-xs tabular-nums text-muted-foreground">
-                  {String(item[subField])}
-                </span>
+              <div className="truncate text-sm">{primary.render(item)}</div>
+              {sub && item[sub.key] != null && (
+                <div className="ml-3 shrink-0 text-xs tabular-nums text-muted-foreground">
+                  {sub.render(item)}
+                </div>
               )}
             </div>
           ))}
