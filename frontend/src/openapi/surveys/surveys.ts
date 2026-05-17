@@ -27,6 +27,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AdHocSuggestionsResponse,
   DataSchemaResponse,
   DataSurvey400,
   TimeSeriesDataRequest,
@@ -238,6 +239,153 @@ export function useDataSchemaSurveySuspense<TData = Awaited<ReturnType<typeof da
  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getDataSchemaSurveySuspenseQueryOptions(options)
+
+  const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+/**
+ * @summary ListAdHocSuggestions
+ */
+export const surveysAdHocSuggestionsListAdHocSuggestions = (
+    
+ signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<AdHocSuggestionsResponse>(
+      {url: `/surveys/ad-hoc-suggestions`, method: 'GET', signal
+    },
+      );
+    }
+  
+
+
+
+export const getSurveysAdHocSuggestionsListAdHocSuggestionsQueryKey = () => {
+    return [
+    `/surveys/ad-hoc-suggestions`
+    ] as const;
+    }
+
+    
+export const getSurveysAdHocSuggestionsListAdHocSuggestionsQueryOptions = <TData = Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getSurveysAdHocSuggestionsListAdHocSuggestionsQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>> = ({ signal }) => surveysAdHocSuggestionsListAdHocSuggestions(signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type SurveysAdHocSuggestionsListAdHocSuggestionsQueryResult = NonNullable<Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>>
+export type SurveysAdHocSuggestionsListAdHocSuggestionsQueryError = unknown
+
+
+export function useSurveysAdHocSuggestionsListAdHocSuggestions<TData = Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>,
+          TError,
+          Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSurveysAdHocSuggestionsListAdHocSuggestions<TData = Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>,
+          TError,
+          Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSurveysAdHocSuggestionsListAdHocSuggestions<TData = Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary ListAdHocSuggestions
+ */
+
+export function useSurveysAdHocSuggestionsListAdHocSuggestions<TData = Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getSurveysAdHocSuggestionsListAdHocSuggestionsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+export const getSurveysAdHocSuggestionsListAdHocSuggestionsSuspenseQueryOptions = <TData = Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>, TError = unknown>( options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getSurveysAdHocSuggestionsListAdHocSuggestionsQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>> = ({ signal }) => surveysAdHocSuggestionsListAdHocSuggestions(signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseSuspenseQueryOptions<Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type SurveysAdHocSuggestionsListAdHocSuggestionsSuspenseQueryResult = NonNullable<Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>>
+export type SurveysAdHocSuggestionsListAdHocSuggestionsSuspenseQueryError = unknown
+
+
+export function useSurveysAdHocSuggestionsListAdHocSuggestionsSuspense<TData = Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>, TError = unknown>(
+  options: { query:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSurveysAdHocSuggestionsListAdHocSuggestionsSuspense<TData = Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>, TError = unknown>(
+  options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSurveysAdHocSuggestionsListAdHocSuggestionsSuspense<TData = Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>, TError = unknown>(
+  options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary ListAdHocSuggestions
+ */
+
+export function useSurveysAdHocSuggestionsListAdHocSuggestionsSuspense<TData = Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>, TError = unknown>(
+  options?: { query?:Partial<UseSuspenseQueryOptions<Awaited<ReturnType<typeof surveysAdHocSuggestionsListAdHocSuggestions>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getSurveysAdHocSuggestionsListAdHocSuggestionsSuspenseQueryOptions(options)
 
   const query = useSuspenseQuery(queryOptions, queryClient) as  UseSuspenseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

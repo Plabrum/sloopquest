@@ -22,6 +22,6 @@ export const SurveyMediaSortableColumn = {
 } as const;
 
 export const SurveyMediaFilterableColumn = {
-  field_id: 'field_id',
+  node_id: 'node_id',
   survey_id: 'survey_id',
 } as const;
