@@ -154,7 +154,7 @@ module "vercel_web" {
 
   name              = "${var.project_name}-web"
   framework         = "vite"
-  root_directory    = "web"
+  root_directory    = "frontend"
   github_repo       = var.github_repo
   production_branch = var.production_branch
   team_id           = var.vercel_team_id
