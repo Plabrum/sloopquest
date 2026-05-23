@@ -2144,6 +2144,7 @@ export interface Section {
   id: string;
   title: string;
   condition?: SectionCondition;
+  fields?: FieldDef[];
   subsections?: Subsection[];
 }
 
@@ -2394,7 +2395,6 @@ export interface SwitchRoleBody {
 
 export interface TemplateDefinition {
   version?: number;
-  survey_metadata_fields?: FieldDef[];
   sections?: Section[];
 }
 

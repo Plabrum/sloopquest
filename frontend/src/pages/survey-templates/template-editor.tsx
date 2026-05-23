@@ -43,7 +43,6 @@ const FIELD_TYPES = [
 
 type EditableTemplate = TemplateDefinition & {
   sections: Section[];
-  survey_metadata_fields: FieldDef[];
 };
 
 function clone<T>(x: T): T {
@@ -57,7 +56,6 @@ function randomId(prefix: string): string {
 function normalizeDefinition(def: TemplateDefinition): EditableTemplate {
   return {
     version: def.version ?? 1,
-    survey_metadata_fields: def.survey_metadata_fields ?? [],
     sections: def.sections ?? [],
   };
 }
@@ -98,6 +96,7 @@ export function TemplateEditor({ template }: { template: SurveyTemplateDetail })
     next.sections.push({
       id: randomId("sec"),
       title: "New section",
+      fields: [],
       subsections: [],
     });
     update(next);
@@ -197,6 +196,41 @@ function SectionEditor({
         <Button variant="ghost" size="sm" onClick={onRemove}>Remove</Button>
       </div>
       <div className="space-y-2 pl-4">
+        <div className="space-y-2">
+          {(section.fields ?? []).map((field, idx) => (
+            <FieldEditor
+              key={field.id}
+              field={field}
+              onChange={(mutator) =>
+                onChange((s) => {
+                  if (!s.fields) s.fields = [];
+                  mutator(s.fields[idx]);
+                })
+              }
+              onRemove={() =>
+                onChange((s) => {
+                  s.fields?.splice(idx, 1);
+                })
+              }
+            />
+          ))}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() =>
+              onChange((s) => {
+                if (!s.fields) s.fields = [];
+                s.fields.push({
+                  id: randomId("fld"),
+                  label: "New field",
+                  type: "text",
+                });
+              })
+            }
+          >
+            + Add field
+          </Button>
+        </div>
         {(section.subsections ?? []).map((sub, idx) => (
           <SubsectionEditor
             key={sub.id}

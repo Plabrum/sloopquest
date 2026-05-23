@@ -41,7 +41,7 @@ export function PageTopBar({ title, state, actions, fallback, children }: PageTo
 
   return (
     <>
-      <header className="relative flex h-14 shrink-0 items-center justify-between border-b border-sidebar-border bg-sidebar px-6">
+      <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-sidebar-border bg-sidebar px-6">
         <div className="flex items-center gap-3">
           <SidebarTrigger className="-ml-1 text-sidebar-foreground/50 hover:text-sidebar-foreground" />
           <Breadcrumb>

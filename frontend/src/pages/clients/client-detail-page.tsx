@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { useParams } from "@tanstack/react-router";
 import { PageTopBar } from "@/components/layout/page-topbar";
 import { KeyValueGrid } from "@/components/layout/key-value-grid";
-import { ActionsMenu } from "@/components/actions-menu";
+import { ObjectActions } from "@/components/object-detail/object-actions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClientsIdDetailHandlerSuspense } from "@/openapi/client/client";
 import { useActionsActionGroupObjectIdListObjectActions } from "@/openapi/actions/actions";
@@ -17,12 +17,10 @@ function ClientDetailContent() {
     <PageTopBar
       title={data.display_name}
       actions={
-        <ActionsMenu
-          actions={actionsData?.actions ?? []}
+        <ObjectActions
+          data={{ ...data, actions: actionsData?.actions ?? [] }}
           actionGroup="client_actions"
-          objectId={clientId}
-          objectData={data}
-          onActionComplete={() => refetchActions()}
+          onRefetch={() => refetchActions()}
         />
       }
     >

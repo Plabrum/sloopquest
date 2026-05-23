@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -24,14 +23,22 @@ function fieldDef(node: FormNodeRef): FieldDef {
   return (node.config ?? { type: "text", label: node.label }) as FieldDef;
 }
 
+function pad2(n: number): string {
+  return n.toString().padStart(2, "0");
+}
+
 export function FieldCard({
   node,
+  fieldIndex,
+  fieldTotal,
   onSave,
-  isSaving,
+  photoActionRow,
 }: {
   node: FormNodeRef;
+  fieldIndex: number;
+  fieldTotal: number;
   onSave: (value: unknown) => Promise<void> | void;
-  isSaving: boolean;
+  photoActionRow?: ReactNode;
 }) {
   const def = fieldDef(node);
   const [draft, setDraft] = useState<unknown>(node.value ?? "");
@@ -52,12 +59,18 @@ export function FieldCard({
 
   return (
     <div className="rounded-2xl border bg-white p-4 shadow-sm">
-      <Label className="mb-1 block text-sm font-medium">
-        {def.label}
-        {def.required && <span className="ml-1 text-red-500">*</span>}
-        {isSaving && <span className="ml-2 text-xs text-muted-foreground">saving…</span>}
-      </Label>
+      <div className="mb-2 flex items-baseline justify-between gap-3">
+        <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+          Field {pad2(fieldIndex + 1)}
+          {fieldTotal > 0 ? ` of ${pad2(fieldTotal)}` : ""}
+        </span>
+        <span className="text-sm font-medium">
+          {def.label}
+          {def.required && <span className="ml-1 text-red-500">*</span>}
+        </span>
+      </div>
       {renderInput()}
+      {photoActionRow && <div className="mt-2">{photoActionRow}</div>}
     </div>
   );
 

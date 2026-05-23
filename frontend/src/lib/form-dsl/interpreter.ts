@@ -29,8 +29,8 @@ function setDefault(
 
 export function iterateFields(definition: FormDefinition): FormField[] {
   const out: FormField[] = [];
-  for (const meta of definition.survey_metadata_fields ?? []) out.push(meta);
   for (const section of definition.sections ?? []) {
+    for (const field of section.fields ?? []) out.push(field);
     for (const sub of section.subsections ?? []) {
       for (const field of sub.fields ?? []) out.push(field);
     }

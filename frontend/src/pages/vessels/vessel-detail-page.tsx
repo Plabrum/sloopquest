@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { useParams } from "@tanstack/react-router";
 import { PageTopBar } from "@/components/layout/page-topbar";
 import { KeyValueGrid } from "@/components/layout/key-value-grid";
-import { ActionsMenu } from "@/components/actions-menu";
+import { ObjectActions } from "@/components/object-detail/object-actions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useVesselsIdDetailHandlerSuspense } from "@/openapi/vessel/vessel";
 import { useActionsActionGroupObjectIdListObjectActions } from "@/openapi/actions/actions";
@@ -17,12 +17,10 @@ function VesselDetailContent() {
     <PageTopBar
       title={data.name}
       actions={
-        <ActionsMenu
-          actions={actionsData?.actions ?? []}
+        <ObjectActions
+          data={{ ...data, actions: actionsData?.actions ?? [] }}
           actionGroup="vessel_actions"
-          objectId={vesselId}
-          objectData={data}
-          onActionComplete={() => refetchActions()}
+          onRefetch={() => refetchActions()}
         />
       }
     >

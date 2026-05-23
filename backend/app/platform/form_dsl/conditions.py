@@ -35,9 +35,7 @@ def resolve_visibility(nodes: Iterable[FormNode]) -> dict[int, bool]:
     Nodes without a condition are omitted (caller treats absence as visible).
     """
     by_schema_ref: dict[str, FormNode] = {
-        n.schema_ref: n
-        for n in nodes
-        if n.kind == FormNodeKind.field and n.schema_ref is not None and n.parent_id is None
+        n.schema_ref: n for n in nodes if n.kind == FormNodeKind.field and n.schema_ref is not None
     }
 
     visibility: dict[int, bool] = {}

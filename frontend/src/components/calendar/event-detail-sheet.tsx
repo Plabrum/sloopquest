@@ -3,7 +3,7 @@ import { format, parseISO } from "date-fns";
 import { X } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { ActionsMenu } from "@/components/actions-menu";
+import { ObjectActions } from "@/components/object-detail/object-actions";
 import {
   EventFormBody,
   addressToInput,
@@ -121,21 +121,16 @@ function EventDetailContent({ eventId, onClose }: { eventId: string; onClose: ()
             disabled={execute.isPending}
           />
         )}
-        <ActionsMenu
-          actions={otherActions}
+        <ObjectActions
+          data={{ ...event, actions: otherActions }}
           actionGroup="calendar_event_actions"
-          objectId={event.id}
-          objectData={event}
-          onActionComplete={() => {
+          onActionComplete={(action) => {
             queryClient.invalidateQueries({
               queryKey: getCalendarEventsIdDetailHandlerQueryKey(eventId),
             });
             queryClient.invalidateQueries({ queryKey: ["/calendar-events"] });
             refetchActions();
-            const wasDeleted = otherActions.some(
-              (a) => a.action.endsWith("__delete"),
-            );
-            if (wasDeleted) onClose();
+            if (action.action.endsWith("__delete")) onClose();
           }}
         />
       </div>

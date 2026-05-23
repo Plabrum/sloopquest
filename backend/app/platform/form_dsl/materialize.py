@@ -25,20 +25,21 @@ async def materialize_form_response(
 
     defn = definition if isinstance(definition, TemplateDefinition) else msgspec.convert(definition, TemplateDefinition)
 
-    order = 0
-    for field in defn.survey_metadata_fields:
-        transaction.add(_field_node(owner, owner_type, parent_id=None, field=field, sort_order=order))
-        order += 1
-
     for section_index, section in enumerate(defn.sections):
         section_node = _section_node(owner, owner_type, section=section, sort_order=section_index)
         transaction.add(section_node)
         await transaction.flush()
 
-        for sub_index, sub in enumerate(section.subsections):
-            sub_node = _subsection_node(owner, owner_type, parent_id=section_node.id, sub=sub, sort_order=sub_index)
+        order = 0
+        for field in section.fields:
+            transaction.add(_field_node(owner, owner_type, parent_id=section_node.id, field=field, sort_order=order))
+            order += 1
+
+        for sub in section.subsections:
+            sub_node = _subsection_node(owner, owner_type, parent_id=section_node.id, sub=sub, sort_order=order)
             transaction.add(sub_node)
             await transaction.flush()
+            order += 1
 
             for field_index, field in enumerate(sub.fields):
                 transaction.add(

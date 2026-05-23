@@ -54,10 +54,10 @@ class Section(BaseSchema):
     id: str
     title: str
     condition: FieldCondition | None = None
+    fields: list[FieldDef] = []
     subsections: list[Subsection] = []
 
 
 class TemplateDefinition(BaseSchema):
     version: int = 1
-    survey_metadata_fields: list[FieldDef] = []
     sections: list[Section] = []

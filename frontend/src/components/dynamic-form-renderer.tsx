@@ -45,25 +45,11 @@ export function DynamicFormRenderer({ surveyId, templateId, existingResponse }: 
     });
   }
 
-  const metadataFields = definition.survey_metadata_fields ?? [];
   const sections = definition.sections ?? [];
 
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
-        {metadataFields.length > 0 && (
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Survey details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {metadataFields.map((field) => (
-                <ConditionalField key={field.id} field={field} surveyId={surveyId} />
-              ))}
-            </CardContent>
-          </Card>
-        )}
-
         {sections.map((section) => (
           <ConditionalSection key={section.id} condition={section.condition ?? null}>
             <Card>
@@ -71,6 +57,9 @@ export function DynamicFormRenderer({ surveyId, templateId, existingResponse }: 
                 <CardTitle className="text-base">{section.title}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
+                {(section.fields ?? []).map((field) => (
+                  <ConditionalField key={field.id} field={field} surveyId={surveyId} />
+                ))}
                 {(section.subsections ?? []).map((sub) => (
                   <div key={sub.id} className="space-y-3">
                     {sub.title && (

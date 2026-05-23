@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { useParams } from "@tanstack/react-router";
 import { PageTopBar } from "@/components/layout/page-topbar";
 import { KeyValueGrid } from "@/components/layout/key-value-grid";
-import { ActionsMenu } from "@/components/actions-menu";
+import { ObjectActions } from "@/components/object-detail/object-actions";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -25,12 +25,10 @@ function PricingGuideDetailContent() {
     <PageTopBar
       title={data.name}
       actions={
-        <ActionsMenu
-          actions={actionsData?.actions ?? []}
+        <ObjectActions
+          data={{ ...data, actions: actionsData?.actions ?? [] }}
           actionGroup="pricing_guide_actions"
-          objectId={guideId}
-          objectData={data}
-          onActionComplete={() => refetchActions()}
+          onRefetch={() => refetchActions()}
         />
       }
     >

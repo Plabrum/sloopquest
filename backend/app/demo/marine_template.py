@@ -21,42 +21,46 @@ from app.platform.form_dsl.schema import (
 def marine_template() -> TemplateDefinition:
     return TemplateDefinition(
         version=1,
-        survey_metadata_fields=[
-            FieldDef(
-                id="survey_type",
-                label="Survey type",
-                type=FieldType.SEGMENTED,
-                required=True,
-                allow_finding=False,
-                config={"options": ["pre_purchase", "insurance", "appraisal"]},
-            ),
-            FieldDef(
-                id="overall_rating",
-                label="Overall rating",
-                type=FieldType.SELECT,
-                allow_finding=False,
-                config={"options": ["above_average", "average", "below_average"]},
-            ),
-            FieldDef(
-                id="market_value",
-                label="Market value (USD)",
-                type=FieldType.CURRENCY,
-                allow_finding=False,
-            ),
-            FieldDef(
-                id="in_water",
-                label="Surveyed in water",
-                type=FieldType.BOOLEAN,
-                allow_finding=False,
-            ),
-            FieldDef(
-                id="sea_trial",
-                label="Sea trial performed",
-                type=FieldType.BOOLEAN,
-                allow_finding=False,
-            ),
-        ],
         sections=[
+            Section(
+                id="survey_info",
+                title="Survey info",
+                fields=[
+                    FieldDef(
+                        id="survey_type",
+                        label="Survey type",
+                        type=FieldType.SEGMENTED,
+                        required=True,
+                        allow_finding=False,
+                        config={"options": ["pre_purchase", "insurance", "appraisal"]},
+                    ),
+                    FieldDef(
+                        id="overall_rating",
+                        label="Overall rating",
+                        type=FieldType.SELECT,
+                        allow_finding=False,
+                        config={"options": ["above_average", "average", "below_average"]},
+                    ),
+                    FieldDef(
+                        id="market_value",
+                        label="Market value (USD)",
+                        type=FieldType.CURRENCY,
+                        allow_finding=False,
+                    ),
+                    FieldDef(
+                        id="in_water",
+                        label="Surveyed in water",
+                        type=FieldType.BOOLEAN,
+                        allow_finding=False,
+                    ),
+                    FieldDef(
+                        id="sea_trial",
+                        label="Sea trial performed",
+                        type=FieldType.BOOLEAN,
+                        allow_finding=False,
+                    ),
+                ],
+            ),
             Section(
                 id="hull_bottom",
                 title="Hull & Bottom",
