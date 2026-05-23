@@ -1,4 +1,4 @@
-import { createRoute } from "@tanstack/react-router";
+import { createRoute, redirect } from "@tanstack/react-router";
 import { authenticatedLayoutRoute } from "@/router/layout.routes";
 import { DashboardPage } from "@/pages/dashboard-page";
 import { InboxPage } from "@/pages/inbox/inbox-page";
@@ -21,7 +21,6 @@ import { BillingPage } from "@/pages/settings/billing-page";
 import { ConnectOnboardingPage } from "@/pages/settings/connect-onboarding-page";
 import { QuotesListPage } from "@/pages/crm/quotes-list-page";
 import { PricingGuideDetailPage } from "@/pages/pricing-guides/pricing-guide-detail-page";
-import { CalendarPage } from "@/pages/calendar/calendar-page";
 import { isCalendarView } from "@/components/calendar/types";
 
 export const indexRoute = createRoute({
@@ -41,18 +40,37 @@ export const searchRoute = createRoute({
 });
 
 export type InboxView = "all" | "unread" | "sent" | "archived";
+export type InboxMode = "mail" | "calendar";
+
+export interface InboxSearch {
+  mode?: InboxMode;
+  view?: InboxView;
+  thread?: string;
+  calendarView?: "month" | "week" | "day";
+  date?: string;
+  event?: string;
+  creating?: boolean;
+}
 
 export const inboxRoute = createRoute({
   getParentRoute: () => authenticatedLayoutRoute,
   path: "/inbox",
-  validateSearch: (search: Record<string, unknown>): { view?: InboxView; thread?: string } => {
+  validateSearch: (search: Record<string, unknown>): InboxSearch => {
     const rawView = search.view;
     const view: InboxView | undefined =
       rawView === "unread" || rawView === "sent" || rawView === "archived" || rawView === "all"
         ? rawView
         : undefined;
-    const thread = typeof search.thread === "string" ? search.thread : undefined;
-    return { view, thread };
+    const mode: InboxMode | undefined = search.mode === "calendar" ? "calendar" : undefined;
+    return {
+      mode,
+      view,
+      thread: typeof search.thread === "string" ? search.thread : undefined,
+      calendarView: isCalendarView(search.calendarView) ? search.calendarView : undefined,
+      date: typeof search.date === "string" ? search.date : undefined,
+      event: typeof search.event === "string" ? search.event : undefined,
+      creating: search.creating === true ? true : undefined,
+    };
   },
   component: InboxPage,
 });
@@ -206,7 +224,19 @@ export const calendarRoute = createRoute({
     event: typeof search.event === "string" ? search.event : undefined,
     creating: search.creating === true ? true : undefined,
   }),
-  component: CalendarPage,
+  beforeLoad: ({ search }) => {
+    throw redirect({
+      to: "/inbox",
+      search: {
+        mode: "calendar",
+        calendarView: search.view,
+        date: search.date,
+        event: search.event,
+        creating: search.creating,
+      },
+    });
+  },
+  component: () => null,
 });
 
 export const settingsRoute = createRoute({
