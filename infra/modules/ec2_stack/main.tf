@@ -8,8 +8,8 @@ locals {
   }
 }
 
-# ── AMI ───────────────────────────────────────────────────────────────────────
-# Amazon Linux 2023 x86_64 — matches the linux/amd64 CI build target
+# -- AMI -----------------------------------------------------------------------
+# Amazon Linux 2023 x86_64 - matches the linux/amd64 CI build target
 
 data "aws_ami" "al2023" {
   most_recent = true
@@ -26,7 +26,7 @@ data "aws_ami" "al2023" {
   }
 }
 
-# ── S3 ────────────────────────────────────────────────────────────────────────
+# -- S3 ------------------------------------------------------------------------
 
 resource "random_id" "bucket_suffix" {
   byte_length = 4
@@ -42,13 +42,13 @@ module "media" {
   lifecycle_pending_expiry_days = 1
 }
 
-# ── Secrets Manager ───────────────────────────────────────────────────────────
+# -- Secrets Manager -----------------------------------------------------------
 # Populate after first apply: aws secretsmanager put-secret-value --secret-id <arn> --secret-string '{"SECRET_KEY":"..."}'
 # deploy.sh refreshes from here on every deploy.
 
 resource "aws_secretsmanager_secret" "app" {
   name                    = "${local.name}-app-secrets"
-  description             = "Sloopquest ${var.environment} secrets — populate manually after first apply"
+  description             = "Sloopquest ${var.environment} secrets - populate manually after first apply"
   recovery_window_in_days = var.environment == "production" ? 7 : 0
 
   tags = { Name = "${local.name}-app-secrets" }
@@ -68,17 +68,17 @@ resource "aws_secretsmanager_secret_version" "app" {
   }
 }
 
-# ── SES ───────────────────────────────────────────────────────────────────────
+# -- SES -----------------------------------------------------------------------
 
 resource "aws_ses_configuration_set" "main" {
   name = "${local.name}-ses"
 }
 
-# ── Security group ────────────────────────────────────────────────────────────
+# -- Security group ------------------------------------------------------------
 
 resource "aws_security_group" "app" {
   name        = "${local.name}-app"
-  description = "${local.name} EC2 — HTTP/HTTPS public, SSH restricted"
+  description = "${local.name} EC2 - HTTP/HTTPS public, SSH restricted"
 
   ingress {
     description = "HTTP (Caddy ACME + redirect)"
@@ -117,7 +117,7 @@ resource "aws_security_group" "app" {
   tags = merge(local.common_tags, { Name = "${local.name}-app" })
 }
 
-# ── IAM ───────────────────────────────────────────────────────────────────────
+# -- IAM -----------------------------------------------------------------------
 
 resource "aws_iam_role" "app" {
   name = "${local.name}-ec2"
@@ -191,7 +191,7 @@ resource "aws_iam_instance_profile" "app" {
   role = aws_iam_role.app.name
 }
 
-# ── EC2 instance ──────────────────────────────────────────────────────────────
+# -- EC2 instance --------------------------------------------------------------
 
 resource "aws_instance" "app" {
   ami                    = data.aws_ami.al2023.id
@@ -230,14 +230,14 @@ resource "aws_instance" "app" {
 
   tags = merge(local.common_tags, { Name = "${local.name}-app" })
 
-  # user_data only runs at first boot — replace instance if it changes
+  # user_data only runs at first boot - replace instance if it changes
   lifecycle {
     create_before_destroy = true
     prevent_destroy       = true
   }
 }
 
-# ── Route53 ───────────────────────────────────────────────────────────────────
+# -- Route53 -------------------------------------------------------------------
 # NOTE: uses the instance's ephemeral public IP.
 # If the instance is stopped (not just rebooted), run terraform apply after
 # restart to update this record to the new IP.

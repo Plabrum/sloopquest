@@ -4,9 +4,9 @@ locals {
   az_count = min(length(data.aws_availability_zones.available.names), length(var.public_subnet_cidrs))
 }
 
-# ══════════════════════════════════════════════════════════════════════════════
+# -
 # VPC
-# ══════════════════════════════════════════════════════════════════════════════
+# -
 
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
@@ -20,7 +20,7 @@ resource "aws_internet_gateway" "main" {
   tags   = { Name = "${var.name}-igw" }
 }
 
-# Public subnets — ALB + ECS tasks (saves NAT Gateway cost ~$87/mo)
+# Public subnets - ALB + ECS tasks (saves NAT Gateway cost ~$87/mo)
 resource "aws_subnet" "public" {
   count                   = local.az_count
   vpc_id                  = aws_vpc.main.id
@@ -30,7 +30,7 @@ resource "aws_subnet" "public" {
   tags                    = { Name = "${var.name}-public-${count.index + 1}" }
 }
 
-# Private subnets — Aurora + ElastiCache only
+# Private subnets - Aurora + ElastiCache only
 resource "aws_subnet" "private" {
   count             = local.az_count
   vpc_id            = aws_vpc.main.id
@@ -65,7 +65,7 @@ resource "aws_route_table_association" "private" {
   route_table_id = aws_route_table.private.id
 }
 
-# ── VPC Endpoints (enables ECS Exec via Session Manager without NAT) ──────────
+# -- VPC Endpoints (enables ECS Exec via Session Manager without NAT) ----------
 
 resource "aws_vpc_endpoint" "ssm" {
   vpc_id              = aws_vpc.main.id
@@ -105,9 +105,9 @@ resource "aws_vpc_endpoint" "s3" {
   tags              = { Name = "${var.name}-s3-endpoint" }
 }
 
-# ══════════════════════════════════════════════════════════════════════════════
+# -
 # SECURITY GROUPS
-# ══════════════════════════════════════════════════════════════════════════════
+# -
 
 resource "aws_security_group" "alb" {
   name        = "${var.name}-alb-sg"

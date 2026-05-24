@@ -1,5 +1,5 @@
 variable "project_name" {
-  description = "Project name — used as a prefix for all resource names"
+  description = "Project name - used as a prefix for all resource names"
   type        = string
   default     = "sloopquest"
 }
@@ -26,7 +26,7 @@ variable "deploy_target" {
   }
 }
 
-# ── EC2-specific (deploy_target = "ec2") ──────────────────────────────────────
+# -- EC2-specific (deploy_target = "ec2") --------------------------------------
 
 variable "instance_type" {
   description = "EC2 instance type"
@@ -71,7 +71,7 @@ variable "image_tag" {
 }
 
 variable "db_password" {
-  description = "PostgreSQL master password — rotate via Secrets Manager after first deploy"
+  description = "PostgreSQL master password - rotate via Secrets Manager after first deploy"
   type        = string
   sensitive   = true
 }
@@ -82,16 +82,16 @@ variable "extra_env" {
   default     = {}
 }
 
-# ── Vercel ─────────────────────────────────────────────────────────────────────
+# -- Vercel ---------------------------------------------------------------------
 
 variable "vercel_api_token" {
-  description = "Vercel API token — generate at vercel.com/account/tokens"
+  description = "Vercel API token - generate at vercel.com/account/tokens"
   type        = string
   sensitive   = true
 }
 
 variable "vercel_team_id" {
-  description = "Vercel team ID — leave blank for personal accounts"
+  description = "Vercel team ID - leave blank for personal accounts"
   type        = string
   default     = ""
 }
@@ -108,10 +108,10 @@ variable "production_branch" {
   default     = "main"
 }
 
-# ── BetterStack ────────────────────────────────────────────────────────────────
+# -- BetterStack ----------------------------------------------------------------
 
 variable "logtail_api_token" {
-  description = "BetterStack personal API token — from account settings"
+  description = "BetterStack personal API token - from account settings"
   type        = string
   sensitive   = true
 }

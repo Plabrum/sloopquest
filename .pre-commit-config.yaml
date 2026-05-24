@@ -16,6 +16,14 @@ repos:
 
   - repo: local
     hooks:
+      - id: terraform-ascii-only
+        name: terraform no non-ASCII (AWS rejects em/en dashes)
+        language: system
+        entry: scripts/check-tf-ascii.sh
+        files: ^infra/.*\.tf$
+
+  - repo: local
+    hooks:
       - id: semgrep
         name: semgrep (custom rules)
         language: system

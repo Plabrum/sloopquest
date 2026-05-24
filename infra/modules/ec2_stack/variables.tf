@@ -1,4 +1,4 @@
-# Base variables — identical interface to app_stack for easy switching
+# Base variables - identical interface to app_stack for easy switching
 variable "project_name" { type = string }
 variable "environment" { type = string }
 variable "aws_region" { type = string }
@@ -52,7 +52,7 @@ variable "betterstack_otlp_source_token" {
   sensitive = true
 }
 
-# ── EC2-specific ──────────────────────────────────────────────────────────────
+# -- EC2-specific --------------------------------------------------------------
 
 variable "instance_type" {
   description = "t3.small (2 vCPU, 2 GB) comfortably runs postgres+redis+api+worker"

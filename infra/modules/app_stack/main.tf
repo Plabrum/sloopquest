@@ -16,9 +16,9 @@ resource "random_id" "bucket_suffix" {
   byte_length = 4
 }
 
-# ══════════════════════════════════════════════════════════════════════════════
+# -
 # NETWORKING
-# ══════════════════════════════════════════════════════════════════════════════
+# -
 
 module "networking" {
   source = "../networking"
@@ -31,9 +31,9 @@ module "networking" {
   tags                 = local.common_tags
 }
 
-# ══════════════════════════════════════════════════════════════════════════════
+# -
 # S3 STORAGE
-# ══════════════════════════════════════════════════════════════════════════════
+# -
 
 module "media" {
   source = "../s3_bucket"
@@ -62,9 +62,9 @@ module "inbound_emails" {
   }]
 }
 
-# ══════════════════════════════════════════════════════════════════════════════
+# -
 # AURORA SERVERLESS V2
-# ══════════════════════════════════════════════════════════════════════════════
+# -
 
 resource "aws_db_subnet_group" "main" {
   name       = "${local.name}-db-subnet-group"
@@ -127,9 +127,9 @@ resource "aws_rds_cluster_instance" "main" {
   tags = { Name = "${local.name}-aurora-instance" }
 }
 
-# ══════════════════════════════════════════════════════════════════════════════
+# -
 # SECRETS MANAGER
-# ══════════════════════════════════════════════════════════════════════════════
+# -
 
 resource "aws_secretsmanager_secret" "app" {
   name                    = "${local.name}-app-secrets"
@@ -149,11 +149,11 @@ resource "aws_secretsmanager_secret_version" "app" {
   }
 }
 
-# ══════════════════════════════════════════════════════════════════════════════
+# -
 # IAM
-# ══════════════════════════════════════════════════════════════════════════════
+# -
 
-# Execution role — ECS control plane (pull images, write logs, read secrets)
+# Execution role - ECS control plane (pull images, write logs, read secrets)
 resource "aws_iam_role" "ecs_task_execution" {
   name = "${local.name}-ecs-task-execution"
   assume_role_policy = jsonencode({
@@ -185,7 +185,7 @@ resource "aws_iam_role_policy" "ecs_task_execution_secrets" {
   })
 }
 
-# Task role — application code permissions at runtime
+# Task role - application code permissions at runtime
 resource "aws_iam_role" "ecs_task" {
   name = "${local.name}-ecs-task"
   assume_role_policy = jsonencode({
@@ -205,7 +205,7 @@ resource "aws_iam_role_policy" "ecs_task" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-      # S3 — media uploads (presigned POST/GET; tagging to clear status=pending lifecycle marker)
+      # S3 - media uploads (presigned POST/GET; tagging to clear status=pending lifecycle marker)
       {
         Effect = "Allow"
         Action = [
@@ -222,7 +222,7 @@ resource "aws_iam_role_policy" "ecs_task" {
           "${module.media.bucket_arn}/*",
         ]
       },
-      # S3 — inbound emails (worker reads raw MIME)
+      # S3 - inbound emails (worker reads raw MIME)
       {
         Effect = "Allow"
         Action = ["s3:GetObject", "s3:PutObject", "s3:ListBucket"]
@@ -237,13 +237,13 @@ resource "aws_iam_role_policy" "ecs_task" {
         Action   = ["secretsmanager:GetSecretValue"]
         Resource = [aws_secretsmanager_secret.app.arn]
       },
-      # SES — outbound email
+      # SES - outbound email
       {
         Effect   = "Allow"
         Action   = ["ses:SendEmail", "ses:SendRawEmail", "ses:SendTemplatedEmail"]
         Resource = ["*"]
       },
-      # SSM Messages — ECS Exec (SSH into tasks via Session Manager)
+      # SSM Messages - ECS Exec (SSH into tasks via Session Manager)
       {
         Effect = "Allow"
         Action = [
@@ -258,18 +258,18 @@ resource "aws_iam_role_policy" "ecs_task" {
   })
 }
 
-# ══════════════════════════════════════════════════════════════════════════════
+# -
 # ECS CLUSTER
-# ══════════════════════════════════════════════════════════════════════════════
+# -
 
 resource "aws_ecs_cluster" "main" {
   name = "${local.name}-cluster"
   tags = { Name = "${local.name}-cluster" }
 }
 
-# ══════════════════════════════════════════════════════════════════════════════
+# -
 # APPLICATION LOAD BALANCER
-# ══════════════════════════════════════════════════════════════════════════════
+# -
 
 resource "aws_lb" "main" {
   name               = "${local.name}-alb"
@@ -333,9 +333,9 @@ resource "aws_lb_listener" "https" {
   }
 }
 
-# ══════════════════════════════════════════════════════════════════════════════
+# -
 # ACM CERTIFICATE + ROUTE53 API RECORD
-# ══════════════════════════════════════════════════════════════════════════════
+# -
 
 resource "aws_acm_certificate" "api" {
   domain_name       = "${var.api_subdomain}.${var.domain}"
@@ -380,9 +380,9 @@ resource "aws_route53_record" "api" {
   }
 }
 
-# ══════════════════════════════════════════════════════════════════════════════
+# -
 # ECS SERVICES
-# ══════════════════════════════════════════════════════════════════════════════
+# -
 
 module "api_service" {
   source = "../ecs_service"
@@ -483,9 +483,9 @@ module "worker_service" {
   tags = local.common_tags
 }
 
-# ══════════════════════════════════════════════════════════════════════════════
+# -
 # ELASTICACHE REDIS
-# ══════════════════════════════════════════════════════════════════════════════
+# -
 
 resource "aws_elasticache_subnet_group" "redis" {
   name       = "${local.name}-redis-subnet-group"
@@ -515,9 +515,9 @@ resource "aws_elasticache_replication_group" "redis" {
   tags = { Name = "${local.name}-redis" }
 }
 
-# ══════════════════════════════════════════════════════════════════════════════
-# SES — PER-ENVIRONMENT
-# ══════════════════════════════════════════════════════════════════════════════
+# -
+# SES - PER-ENVIRONMENT
+# -
 
 resource "aws_ses_configuration_set" "main" {
   name = "${local.name}-ses"
@@ -552,9 +552,9 @@ resource "aws_ses_receipt_rule" "inbound" {
   depends_on = [module.inbound_emails]
 }
 
-# ══════════════════════════════════════════════════════════════════════════════
-# LAMBDA — Inbound email S3→webhook forwarder
-# ══════════════════════════════════════════════════════════════════════════════
+# -
+# LAMBDA - Inbound email S3--webhook forwarder
+# -
 
 data "archive_file" "email_webhook_zip" {
   type        = "zip"

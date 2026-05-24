@@ -52,7 +52,7 @@ resource "logtail_source" "api" {
   platform = "open_telemetry"
 }
 
-# ── EC2 stack (deploy_target = "ec2") ─────────────────────────────────────────
+# -- EC2 stack (deploy_target = "ec2") -----------------------------------------
 
 module "ec2" {
   count  = var.deploy_target == "ec2" ? 1 : 0
@@ -78,7 +78,7 @@ module "ec2" {
   betterstack_otlp_source_token   = logtail_source.api.token
 }
 
-# ── ECS stack (deploy_target = "ecs") ─────────────────────────────────────────
+# -- ECS stack (deploy_target = "ecs") -----------------------------------------
 
 module "ecs" {
   count  = var.deploy_target == "ecs" ? 1 : 0
@@ -100,7 +100,7 @@ module "ecs" {
   betterstack_otlp_source_token   = logtail_source.api.token
 }
 
-# ── Vercel DNS (Route53 side — points domains at Vercel's edge) ───────────────
+# -- Vercel DNS (Route53 side - points domains at Vercel's edge) ---------------
 
 resource "aws_route53_record" "root" {
   zone_id = aws_route53_zone.main.zone_id
@@ -126,7 +126,7 @@ resource "aws_route53_record" "app" {
   records = ["cname.vercel-dns.com"]
 }
 
-# ── Vercel projects ───────────────────────────────────────────────────────────
+# -- Vercel projects -----------------------------------------------------------
 
 module "vercel_landing" {
   source = "./modules/vercel_project"
@@ -170,7 +170,7 @@ module "vercel_web" {
   ]
 }
 
-# ── Outputs ───────────────────────────────────────────────────────────────────
+# -- Outputs -------------------------------------------------------------------
 
 output "deploy_target" {
   description = "Active deploy target"
