@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@600&amp;display=swap');
+      text { font-family: 'Cormorant SC', Georgia, serif; font-weight: 600; }
+    </style>
+  </defs>
+  <rect width="64" height="64" rx="10" fill="#1c1812"/>
+  <text x="32" y="46" font-size="38" text-anchor="middle" fill="#f5f0ea">S<tspan fill="#a07850">Q</tspan></text>
+</svg>

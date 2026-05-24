@@ -1,0 +1,15 @@
+local
+.env
+
+# Terraform
+infra/**/.terraform/
+infra/**/terraform.tfvars
+infra/**/*.tfstate
+infra/**/*.tfstate.*
+infra/**/tfplan
+infra/**/plan_output.txt
+infra/lambda/*.zip
+.vscode/settings.json
+.vscode/settings.json
+.playwright-mcp
+backend/uploads/sloopquest-media/media

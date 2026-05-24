@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "PROJECT_ROOT": "/Users/phil/repos/sloopquest",
+    "PYTHONPATH": "/Users/phil/repos/sloopquest/backend",
+    "NODE_ENV": "development"
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /Users/phil/repos/sloopquest && git diff --name-only --diff-filter=d | grep '\\.py$' | while read -r f; do [ -f \"$f\" ] && (cd backend && uv run ruff format \"$f\" 2>/dev/null && uv run ruff check --fix \"$f\" 2>/dev/null) || true; done; true"
+          },
+          {
+            "type": "command",
+            "command": "cd /Users/phil/repos/sloopquest && git diff --name-only --diff-filter=d -- '*.py' | grep -q . && (cd backend && uv run basedpyright 2>&1 | tail -20) || true; true"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"import json, sys; data=json.load(sys.stdin); path=data.get('tool_input',{}).get('file_path',''); blocked = ['.env', 'package-lock.json', 'pnpm-lock.yaml', 'uv.lock', '.git/', 'node_modules/', '__pycache__/', '.terraform/', 'terraform.tfstate']; sys.exit(2 if any(p in path for p in blocked) else 0)\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"import json, sys; data=json.load(sys.stdin); path=data.get('tool_input',{}).get('file_path',''); reminders=[]; (reminders.append('Routes changed — run just codegen to regenerate frontend API client') if '/routes.py' in path or path.endswith('/routes/__init__.py') else None); (reminders.append('Model changed — run just db-migrate to create a migration') if '/models.py' in path else None); [print(f'Reminder: {r}') for r in reminders]\""
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "linear@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "vercel@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "terraform@claude-plugins-official": true,
+    "playwright@claude-plugins-official": true
+  }
+}
