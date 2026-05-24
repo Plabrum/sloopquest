@@ -19,22 +19,17 @@ export function Lede() {
         {/* Body — magazine lede with drop cap */}
         <div className="col-span-12 md:col-span-9 md:max-w-[820px]">
           <p className="dropcap font-serif text-[22px] leading-[1.5] text-ink md:text-[26px] md:leading-[1.48]">
-            Marine surveying is craft work. A surveyor walks a dock with a
-            moisture meter, a flashlight, and three decades of pattern
-            recognition — then returns to the office to type the whole
-            inspection into a&nbsp;Word document by Friday. Sloopquest is the
-            first workspace built with reverence for what they actually do:
-            capture findings inline, photograph in context, and publish a
-            polished report{" "}
+            Marine surveying is craft work. A surveyor&rsquo;s job is to walk a
+            dock, look closely, and document what they see. Most of the week
+            disappears into the work around it: invoicing, scheduling,
+            writing up the inspection, chasing signatures, getting the report
+            out the door. All of that is taken care of. You observe and
+            document, by hand, by voice, or by keyboard, and{" "}
             <em className="italic text-brass-deep">
-              without ever leaving the document.
+              the rest is automatic.
             </em>
           </p>
 
-          <div className="mt-10 flex items-center gap-4 font-mono text-[10px] uppercase tracking-[0.28em] text-ink-muted">
-            <span className="inline-block h-px w-9 bg-ink-muted/60" />
-            From the editor &middot; Spring 2026
-          </div>
         </div>
       </div>
     </Plate>

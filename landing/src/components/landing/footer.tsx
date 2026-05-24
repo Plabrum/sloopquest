@@ -2,36 +2,19 @@ import Link from "next/link";
 import { AnchorGlyph, Wordmark } from "./marks";
 import { SectionLabel } from "./section-label";
 
+// TODO: build out the Almanac (blog / quarterly field-notes). When we commit
+// to publishing, re-add Field guide / Changelog / Essays entries under it.
 const columns = [
-  {
-    title: "Workspace",
-    links: [
-      { href: "/workspace", label: "The document" },
-      { href: "/templates", label: "Templates" },
-      { href: "/findings", label: "Findings" },
-      { href: "/reports", label: "Reports" },
-      { href: "/ai", label: "AI surveyor" },
-    ],
-  },
   {
     title: "Almanac",
     links: [
-      { href: "/field-guide", label: "Field guide" },
-      { href: "/changelog", label: "Changelog" },
-      { href: "/about", label: "About" },
-      { href: "/careers", label: "Careers" },
+      { href: "/almanac", label: "Field notes" },
       { href: "/contact", label: "Contact" },
     ],
   },
   {
-    title: "Quartermaster",
-    links: [
-      { href: "/pricing", label: "Pricing" },
-      { href: "/api", label: "API" },
-      { href: "/status", label: "Status" },
-      { href: "/security", label: "Security" },
-      { href: "/terms", label: "Terms & privacy" },
-    ],
+    title: "Company",
+    links: [{ href: "/#pricing", label: "Pricing" }],
   },
 ];
 
@@ -42,17 +25,19 @@ export function Footer() {
         {/* Newsletter signup */}
         <div className="grid grid-cols-12 gap-x-10 gap-y-10 border-b border-paper-edge/70 pb-14">
           <div className="col-span-12 md:col-span-7">
-            <SectionLabel title="Field Notes · quarterly" className="mb-4" />
+            <SectionLabel title="The Almanac · blog & newsletter" className="mb-4" />
             <h3 className="fv-display-soft font-display text-[clamp(2rem,4.4vw,3.4rem)] font-light leading-[0.98] tracking-[-0.02em] text-ink">
-              Dispatches from{" "}
+              The{" "}
               <span className="fv-display-italic italic text-brass-deep">
-                the dock.
+                Almanac.
               </span>
             </h3>
             <p className="mt-4 max-w-md font-serif text-[16px] leading-[1.55] text-ink-soft">
-              Four times a year. One letter, hand-set. New templates, product
-              notes, an occasional essay. No tracking, no &ldquo;product
-              updates.&rdquo;
+              Field notes, new templates, the occasional essay.{" "}
+              <Link href="/almanac" className="link-rule italic text-ink hover:text-brass-deep">
+                Read on the web
+              </Link>{" "}
+              or drop your email to get posts when they go out.
             </p>
           </div>
 
@@ -64,7 +49,7 @@ export function Footer() {
               <input
                 id="newsletter"
                 type="email"
-                placeholder="captain@harbor.co"
+                placeholder="you@sloopquest.com"
                 className="flex-1 border border-ink/20 bg-paper-card px-4 py-3 font-serif text-[15px] text-ink placeholder:text-ink-muted/70 focus:border-ink focus:outline-none"
               />
               <button
@@ -77,7 +62,7 @@ export function Footer() {
             </form>
             <p className="mt-3 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-ink-muted">
               <span className="inline-block h-1 w-1 rounded-full bg-moss pulse-dot" />
-              ~1,200 surveyors aboard
+              No tracking. Unsubscribe anytime.
             </p>
           </div>
         </div>
@@ -89,12 +74,12 @@ export function Footer() {
             <p className="max-w-sm font-serif text-[15px] italic leading-[1.55] text-ink-soft">
               A workspace for marine surveyors who care about their craft.
               <br />
-              Hand-bound in Newport, R.I.
+              Built in Newport, R.I.
             </p>
             <div className="mt-6 flex items-center gap-3 text-ink-soft">
               <AnchorGlyph size={26} />
               <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-ink-muted">
-                41&deg;22′N &nbsp;—&nbsp; 70&deg;57′W
+                41&deg;29′N &nbsp;—&nbsp; 71&deg;19′W
               </span>
             </div>
           </div>
@@ -126,15 +111,6 @@ export function Footer() {
             © MMXXVI Sloopquest, Inc. &middot; All soundings honest
           </div>
           <div className="flex items-center gap-5 font-mono text-[10px] uppercase tracking-[0.22em] text-ink-muted">
-            <Link href="#" className="link-grow hover:text-ink">
-              Twitter ↗
-            </Link>
-            <Link href="#" className="link-grow hover:text-ink">
-              GitHub ↗
-            </Link>
-            <Link href="#" className="link-grow hover:text-ink">
-              RSS
-            </Link>
             <span className="flex items-center gap-2">
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-moss" />
               All systems clear

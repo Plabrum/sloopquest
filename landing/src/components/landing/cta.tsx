@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { appUrl } from "@/lib/app-url";
 import { CompassRose } from "./marks";
 import { Plate } from "./plate";
 import { PrimaryButton } from "./primary-button";
@@ -13,7 +13,7 @@ export function Cta() {
         </div>
 
         <div className="relative col-span-12 lg:col-span-9">
-          <SectionLabel numeral="V" title="The Invitation" className="mb-6" />
+          <SectionLabel numeral="VII" title="The Invitation" className="mb-6" />
 
           <h2 className="fv-display-soft font-display text-[clamp(3rem,8vw,7.4rem)] font-light leading-[0.92] tracking-[-0.025em] text-ink">
             Begin a{" "}
@@ -25,20 +25,12 @@ export function Cta() {
           <p className="mt-7 max-w-xl font-serif text-[19px] leading-[1.5] text-ink-soft md:text-[21px]">
             Open the workspace, click{" "}
             <em className="italic text-ink">New survey</em>, and capture your
-            first vessel inside of a minute. The first one is free — no card,
+            first vessel in under a minute. The first one is free. No card,
             no demo call, no &ldquo;book a time.&rdquo;
           </p>
 
           <div className="mt-10 flex flex-col items-start gap-5 sm:flex-row sm:items-center">
-            <PrimaryButton href="/get-started">Open Sloopquest</PrimaryButton>
-
-            <Link
-              href="/sample-report.pdf"
-              className="link-rule inline-flex items-center gap-2 font-serif text-[15px] italic text-ink-soft hover:text-brass-deep"
-            >
-              Or download a sample report
-              <span aria-hidden>↘</span>
-            </Link>
+            <PrimaryButton href={appUrl("/auth")}>Open Sloopquest</PrimaryButton>
           </div>
 
           {/* Tiny details strip */}
@@ -49,7 +41,7 @@ export function Cta() {
             </span>
             <span className="flex items-center gap-2">
               <span className="inline-block h-1 w-1 rounded-full bg-moss" />
-              iPad-ready
+              Works offline
             </span>
             <span className="flex items-center gap-2">
               <span className="inline-block h-1 w-1 rounded-full bg-moss" />

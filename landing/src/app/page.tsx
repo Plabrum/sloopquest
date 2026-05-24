@@ -4,7 +4,9 @@ import { Footer } from "@/components/landing/footer";
 import { Hero } from "@/components/landing/hero";
 import { Lede } from "@/components/landing/lede";
 import { Nav } from "@/components/landing/nav";
+import { Office } from "@/components/landing/office";
 import { Pillars } from "@/components/landing/pillars";
+import { Pricing } from "@/components/landing/pricing";
 import { Specifications } from "@/components/landing/specifications";
 
 export default function HomePage() {
@@ -14,8 +16,10 @@ export default function HomePage() {
       <Hero />
       <Lede />
       <Pillars />
+      <Office />
       <Anatomy />
       <Specifications />
+      <Pricing />
       <Cta />
       <Footer />
     </main>

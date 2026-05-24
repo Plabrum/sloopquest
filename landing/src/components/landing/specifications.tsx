@@ -7,32 +7,35 @@ const specs: Spec[] = [
   {
     k: "Field types",
     v: "14",
-    sub: "text · segmented · select · photo grid · number grid · notes · signature · repeater · …",
+    sub: "text · multiple choice · photo grid · number grid · notes · signature · repeating group · …",
   },
   { k: "Sections", v: "Unlimited", sub: "per template, nesting supported" },
-  { k: "Conditional logic", v: "Yes", sub: "evaluated at runtime, surfaced as skipped placeholders" },
-  { k: "Auto-save", v: "On blur", sub: "every field, no “save section” button" },
+  { k: "Smart sections", v: "Yes", sub: "questions appear and disappear based on prior answers" },
+  { k: "Saving", v: "Automatic", sub: "every field, every time. No save button to remember." },
   {
     k: "Photo capture",
     v: "Camera · Library · Drag",
     sub: "auto-assigned by context, drag from “unassigned”",
   },
-  { k: "Report formats", v: "PDF · HTML · JSON", sub: "branded, sortable, machine-readable" },
-  { k: "Touch-optimized", v: "iPad first", sub: "desktop second — surveyors work standing" },
-  { k: "Offline capture", v: "Q3 MMXXVI", sub: "forthcoming — sync on next dock-side wifi" },
-  { k: "Storage", v: "AES-256, AWS us-east-1", sub: "encrypted at rest, audited quarterly" },
-  { k: "Templates", v: "Versioned", sub: "promote per-survey adds with one click" },
-  { k: "AI surveyor", v: "GPT-class, scoped", sub: "answers grounded in the current survey’s notes" },
-  { k: "Compliance", v: "NAMS-aligned", sub: "SOC 2 in progress, GDPR-ready" },
+  { k: "Report formats", v: "PDF · Web link", sub: "branded, share-able, indexed by finding" },
+  { k: "Offline capture", v: "Yes", sub: "syncs the moment you're back on wifi" },
+  { k: "Storage", v: "Encrypted, US-hosted", sub: "your data, locked at rest and in transit" },
+  { k: "Templates", v: "Versioned", sub: "one-click to promote per-survey additions" },
+  { k: "Dictation", v: "Hands-free", sub: "speak into a field, it lands as text in the right place" },
+  { k: "Scheduling", v: "Calendar sync", sub: "client inquiries become bookings, with reminders" },
+  { k: "Inbox", v: "Threaded by survey", sub: "client email and attachments live with the file" },
+  { k: "Invoicing", v: "Auto-drafted", sub: "drafted on booking, sent on delivery, tracked to paid" },
+  { k: "Finance", v: "Built-in dashboard", sub: "paid · outstanding · monthly P&L, no spreadsheet" },
+  { k: "Compliance", v: "NAMS-aligned", sub: "built to SOC 2 and GDPR practices" },
 ];
 
 export function Specifications() {
   return (
-    <Plate tone="ink">
+    <Plate tone="ink" id="specs">
       {/* Header */}
       <div className="mb-14 flex flex-col gap-6 border-b border-paper-warm/15 pb-8 md:mb-16 md:flex-row md:items-end md:justify-between">
         <div>
-          <SectionLabel numeral="IV" title="Specifications" tone="light" className="mb-3" />
+          <SectionLabel numeral="V" title="Specifications" tone="light" className="mb-3" />
           <h2 className="font-display text-[clamp(2.2rem,5vw,4rem)] font-light leading-[1] tracking-[-0.02em] text-paper-warm">
             What&rsquo;s in the{" "}
             <span className="fv-display-italic italic text-brass-light">
@@ -78,17 +81,6 @@ export function Specifications() {
         ))}
       </div>
 
-      {/* Pull quote */}
-      <figure className="mt-20 border-l-2 border-brass-light pl-6 md:mt-28 md:pl-8">
-        <blockquote className="fv-display-italic font-display text-[clamp(1.6rem,3.2vw,2.6rem)] font-light italic leading-[1.2] text-paper-warm">
-          &ldquo;Survey on the dock. Publish before dinner. The kit fits in
-          one bag and the workflow fits in one screen.&rdquo;
-        </blockquote>
-        <figcaption className="mt-5 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.24em] text-paper-warm/55">
-          <span className="inline-block h-px w-8 bg-paper-warm/30" />
-          M. Carrick &middot; Marine Surveyor &middot; AMS&reg; &middot; Bristol, R.I.
-        </figcaption>
-      </figure>
     </Plate>
   );
 }

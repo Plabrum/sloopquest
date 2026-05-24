@@ -1,7 +1,7 @@
 import { Plate } from "./plate";
 import { SectionLabel } from "./section-label";
 
-type Pillar = {
+type Desk = {
   numeral: string;
   kicker: string;
   title: string;
@@ -10,96 +10,91 @@ type Pillar = {
   bullets: string[];
 };
 
-const pillars: Pillar[] = [
+const desks: Desk[] = [
   {
     numeral: "I",
-    kicker: "What you do",
-    title: "Walk the dock,",
-    italicWord: "look closely.",
-    body: "Per-field photos. Findings attached to the section they belong to. Sticky section headers so you always know where you are. Built for gloves, salt spray, and a flashlight in one hand.",
+    kicker: "Calendar",
+    title: "Bookings",
+    italicWord: "land on your day.",
+    body: "Client inquiries become appointments. Surveys land on your calendar with the vessel, the dock, and the drive time already filled in. Confirmations and reminders go out without you opening an email.",
     bullets: [
-      "Per-field photo capture",
-      "Inline findings (info · advisory · critical)",
-      "Sticky section headers",
-      "Works offline, syncs when you reconnect",
+      "Two-way calendar sync",
+      "Auto-confirmations and reminders",
+      "Drive-time built into the slot",
     ],
   },
   {
     numeral: "II",
-    kicker: "How you record it",
-    title: "Notes by hand,",
-    italicWord: "dictation, or keyboard.",
-    body: "Write the way you already do. Handwritten notes, dictation, and typed input all land in the same survey, the same section, the same field. Use whatever your hands are doing at the time.",
+    kicker: "Inbox",
+    title: "Client email,",
+    italicWord: "threaded to the survey.",
+    body: "Messages from a buyer or broker stay attached to the survey they belong to. No hunting through Gmail for the photo of the engine plate or last week's question about the rig.",
     bullets: [
-      "Handwritten note capture",
-      "Dictation, hands-free",
-      "Keyboard entry",
-      "All three land in the same place",
+      "Email threaded by survey",
+      "Attachments saved into the file",
+      "Reports delivered from inside the thread",
     ],
   },
   {
     numeral: "III",
-    kicker: "Everything else",
-    title: "Invoicing, scheduling,",
-    italicWord: "drafting, delivery.",
-    body: "The work around the survey is the work most surveyors get buried in. Invoices draft themselves. The schedule fills your calendar. The report assembles from your findings. The client gets it without you composing the email.",
+    kicker: "Books",
+    title: "Invoices out,",
+    italicWord: "money in view.",
+    body: "Invoices draft themselves the moment a survey is booked, send when the report goes out, and post to a finance dashboard you can actually read. The bookkeeping happens; you watch it happen.",
     bullets: [
-      "Invoices drafted automatically",
-      "Calendar booked from client inquiries",
-      "Reports assembled from your findings",
-      "Delivered to the client on completion",
+      "Auto-drafted invoices",
+      "Paid / outstanding at a glance",
+      "Monthly P&L without a spreadsheet",
     ],
   },
 ];
 
-export function Pillars() {
+export function Office() {
   return (
-    <Plate tone="warm" id="approach">
-      {/* Section header */}
+    <Plate id="office">
       <div className="mb-14 flex items-end justify-between gap-6 border-b border-paper-edge/70 pb-6 md:mb-20">
         <div>
-          <SectionLabel numeral="II" title="Three Acts" className="mb-3" />
+          <SectionLabel numeral="III" title="The Office" className="mb-3" />
           <h2 className="fv-display-soft font-display text-[clamp(2.4rem,5.4vw,4.4rem)] font-light leading-[0.98] tracking-[-0.02em] text-ink">
-            You observe and document.
+            A sole proprietor&rsquo;s back office,
             <br />
             <span className="fv-display-italic italic text-ink-soft">
-              The rest runs itself.
+              already in place.
             </span>
           </h2>
         </div>
         <span className="t-meta hidden shrink-0 tracking-[0.28em] md:block">
-          pp. 14 — 17
+          pp. 18 — 21
         </span>
       </div>
 
-      {/* Pillars grid */}
       <div className="grid grid-cols-1 gap-x-10 gap-y-14 md:grid-cols-3">
-        {pillars.map((p, i) => (
-          <article key={p.numeral} className="relative flex flex-col">
+        {desks.map((d, i) => (
+          <article key={d.numeral} className="relative flex flex-col">
             <div className="mb-6 flex items-baseline justify-between">
               <div className="fv-display-numeral font-display text-[88px] leading-none text-brass-deep">
-                {p.numeral}
+                {d.numeral}
               </div>
               <div className="t-meta tracking-[0.28em]">
                 ★ {String(i + 1).padStart(2, "0")}
               </div>
             </div>
 
-            <div className="t-kicker mb-4 text-[11px]">{p.kicker}</div>
+            <div className="t-kicker mb-4 text-[11px]">{d.kicker}</div>
 
             <h3 className="fv-card-soft mb-5 font-display text-[28px] font-light leading-[1.1] tracking-[-0.01em] text-ink">
-              {p.title}{" "}
+              {d.title}{" "}
               <span className="fv-card-italic italic text-brass-deep">
-                {p.italicWord}
+                {d.italicWord}
               </span>
             </h3>
 
             <p className="mb-6 font-serif text-[16px] leading-[1.6] text-ink-soft">
-              {p.body}
+              {d.body}
             </p>
 
             <ul className="mt-auto space-y-2.5 border-t border-paper-edge/70 pt-5">
-              {p.bullets.map((b) => (
+              {d.bullets.map((b) => (
                 <li
                   key={b}
                   className="flex items-baseline gap-3 font-mono text-[12px] uppercase tracking-[0.14em] text-ink-soft"
@@ -114,7 +109,6 @@ export function Pillars() {
           </article>
         ))}
       </div>
-
     </Plate>
   );
 }
