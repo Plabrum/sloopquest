@@ -40,14 +40,31 @@ import { useTheme } from "@/lib/theme";
 import { MetricBarChart } from "@/components/data-display/metric-bar-chart";
 import { MetricAreaChart } from "@/components/data-display/metric-area-chart";
 import { StatCards } from "@/components/data-display/stat-card";
+import { RailSection } from "@/components/surveys/workspace/rail-section";
+import { VesselCard } from "@/components/surveys/workspace/vessel-card";
+import { FieldCard } from "@/components/surveys/workspace/field";
+import { PhotosRail } from "@/components/surveys/workspace/photos-rail";
+import {
+  Dropzone,
+  DropzoneContent,
+  DropzoneEmptyState,
+} from "@/components/ui/dropzone";
+import {
+  FormNodeKind,
+  SurveyState,
+  type SurveyDetail,
+  type SurveyFormNodeRef,
+  type SurveyMediaListItem,
+} from "@/openapi/litestarAPI.schemas";
 
-type Theme = "shad" | "glass" | "angular";
+type Theme = "shad" | "glass" | "angular" | "almanac";
 type ColorMode = "light" | "dark" | "system";
 
 const THEMES: { id: Theme; label: string; description: string }[] = [
   { id: "shad", label: "Shad", description: "Base shadcn theme" },
   { id: "angular", label: "Angular", description: "Sharp edges, dense, high contrast" },
   { id: "glass", label: "Glass", description: "Rounded, translucent, soft" },
+  { id: "almanac", label: "Almanac", description: "Editorial / nautical, serif + mono" },
 ];
 
 const COLOR_MODES: { id: ColorMode; label: string }[] = [
@@ -79,6 +96,7 @@ export function GalleryPage() {
   const [switchOn, setSwitchOn] = useState(false);
   const [checked, setChecked] = useState(false);
   const [sliderVal, setSliderVal] = useState([40]);
+  const [dropFiles, setDropFiles] = useState<File[] | undefined>(undefined);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -319,6 +337,61 @@ export function GalleryPage() {
           />
         </Section>
 
+        <Section title="Survey · Rail (Vessel + Photos)">
+          <div className="grid grid-cols-2 gap-6">
+            <div className="rounded-sm border border-ink/10 bg-card p-4">
+              <VesselCard data={MOCK_SURVEY_DETAIL} />
+              <RailSection label="Notes" meta="(3)">
+                <ul className="space-y-1 font-serif text-[13px] italic leading-snug text-ink-soft">
+                  <li>Survey scheduled for slip 14, west marina.</li>
+                  <li>Owner requested gelcoat condition photos.</li>
+                  <li>Last haul-out: 2024-09-12.</li>
+                </ul>
+              </RailSection>
+            </div>
+            <div className="rounded-sm border border-ink/10 bg-card p-4">
+              <PhotosRail
+                items={MOCK_MEDIA.slice(0, 6)}
+                unassigned={MOCK_MEDIA.slice(6)}
+                sectionLabel="Hull"
+              />
+            </div>
+          </div>
+        </Section>
+
+        <Section title="Survey · Field Cards">
+          <div className="space-y-0">
+            {MOCK_FIELD_NODES.map((node, i) => (
+              <FieldCard
+                key={node.id}
+                node={node}
+                fieldIndex={i}
+                fieldTotal={MOCK_FIELD_NODES.length}
+                onSave={() => {}}
+              />
+            ))}
+          </div>
+        </Section>
+
+        <Section title="Dropzone">
+          <div className="grid grid-cols-2 gap-4">
+            <Dropzone
+              maxFiles={5}
+              accept={{ "image/*": [".png", ".jpg", ".jpeg"] }}
+              maxSize={5 * 1024 * 1024}
+              src={dropFiles}
+              onDrop={(files) => setDropFiles(files)}
+            >
+              <DropzoneEmptyState />
+              <DropzoneContent />
+            </Dropzone>
+            <Dropzone disabled src={undefined}>
+              <DropzoneEmptyState />
+              <DropzoneContent />
+            </Dropzone>
+          </div>
+        </Section>
+
         <Section title="Avatars & Skeletons">
           <div className="flex items-center gap-4">
             <Avatar>
@@ -342,6 +415,72 @@ export function GalleryPage() {
     </div>
   );
 }
+
+const MOCK_SURVEY_DETAIL: SurveyDetail = {
+  id: "svy_001",
+  state: SurveyState.in_draft,
+  vessel: { id: "ves_001", label: "MV Seabird", href: "/objects/vessel/ves_001" },
+  surveyor: { id: "usr_001", label: "P. Labrum", href: "/objects/user/usr_001" },
+  form_nodes: [],
+  unassigned_media: [],
+  section_completion: [],
+};
+
+const MOCK_MEDIA: SurveyMediaListItem[] = Array.from({ length: 10 }, (_, i) => ({
+  id: `med_${i}`,
+  view_url: `https://picsum.photos/seed/sloop-${i}/200/200`,
+  thumbnail_url: `https://picsum.photos/seed/sloop-${i}/120/120`,
+  caption: null,
+  node_id: i < 6 ? "node_hull" : null,
+  filename: `photo-${i}.jpg`,
+  content_type: "image/jpeg",
+  size_bytes: 100_000,
+  created_at: "2026-05-20T12:00:00Z",
+  uploaded_by: { id: "usr_001", label: "P. Labrum", href: "/objects/user/usr_001" },
+} as SurveyMediaListItem));
+
+const MOCK_FIELD_NODES: SurveyFormNodeRef[] = [
+  {
+    id: "f1",
+    kind: FormNodeKind.field,
+    label: "Hull serial number",
+    value: "SBR-2018-04421",
+    sort_order: 0,
+    config: { type: "text", label: "Hull serial number", required: true },
+  },
+  {
+    id: "f2",
+    kind: FormNodeKind.field,
+    label: "Overall condition",
+    value: "good",
+    sort_order: 1,
+    config: { type: "segmented", label: "Overall condition", options: ["poor", "fair", "good", "excellent"] },
+  },
+  {
+    id: "f3",
+    kind: FormNodeKind.field,
+    label: "Surveyor notes",
+    value: "Gelcoat exhibits minor crazing at port bow. Recommend cosmetic repair only.",
+    sort_order: 2,
+    config: { type: "longtext", label: "Surveyor notes" },
+  },
+  {
+    id: "f4",
+    kind: FormNodeKind.field,
+    label: "Last haul-out",
+    value: "2024-09-12",
+    sort_order: 3,
+    config: { type: "date", label: "Last haul-out" },
+  },
+  {
+    id: "f5",
+    kind: FormNodeKind.field,
+    label: "Engine type",
+    value: "diesel",
+    sort_order: 4,
+    config: { type: "select", label: "Engine type", options: ["diesel", "gasoline", "electric", "hybrid"] },
+  },
+];
 
 const STATUS_VARIANTS: { variant: StatusVariant; sample: string }[] = [
   { variant: "active", sample: "active" },

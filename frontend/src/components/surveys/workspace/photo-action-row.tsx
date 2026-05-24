@@ -1,11 +1,25 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import type { SurveyMediaListItem } from "@/openapi/litestarAPI.schemas";
 import { CapturePhotoButton } from "./capture-photo-button";
-import { useWorkspace } from "./workspace-context";
+import type { SurveyActions } from "./use-survey-actions";
 
-export function PhotoActionRow({ nodeId }: { nodeId: string }) {
-  const { surveyId, actions, mediaByNode } = useWorkspace();
+type PhotoActionRowProps = {
+  nodeId: string;
+  surveyId: string;
+  actions: SurveyActions;
+  mediaByNode: Map<string, SurveyMediaListItem[]>;
+  unassignedMedia: SurveyMediaListItem[];
+};
+
+export function PhotoActionRow({
+  nodeId,
+  surveyId,
+  actions,
+  mediaByNode,
+  unassignedMedia,
+}: PhotoActionRowProps) {
   const attachedCount = mediaByNode.get(nodeId)?.length ?? 0;
 
   return (
@@ -20,13 +34,24 @@ export function PhotoActionRow({ nodeId }: { nodeId: string }) {
         label="+ Camera"
         onUploaded={actions.invalidate}
       />
-      <AttachPhotoButton nodeId={nodeId} />
+      <AttachPhotoButton
+        nodeId={nodeId}
+        actions={actions}
+        unassignedMedia={unassignedMedia}
+      />
     </div>
   );
 }
 
-function AttachPhotoButton({ nodeId }: { nodeId: string }) {
-  const { actions, unassignedMedia } = useWorkspace();
+function AttachPhotoButton({
+  nodeId,
+  actions,
+  unassignedMedia,
+}: {
+  nodeId: string;
+  actions: SurveyActions;
+  unassignedMedia: SurveyMediaListItem[];
+}) {
   const [open, setOpen] = useState(false);
   const disabled = unassignedMedia.length === 0;
 

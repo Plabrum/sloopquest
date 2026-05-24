@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-type Theme = "shad" | "glass" | "angular";
+type Theme = "shad" | "glass" | "angular" | "almanac";
 type ColorMode = "light" | "dark" | "system";
 
 interface ThemeContextValue {
@@ -21,7 +21,7 @@ function resolveMode(mode: ColorMode): "light" | "dark" {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(
-    () => (localStorage.getItem("sq-theme") as Theme | null) ?? "shad"
+    () => (localStorage.getItem("sq-theme") as Theme | null) ?? "almanac"
   );
   const [colorMode, setColorModeState] = useState<ColorMode>(
     () => (localStorage.getItem("sq-color-mode") as ColorMode | null) ?? "light"

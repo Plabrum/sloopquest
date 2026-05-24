@@ -103,7 +103,7 @@ export function ObjectActions(props: ObjectActionsProps) {
   const sortedActions = availableActions.sort(
     (a: ActionDTO, b: ActionDTO) => (a.priority || 0) - (b.priority || 0),
   );
-  const maxVisible = props.maxVisible ?? 2;
+  const maxVisible = props.maxVisible ?? 1;
   const visibleActions = sortedActions.slice(0, maxVisible);
   const remainingActions = sortedActions.slice(maxVisible);
 

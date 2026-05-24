@@ -98,12 +98,12 @@ export function getStatusConfig(status: string): StatusConfig {
 }
 
 export const statusVariantClasses: Record<StatusVariant, string> = {
-  active: "bg-[#7A9E87]/20 text-[#3D6B4A]",
-  pending: "bg-[#D4A853]/20 text-[#7A5F1E]",
-  warning: "bg-[#E8913A]/20 text-[#874E14]",
-  danger: "bg-[#C75450]/20 text-[#7E2E2B]",
-  neutral: "bg-[#8B8178]/20 text-[#4A453F]",
-  info: "bg-[#5B8DB8]/20 text-[#2E5A7A]",
+  active: "border border-[#7A9E87]/50 bg-[#7A9E87]/10 text-[#3D6B4A]",
+  pending: "border border-[#D4A853]/50 bg-[#D4A853]/10 text-[#7A5F1E]",
+  warning: "border border-[#E8913A]/50 bg-[#E8913A]/10 text-[#874E14]",
+  danger: "border border-[#C75450]/50 bg-[#C75450]/10 text-[#7E2E2B]",
+  neutral: "border border-[#8B8178]/50 bg-[#8B8178]/10 text-[#4A453F]",
+  info: "border border-[#5B8DB8]/50 bg-[#5B8DB8]/10 text-[#2E5A7A]",
 };
 
 export const statusDotClasses: Record<StatusVariant, string> = {

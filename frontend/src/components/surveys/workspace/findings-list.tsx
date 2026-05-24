@@ -1,17 +1,22 @@
 import { useMemo } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { jumpToHash } from "@/lib/scroll";
 import type { SurveyFormNodeRef } from "@/openapi/litestarAPI.schemas";
-import { getFindingValue } from "./node-helpers";
-import { SEVERITY_DOT, SEVERITY_RANK, SEVERITY_TEXT, asSeverity } from "./severity";
+import { SEVERITY_RANK, asSeverity, getFindingValue, type Severity } from "./field";
+import { RailSection } from "./rail-section";
+
+const SEVERITY_TONE: Record<Severity, string> = {
+  critical: "bg-red-500 border-red-500",
+  advisory: "bg-amber-500 border-amber-500",
+  info: "bg-sky-500 border-sky-500",
+};
 
 export function FindingsList({
   findings,
   sectionAncestor,
+  goToSection,
 }: {
   findings: SurveyFormNodeRef[];
   sectionAncestor: Map<string, string>;
+  goToSection: (sectionId: string) => void;
 }) {
   const sorted = useMemo(
     () =>
@@ -24,35 +29,36 @@ export function FindingsList({
   );
 
   return (
-    <Card className="gap-2 py-3">
-      <CardHeader className="px-3">
-        <CardTitle className="text-sm">Findings ({findings.length})</CardTitle>
-      </CardHeader>
-      <CardContent className="px-3">
-        {findings.length === 0 && (
-          <p className="text-xs text-muted-foreground">None yet.</p>
-        )}
-        <ul className="space-y-1">
+    <RailSection label="Findings" meta={`(${findings.length})`}>
+      {findings.length === 0 ? (
+        <p className="font-serif text-[12px] italic text-muted-foreground">None yet.</p>
+      ) : (
+        <ul className="space-y-2">
           {sorted.map((f) => {
             const v = getFindingValue(f);
             const sev = asSeverity(v?.severity);
-            const sectionId = f.parent_id ? sectionAncestor.get(f.parent_id) ?? f.parent_id : null;
+            const sectionId = f.parent_id
+              ? sectionAncestor.get(f.parent_id) ?? f.parent_id
+              : null;
             return (
               <li key={f.id}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-auto w-full justify-start gap-1 px-1 py-0.5 text-xs font-normal"
-                  onClick={() => sectionId && jumpToHash(`section-${sectionId}`)}
+                <button
+                  type="button"
+                  onClick={() => sectionId && goToSection(sectionId)}
+                  className="group flex w-full items-start gap-2 text-left"
                 >
-                  <span className={`inline-block h-1.5 w-1.5 rounded-full ${SEVERITY_DOT[sev]}`} />
-                  <span className={SEVERITY_TEXT[sev]}>{v?.summary ?? f.label}</span>
-                </Button>
+                  <span
+                    className={`mt-1 inline-block h-2 w-2 shrink-0 rounded-full border ${SEVERITY_TONE[sev]}`}
+                  />
+                  <span className="font-serif text-[13px] leading-[1.4] text-muted-foreground group-hover:text-foreground">
+                    {v?.summary ?? f.label}
+                  </span>
+                </button>
               </li>
             );
           })}
         </ul>
-      </CardContent>
-    </Card>
+      )}
+    </RailSection>
   );
 }

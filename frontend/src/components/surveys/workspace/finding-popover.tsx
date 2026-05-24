@@ -90,8 +90,9 @@ export function AddFindingButton({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button size="sm" variant="outline" className="border-red-300 text-red-700">
-          + Add finding
+        <Button size="sm" variant="outline">
+          <span className="text-[14px] leading-none">+</span>
+          Add finding
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-96 space-y-3">

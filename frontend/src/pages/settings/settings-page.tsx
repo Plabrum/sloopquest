@@ -20,6 +20,7 @@ import { pricingGuideColumnDefs } from "@/openapi/pricing_guides/columns.gen";
 import { useTheme } from "@/lib/theme";
 
 const THEME_OPTIONS = [
+  { value: "almanac", label: "Almanac" },
   { value: "shad", label: "Default" },
   { value: "glass", label: "Glass" },
   { value: "angular", label: "Angular" },

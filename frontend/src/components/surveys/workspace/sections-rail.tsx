@@ -1,10 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { jumpToHash } from "@/lib/scroll";
 import type { SectionCompletion } from "@/openapi/litestarAPI.schemas";
-import type { Tree } from "./node-helpers";
+import type { Tree } from "./field";
 
 function statusDot(c?: SectionCompletion): string {
-  if (!c || c.total === 0 || c.filled === 0) return "bg-gray-300";
+  if (!c || c.total === 0 || c.filled === 0) return "bg-muted-foreground/40";
   if (c.filled < c.total) return "bg-amber-500";
   return "bg-emerald-500";
 }
@@ -13,10 +12,12 @@ export function SectionsRail({
   sections,
   completion,
   currentSectionId,
+  goToSection,
 }: {
   sections: Tree[];
   completion: Map<string, SectionCompletion>;
   currentSectionId: string | null;
+  goToSection: (sectionId: string) => void;
 }) {
   return (
     <div className="pointer-events-none absolute inset-y-0 left-0 z-20 hidden md:block">
@@ -24,7 +25,7 @@ export function SectionsRail({
         aria-label="Sections"
         className="group pointer-events-auto sticky top-20"
       >
-        <ul className="flex flex-col gap-1 rounded-r-xl py-2 pl-2 pr-2 transition-colors group-hover:bg-white group-hover:shadow-md group-hover:ring-1 group-hover:ring-border">
+        <ul className="flex flex-col gap-1 rounded-r-xl py-2 pl-2 pr-2 transition-colors group-hover:bg-popover group-hover:shadow-md group-hover:ring-1 group-hover:ring-border">
         {sections.map((s) => {
           const c = completion.get(s.id);
           const active = currentSectionId === s.id;
@@ -33,7 +34,7 @@ export function SectionsRail({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => jumpToHash(`section-${s.id}`)}
+                onClick={() => goToSection(s.id)}
                 className={`h-7 w-full justify-start gap-2 px-1 text-xs ${
                   active ? "text-foreground" : "text-muted-foreground"
                 }`}

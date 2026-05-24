@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import type { SurveyFormNodeRef, SectionCompletion } from "@/openapi/litestarAPI.schemas";
-import { type Tree } from "./node-helpers";
+import { type Tree } from "./field";
 
 function buildTree(nodes: SurveyFormNodeRef[]): Tree[] {
   const byId = new Map<string, Tree>();

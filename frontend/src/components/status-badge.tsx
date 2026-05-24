@@ -25,6 +25,9 @@ export function StatusBadge({
 
   return (
     <span
+      data-slot="status-badge"
+      data-variant={config.variant}
+      data-tone={tone}
       className={cn(
         "inline-flex items-center rounded-md font-medium tracking-wide uppercase",
         isSolid
@@ -37,6 +40,7 @@ export function StatusBadge({
     >
       {showDot && !isSolid && (
         <span
+          data-slot="status-badge-dot"
           className={cn(
             "rounded-full",
             statusDotClasses[config.variant],

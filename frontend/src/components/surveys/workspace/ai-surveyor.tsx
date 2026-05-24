@@ -20,13 +20,18 @@ export function AiSurveyorEntry() {
       <SheetTrigger asChild>
         <button
           type="button"
-          className="flex w-full items-center gap-2 rounded-2xl border bg-white p-3 text-left text-sm hover:bg-muted/40"
+          className="mt-6 block w-full rounded-sm border border-primary/40 bg-primary/5 p-3 text-left transition hover:bg-primary/10"
         >
-          <LlmOrb size={28} />
-          <div className="flex flex-col">
-            <span className="font-medium">AI surveyor</span>
-            <span className="text-xs text-muted-foreground">Ask anything about this survey</span>
+          <div className="mb-1 flex items-center justify-between">
+            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
+              <span className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-primary" />
+              AI Surveyor
+            </div>
+            <span className="font-mono text-[10px] text-muted-foreground">⌘K</span>
           </div>
+          <p className="font-serif text-[12px] italic leading-[1.45] text-muted-foreground">
+            “Ask about blistering severity, gelcoat repair specs, or anything else on this section…”
+          </p>
         </button>
       </SheetTrigger>
       <SheetContent side="right" className="flex w-[440px] flex-col p-0 sm:max-w-[440px]">

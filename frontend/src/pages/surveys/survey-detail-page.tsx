@@ -15,7 +15,7 @@ function SurveyDetailContent() {
 
   return (
     <PageTopBar
-      title="Survey"
+      title={data.vessel?.label ?? "Survey"}
       state={data.state}
       actions={
         <ObjectActions

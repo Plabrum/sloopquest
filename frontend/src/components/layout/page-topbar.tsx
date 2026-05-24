@@ -13,6 +13,7 @@ import { StatusBadge } from "@/components/status-badge"
 import { PageSkeleton } from "@/components/ui/page-skeleton"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { useBreadcrumbTrail } from "@/stores/breadcrumb-trail"
+import { usePageSubcrumb } from "@/stores/page-subcrumb"
 
 interface PageTopBarProps {
   title: string
@@ -26,6 +27,7 @@ export function PageTopBar({ title, state, actions, fallback, children }: PageTo
   const pathname = useRouterState({ select: (s) => s.location.pathname })
   const push = useBreadcrumbTrail((s) => s.push)
   const trail = useBreadcrumbTrail((s) => s.trail)
+  const subcrumb = usePageSubcrumb((s) => s.label)
 
   useEffect(() => {
     push({ url: pathname, label: title })
@@ -42,7 +44,7 @@ export function PageTopBar({ title, state, actions, fallback, children }: PageTo
   return (
     <>
       <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-sidebar-border bg-sidebar px-6">
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <SidebarTrigger className="-ml-1 text-sidebar-foreground/50 hover:text-sidebar-foreground" />
           <Breadcrumb>
             <BreadcrumbList>
@@ -50,31 +52,34 @@ export function PageTopBar({ title, state, actions, fallback, children }: PageTo
                 <span key={segment.url} className="contents">
                   <BreadcrumbItem>
                     <BreadcrumbLink asChild>
-                      <Link
-                        to={segment.url}
-                        className="text-sm font-medium text-sidebar-foreground/60"
-                      >
-                        {segment.label}
-                      </Link>
+                      <Link to={segment.url}>{segment.label}</Link>
                     </BreadcrumbLink>
                   </BreadcrumbItem>
-                  <BreadcrumbSeparator className="text-sidebar-foreground/30" />
+                  <BreadcrumbSeparator>/</BreadcrumbSeparator>
                 </span>
               ))}
               <BreadcrumbItem>
-                <BreadcrumbPage className="text-sm font-bold text-sidebar-foreground">
-                  {current.label}
-                </BreadcrumbPage>
+                <BreadcrumbPage>{current.label}</BreadcrumbPage>
               </BreadcrumbItem>
+              {subcrumb ? (
+                <>
+                  <BreadcrumbSeparator>/</BreadcrumbSeparator>
+                  <BreadcrumbItem>
+                    <span data-slot="breadcrumb-subcrumb" aria-current="page">
+                      {subcrumb}
+                    </span>
+                  </BreadcrumbItem>
+                </>
+              ) : null}
             </BreadcrumbList>
           </Breadcrumb>
         </div>
-        {state ? (
-          <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <StatusBadge status={state} tone="solid" showDot={false} />
-          </div>
-        ) : null}
-        {actions && <div className="flex items-center gap-2">{actions}</div>}
+        <div className="flex items-center gap-3">
+          {state ? (
+            <StatusBadge status={state} tone="subtle" />
+          ) : null}
+          {actions && <div className="flex items-center gap-2">{actions}</div>}
+        </div>
       </header>
       <Suspense fallback={fallback ?? <PageSkeleton />}>{children}</Suspense>
     </>
