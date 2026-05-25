@@ -18,6 +18,8 @@ from app.domain.surveys.schemas import (
     SurveyTemplateListItem,
 )
 from app.domain.users.models import User
+from app.platform.actions.deps import ActionDeps
+from app.platform.actions.registry import ActionRegistry
 from app.platform.base.crud import CRUDConfig, make_crud_controller
 from app.platform.base.schemas import EntityRef
 from app.platform.clients.s3 import BaseS3Client, LocalS3Client, S3Client
@@ -54,7 +56,13 @@ def _to_form_node_ref(
     visibility: dict[int, bool],
     media_by_node: dict[int, list[SurveyMediaListItem]],
     findings_by_parent: dict[int, list[SurveyFormNodeRef]],
+    action_deps: ActionDeps | None,
 ) -> SurveyFormNodeRef:
+    actions: list = []
+    if action_deps is not None:
+        group = ActionRegistry().find_by_model(FormNode)
+        if group is not None:
+            actions = group.get_available_actions(action_deps, node)
     return SurveyFormNodeRef(
         id=node.id,
         parent_id=node.parent_id,
@@ -67,10 +75,11 @@ def _to_form_node_ref(
         condition_visible=visibility.get(node.id),
         attached_media=media_by_node.get(node.id, []),
         findings=findings_by_parent.get(node.id, []),
+        actions=actions,
     )
 
 
-def _to_survey_detail(survey: Survey, user: User) -> SurveyDetail:
+def _to_survey_detail(survey: Survey, user: User, action_deps: ActionDeps | None = None) -> SurveyDetail:
     template_ref = (
         EntityRef(
             id=survey.template.id,
@@ -99,7 +108,7 @@ def _to_survey_detail(survey: Survey, user: User) -> SurveyDetail:
     for n in sorted(annotations, key=lambda n: n.sort_order):
         if n.parent_id is None:
             continue
-        ref = _to_form_node_ref(n, visibility, media_by_node, {})
+        ref = _to_form_node_ref(n, visibility, media_by_node, {}, action_deps)
         findings_by_parent.setdefault(n.parent_id, []).append(ref)
 
     return SurveyDetail(
@@ -118,7 +127,7 @@ def _to_survey_detail(survey: Survey, user: User) -> SurveyDetail:
         template=template_ref,
         template_version=survey.template_version,
         form_nodes=[
-            _to_form_node_ref(n, visibility, media_by_node, findings_by_parent)
+            _to_form_node_ref(n, visibility, media_by_node, findings_by_parent, action_deps)
             for n in sorted(structural, key=lambda n: (n.parent_id or 0, n.sort_order))
         ],
         unassigned_media=unassigned_media,

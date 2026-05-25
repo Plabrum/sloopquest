@@ -10,7 +10,6 @@ type Props = {
   mode?: "camera" | "library";
   label?: string;
   size?: "sm" | "xs";
-  onUploaded?: () => Promise<unknown> | void;
 };
 
 export function CapturePhotoButton({
@@ -19,10 +18,9 @@ export function CapturePhotoButton({
   mode = "library",
   label,
   size = "sm",
-  onUploaded,
 }: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const { attachFiles, status } = useAttachSurveyMedia(surveyId, onUploaded);
+  const { attachFiles, status } = useAttachSurveyMedia(surveyId);
   const pending = status === "uploading";
 
   async function handleFiles(files: FileList | null) {

@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 
-import { actionsActionGroupExecuteAction } from "@/openapi/actions/actions";
+import { useActionExecutor } from "@/hooks/actions/use-action-executor";
+import type { ActionDTO } from "@/lib/actions/types";
 
 import { useMediaUpload } from "./use-media-upload";
 
@@ -18,11 +19,11 @@ export type UseAttachSurveyMediaReturn = {
   reset: () => void;
 };
 
-export function useAttachSurveyMedia(
-  surveyId: string,
-  onAttached?: () => Promise<unknown> | void,
-): UseAttachSurveyMediaReturn {
+const ATTACH: ActionDTO = { action: "survey_media_actions__attach", label: "Attach media" };
+
+export function useAttachSurveyMedia(surveyId: string): UseAttachSurveyMediaReturn {
   const { uploadFile, reset: resetUpload } = useMediaUpload();
+  const executor = useActionExecutor({ actionGroup: "survey_media_actions" });
   const [status, setStatus] = useState<AttachSurveyMediaStatus>("idle");
   const [pendingCount, setPendingCount] = useState(0);
   const [completedCount, setCompletedCount] = useState(0);
@@ -55,27 +56,30 @@ export function useAttachSurveyMedia(
           if (!result) {
             throw new Error(`Failed to upload ${file.name}`);
           }
-          await actionsActionGroupExecuteAction("survey_media_actions", {
-            action: "survey_media_actions__attach",
-            data: {
-              survey_id: surveyId,
-              media_id: result.mediaId,
-              node_id: nodeId,
-              caption,
-              sort_order: 0,
-            },
-          } as never);
+          await executor.executeAction(
+            ATTACH,
+            {
+              action: ATTACH.action,
+              data: {
+                survey_id: surveyId,
+                media_id: result.mediaId,
+                node_id: nodeId,
+                caption,
+                sort_order: 0,
+              },
+            } as never,
+            { silent: true },
+          );
           setCompletedCount((n) => n + 1);
         }
         setStatus("complete");
-        await onAttached?.();
       } catch (err) {
         const message = err instanceof Error ? err.message : "Failed to attach media";
         setStatus("error");
         setError(message);
       }
     },
-    [surveyId, uploadFile, onAttached],
+    [surveyId, uploadFile, executor],
   );
 
   return { attachFiles, status, pendingCount, completedCount, error, reset };

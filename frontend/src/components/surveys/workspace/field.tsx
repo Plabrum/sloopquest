@@ -12,10 +12,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useActionExecutor } from "@/hooks/actions/use-action-executor";
 import { useDropTarget } from "@/hooks/use-drop-target";
+import type { ActionDTO } from "@/lib/actions/types";
 import type { SurveyFormNodeRef, SurveyMediaListItem } from "@/openapi/litestarAPI.schemas";
 import { PhotoActionRow } from "./photo-action-row";
-import type { SurveyActions } from "./use-survey-actions";
+
+const UPDATE_VALUE: ActionDTO = { action: "form_node_actions__update_value", label: "Save field" };
+const ADD_REPEATER: ActionDTO = { action: "form_node_actions__add_repeater_instance", label: "Add repeater instance" };
+const DELETE_NODE: ActionDTO = { action: "form_node_actions__delete", label: "Delete node" };
+const ASSIGN_MEDIA: ActionDTO = { action: "survey_media_actions__assign", label: "Assign media" };
 
 // ── Node & severity helpers ──────────────────────────────────────────────
 
@@ -239,7 +245,6 @@ export function FieldCard({
 
 type FieldDeps = {
   surveyId: string;
-  actions: SurveyActions;
   findingsByParent: Map<string, SurveyFormNodeRef[]>;
   mediaByNode: Map<string, SurveyMediaListItem[]>;
   unassignedMedia: SurveyMediaListItem[];
@@ -255,8 +260,8 @@ export function FieldOrRepeater({
   fieldIndex: number;
   fieldTotal: number;
 } & FieldDeps) {
-  const { actions } = deps;
   const isRepeater = getFieldType(node) === "repeater";
+  const formNodeExecutor = useActionExecutor({ actionGroup: "form_node_actions" });
 
   if (!isRepeater) {
     return (
@@ -276,7 +281,13 @@ export function FieldOrRepeater({
         <Button
           size="sm"
           variant="outline"
-          onClick={() => actions.addRepeaterInstance(node.id)}
+          onClick={() =>
+            formNodeExecutor.executeAction(
+              ADD_REPEATER,
+              { action: ADD_REPEATER.action, data: {} } as never,
+              { silent: true, objectId: node.id },
+            )
+          }
         >
           + Add another
         </Button>
@@ -294,8 +305,8 @@ function RepeaterInstance({
   instance,
   ...deps
 }: { instance: Tree } & FieldDeps) {
-  const { actions } = deps;
   const fields = instance.children.filter((c) => c.kind === "field");
+  const formNodeExecutor = useActionExecutor({ actionGroup: "form_node_actions" });
 
   return (
     <div className="space-y-2 rounded-xl bg-muted/40 p-3">
@@ -305,7 +316,13 @@ function RepeaterInstance({
           size="sm"
           variant="ghost"
           className="text-xs text-muted-foreground"
-          onClick={() => actions.deleteNode(instance.id)}
+          onClick={() =>
+            formNodeExecutor.executeAction(
+              DELETE_NODE,
+              { action: DELETE_NODE.action, data: {} } as never,
+              { silent: true, objectId: instance.id },
+            )
+          }
         >
           Remove
         </Button>
@@ -328,7 +345,6 @@ function FieldWithExtras({
   fieldIndex,
   fieldTotal,
   surveyId,
-  actions,
   findingsByParent,
   mediaByNode,
   unassignedMedia,
@@ -337,7 +353,15 @@ function FieldWithExtras({
   fieldIndex: number;
   fieldTotal: number;
 } & FieldDeps) {
-  const drop = useDropTarget(DRAG_MEDIA_TYPE, (mediaId) => actions.assignMedia(mediaId, node.id));
+  const formNodeExecutor = useActionExecutor({ actionGroup: "form_node_actions" });
+  const mediaExecutor = useActionExecutor({ actionGroup: "survey_media_actions" });
+  const drop = useDropTarget(DRAG_MEDIA_TYPE, (mediaId) =>
+    mediaExecutor.executeAction(
+      ASSIGN_MEDIA,
+      { action: ASSIGN_MEDIA.action, data: { node_id: node.id } } as never,
+      { silent: true, objectId: mediaId },
+    ),
+  );
   const findings = findingsByParent.get(node.id) ?? [];
   const isPhoto = getFieldType(node) === "photo";
 
@@ -352,13 +376,18 @@ function FieldWithExtras({
         node={node}
         fieldIndex={fieldIndex}
         fieldTotal={fieldTotal}
-        onSave={(value) => actions.saveField(node, value)}
+        onSave={(value) =>
+          formNodeExecutor.executeAction(
+            UPDATE_VALUE,
+            { action: UPDATE_VALUE.action, data: { value } } as never,
+            { silent: true, objectId: node.id },
+          )
+        }
         photoActionRow={
           isPhoto ? (
             <PhotoActionRow
               nodeId={node.id}
               surveyId={surveyId}
-              actions={actions}
               mediaByNode={mediaByNode}
               unassignedMedia={unassignedMedia}
             />

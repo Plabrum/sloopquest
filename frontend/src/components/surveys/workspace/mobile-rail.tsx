@@ -9,7 +9,6 @@ import { VesselCard } from "./vessel-card";
 
 export function MobileRail({
   surveyId,
-  onUploaded,
   mediaItems,
   unassignedMedia,
   sectionLabel,
@@ -19,7 +18,6 @@ export function MobileRail({
   goToSection,
 }: {
   surveyId: string;
-  onUploaded: () => Promise<unknown> | void;
   mediaItems: SurveyMediaListItem[];
   unassignedMedia: SurveyMediaListItem[];
   sectionLabel: string | null;
@@ -53,7 +51,6 @@ export function MobileRail({
             <TabsContent value="photos" className="space-y-3">
               <PhotosRail
                 surveyId={surveyId}
-                onUploaded={onUploaded}
                 items={mediaItems}
                 unassigned={unassignedMedia}
                 sectionLabel={sectionLabel}

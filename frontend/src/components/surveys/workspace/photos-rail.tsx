@@ -11,19 +11,17 @@ const IMAGE_ACCEPT = {
 
 export function PhotosRail({
   surveyId,
-  onUploaded,
   items,
   unassigned,
   sectionLabel,
 }: {
   surveyId: string;
-  onUploaded: () => Promise<unknown> | void;
   items: SurveyMediaListItem[];
   unassigned: SurveyMediaListItem[];
   sectionLabel: string | null;
 }) {
   const { attachFiles, status, pendingCount, completedCount, error } =
-    useAttachSurveyMedia(surveyId, onUploaded);
+    useAttachSurveyMedia(surveyId);
 
   const uploading = status === "uploading";
 

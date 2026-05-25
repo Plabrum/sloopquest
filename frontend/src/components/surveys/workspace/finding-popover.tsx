@@ -8,23 +8,22 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  useActionsActionGroupExecuteAction,
-  useActionsActionGroupObjectIdExecuteObjectAction,
-} from "@/openapi/actions/actions";
+import { useActionExecutor } from "@/hooks/actions/use-action-executor";
+import type { ActionDTO } from "@/lib/actions/types";
 import type { SurveyMediaListItem } from "@/openapi/litestarAPI.schemas";
 
 const SEVERITIES = ["info", "advisory", "critical"] as const;
 type Severity = (typeof SEVERITIES)[number];
 
+const ADD_FINDING: ActionDTO = { action: "survey_finding_actions__add", label: "Add finding" };
+const ASSIGN_MEDIA: ActionDTO = { action: "survey_media_actions__assign", label: "Assign media" };
+
 export function AddFindingButton({
   parentNodeId,
   unassignedMedia = [],
-  onAdded,
 }: {
   parentNodeId: string;
   unassignedMedia?: SurveyMediaListItem[];
-  onAdded?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [severity, setSeverity] = useState<Severity>("advisory");
@@ -32,8 +31,8 @@ export function AddFindingButton({
   const [detail, setDetail] = useState("");
   const [recommended, setRecommended] = useState("");
   const [pickedMedia, setPickedMedia] = useState<Set<string>>(new Set());
-  const execute = useActionsActionGroupExecuteAction();
-  const assign = useActionsActionGroupObjectIdExecuteObjectAction();
+  const findingExecutor = useActionExecutor({ actionGroup: "survey_finding_actions" });
+  const mediaExecutor = useActionExecutor({ actionGroup: "survey_media_actions" });
 
   function togglePick(id: string) {
     setPickedMedia((prev) => {
@@ -54,10 +53,10 @@ export function AddFindingButton({
 
   async function submit() {
     if (!summary.trim()) return;
-    const res = await execute.mutateAsync({
-      actionGroup: "survey_finding_actions",
-      data: {
-        action: "survey_finding_actions__add",
+    const res = await findingExecutor.executeAction(
+      ADD_FINDING,
+      {
+        action: ADD_FINDING.action,
         data: {
           parent_id: parentNodeId,
           severity,
@@ -66,25 +65,22 @@ export function AddFindingButton({
           recommended_action: recommended || null,
         },
       } as never,
-    });
-    const findingId = (res as { created_id?: string } | undefined)?.created_id;
+      { silent: true },
+    );
+    const findingId = res.created_id;
     if (findingId && pickedMedia.size > 0) {
       await Promise.all(
         Array.from(pickedMedia).map((mediaId) =>
-          assign.mutateAsync({
-            actionGroup: "survey_media_actions",
-            objectId: mediaId,
-            data: {
-              action: "survey_media_actions__assign",
-              data: { node_id: findingId },
-            } as never,
-          }),
+          mediaExecutor.executeAction(
+            ASSIGN_MEDIA,
+            { action: ASSIGN_MEDIA.action, data: { node_id: findingId } } as never,
+            { silent: true, objectId: mediaId },
+          ),
         ),
       );
     }
     reset();
     setOpen(false);
-    onAdded?.();
   }
 
   return (
@@ -150,7 +146,7 @@ export function AddFindingButton({
         <Button
           size="sm"
           onClick={submit}
-          disabled={!summary.trim() || execute.isPending || assign.isPending}
+          disabled={!summary.trim() || findingExecutor.isExecuting || mediaExecutor.isExecuting}
         >
           Save finding{pickedMedia.size > 0 ? ` (+${pickedMedia.size} photo)` : ""}
         </Button>

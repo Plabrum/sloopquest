@@ -14,42 +14,42 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useActionsActionGroupExecuteAction } from "@/openapi/actions/actions";
+import { useActionExecutor } from "@/hooks/actions/use-action-executor";
+import type { ActionDTO } from "@/lib/actions/types";
 
 const TYPES = ["text", "longtext", "number", "boolean", "select", "date"] as const;
+const ADD_FIELD: ActionDTO = { action: "form_node_actions__add_ad_hoc_field", label: "Add field" };
+const ADD_SECTION: ActionDTO = { action: "form_node_actions__add_ad_hoc_section", label: "Add section" };
 
-export function AddAdHocFieldButton({
-  parentNodeId,
-  onAdded,
-}: {
-  parentNodeId: string;
-  onAdded?: () => void;
-}) {
+export function AddAdHocFieldButton({ parentNodeId }: { parentNodeId: string }) {
   const [open, setOpen] = useState(false);
   const [label, setLabel] = useState("");
   const [type, setType] = useState<(typeof TYPES)[number]>("text");
   const [options, setOptions] = useState("");
-  const execute = useActionsActionGroupExecuteAction();
+  const executor = useActionExecutor({ actionGroup: "form_node_actions" });
 
   async function submit() {
     if (!label.trim()) return;
-    await execute.mutateAsync({
-      actionGroup: "form_node_actions",
-      data: {
-        action: "form_node_actions__add_ad_hoc_field",
+    await executor.executeAction(
+      ADD_FIELD,
+      {
+        action: ADD_FIELD.action,
         data: {
           parent_id: parentNodeId,
           label,
           type,
-          options: type === "select" ? options.split(",").map((s) => s.trim()).filter(Boolean) : [],
+          options:
+            type === "select"
+              ? options.split(",").map((s) => s.trim()).filter(Boolean)
+              : [],
           required: false,
         },
       } as never,
-    });
+      { silent: true },
+    );
     setLabel("");
     setOptions("");
     setOpen(false);
-    onAdded?.();
   }
 
   return (
@@ -77,7 +77,7 @@ export function AddAdHocFieldButton({
             <Input value={options} onChange={(e) => setOptions(e.target.value)} />
           </div>
         )}
-        <Button size="sm" onClick={submit} disabled={!label.trim() || execute.isPending}>
+        <Button size="sm" onClick={submit} disabled={!label.trim() || executor.isExecuting}>
           Add field
         </Button>
       </PopoverContent>
@@ -88,32 +88,26 @@ export function AddAdHocFieldButton({
 export function AddAdHocSectionButton({
   ownerType,
   ownerId,
-  onAdded,
 }: {
   ownerType: string;
   ownerId: string;
-  onAdded?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
-  const execute = useActionsActionGroupExecuteAction();
+  const executor = useActionExecutor({ actionGroup: "form_node_actions" });
 
   async function submit() {
     if (!title.trim()) return;
-    await execute.mutateAsync({
-      actionGroup: "form_node_actions",
-      data: {
-        action: "form_node_actions__add_ad_hoc_section",
-        data: {
-          owner_type: ownerType,
-          owner_id: ownerId,
-          title,
-        },
+    await executor.executeAction(
+      ADD_SECTION,
+      {
+        action: ADD_SECTION.action,
+        data: { owner_type: ownerType, owner_id: ownerId, title },
       } as never,
-    });
+      { silent: true },
+    );
     setTitle("");
     setOpen(false);
-    onAdded?.();
   }
 
   return (
@@ -126,7 +120,7 @@ export function AddAdHocSectionButton({
           <Label className="text-xs">Section title</Label>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} />
         </div>
-        <Button size="sm" onClick={submit} disabled={!title.trim() || execute.isPending}>
+        <Button size="sm" onClick={submit} disabled={!title.trim() || executor.isExecuting}>
           Add section
         </Button>
       </PopoverContent>

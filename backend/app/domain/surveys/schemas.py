@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Any
 
 from app.domain.surveys.enums import SurveyState
-from app.platform.actions.schemas import ActionableDetail, ActionableList
+from app.platform.actions.schemas import ActionableDetail, ActionableList, ActionDTO
 from app.platform.base.schemas import BaseSchema, EntityRef
 from app.platform.form_dsl.enums import FormNodeKind
 from app.platform.form_dsl.schema import TemplateDefinition
@@ -95,6 +95,7 @@ class SurveyFormNodeRef(BaseSchema):
     condition_visible: bool | None = None
     attached_media: list[SurveyMediaListItem] = []
     findings: list[SurveyFormNodeRef] = []
+    actions: list[ActionDTO] = []
 
 
 class SurveyDetail(ActionableDetail):

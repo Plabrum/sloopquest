@@ -8,7 +8,6 @@ import { MobileRail } from "./mobile-rail";
 import { PhotosRail } from "./photos-rail";
 import { SectionBlock } from "./section-block";
 import { SectionsRail } from "./sections-rail";
-import { useSurveyActions } from "./use-survey-actions";
 import { useSurveyMedia } from "./use-survey-media";
 import { useSurveyTree } from "./use-survey-tree";
 import { VesselCard } from "./vessel-card";
@@ -18,7 +17,6 @@ export function SurveyWorkspace({ data }: { data: SurveyDetail }) {
     data.form_nodes,
     data.section_completion,
   );
-  const actions = useSurveyActions(data.id);
   const media = useSurveyMedia(data);
 
   const [currentSectionId, setCurrentSectionId] = useState<string | null>(
@@ -71,7 +69,6 @@ export function SurveyWorkspace({ data }: { data: SurveyDetail }) {
                 }
                 completion={completion.get(currentSection.id)}
                 surveyId={data.id}
-                actions={actions}
                 findingsByParent={findingsByParent}
                 mediaByNode={media.byNode}
                 unassignedMedia={media.unassigned}
@@ -80,11 +77,7 @@ export function SurveyWorkspace({ data }: { data: SurveyDetail }) {
             )}
 
             {!nextSection && (
-              <AddAdHocSectionButton
-                ownerType="surveys"
-                ownerId={data.id}
-                onAdded={actions.invalidate}
-              />
+              <AddAdHocSectionButton ownerType="surveys" ownerId={data.id} />
             )}
           </div>
         </main>
@@ -92,7 +85,6 @@ export function SurveyWorkspace({ data }: { data: SurveyDetail }) {
         <aside className="hidden h-full overflow-y-auto bg-sidebar/60 px-4 py-6 md:block md:border-l md:border-sidebar-border md:px-6 md:py-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <PhotosRail
             surveyId={data.id}
-            onUploaded={actions.invalidate}
             items={sectionMediaItems}
             unassigned={media.unassigned}
             sectionLabel={currentSection?.label ?? null}
@@ -109,7 +101,6 @@ export function SurveyWorkspace({ data }: { data: SurveyDetail }) {
 
       <MobileRail
         surveyId={data.id}
-        onUploaded={actions.invalidate}
         mediaItems={sectionMediaItems}
         unassignedMedia={media.unassigned}
         sectionLabel={currentSection?.label ?? null}

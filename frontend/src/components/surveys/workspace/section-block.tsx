@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useActionExecutor } from "@/hooks/actions/use-action-executor";
 import { useDropTarget } from "@/hooks/use-drop-target";
+import type { ActionDTO } from "@/lib/actions/types";
 import type {
   SectionCompletion,
   SurveyFormNodeRef,
@@ -9,11 +11,11 @@ import type {
 import { AddAdHocFieldButton } from "./ad-hoc";
 import { DRAG_MEDIA_TYPE, FieldOrRepeater, pad2, type Tree } from "./field";
 import { AddFindingButton } from "./finding-popover";
-import type { SurveyActions } from "./use-survey-actions";
+
+const ASSIGN_MEDIA: ActionDTO = { action: "survey_media_actions__assign", label: "Assign media" };
 
 type SectionDeps = {
   surveyId: string;
-  actions: SurveyActions;
   findingsByParent: Map<string, SurveyFormNodeRef[]>;
   mediaByNode: Map<string, SurveyMediaListItem[]>;
   unassignedMedia: SurveyMediaListItem[];
@@ -30,7 +32,6 @@ export function SectionBlock({
   nextSectionCompletion,
   completion,
   surveyId,
-  actions,
   findingsByParent,
   mediaByNode,
   unassignedMedia,
@@ -48,7 +49,14 @@ export function SectionBlock({
   const hidden = section.condition_visible === false;
   const [overridden, setOverridden] = useState(false);
   const show = !hidden || overridden;
-  const drop = useDropTarget(DRAG_MEDIA_TYPE, (mediaId) => actions.assignMedia(mediaId, section.id));
+  const mediaExecutor = useActionExecutor({ actionGroup: "survey_media_actions" });
+  const drop = useDropTarget(DRAG_MEDIA_TYPE, (mediaId) =>
+    mediaExecutor.executeAction(
+      ASSIGN_MEDIA,
+      { action: ASSIGN_MEDIA.action, data: { node_id: section.id } } as never,
+      { silent: true, objectId: mediaId },
+    ),
+  );
 
   const progress = completion ? `${pad2(completion.filled)} / ${pad2(completion.total)}` : null;
 
@@ -94,7 +102,7 @@ export function SectionBlock({
             )}
           </div>
         </div>
-        {show && <AddFindingButton parentNodeId={section.id} onAdded={actions.invalidate} />}
+        {show && <AddFindingButton parentNodeId={section.id} />}
       </div>
 
       {!show ? (
@@ -113,7 +121,6 @@ export function SectionBlock({
         <SectionBody
           section={section}
           surveyId={surveyId}
-          actions={actions}
           findingsByParent={findingsByParent}
           mediaByNode={mediaByNode}
           unassignedMedia={unassignedMedia}
@@ -145,7 +152,6 @@ export function SectionBlock({
 
 type FieldDeps = {
   surveyId: string;
-  actions: SurveyActions;
   findingsByParent: Map<string, SurveyFormNodeRef[]>;
   mediaByNode: Map<string, SurveyMediaListItem[]>;
   unassignedMedia: SurveyMediaListItem[];
@@ -155,7 +161,6 @@ function SectionBody({
   section,
   ...deps
 }: { section: Tree } & FieldDeps) {
-  const { actions } = deps;
   const fieldChildren = section.children.filter((c) => c.kind === "field");
   return (
     <div className="space-y-4">
@@ -177,7 +182,7 @@ function SectionBody({
         }
         return null;
       })}
-      <AddAdHocFieldButton parentNodeId={section.id} onAdded={actions.invalidate} />
+      <AddAdHocFieldButton parentNodeId={section.id} />
     </div>
   );
 }
@@ -186,7 +191,6 @@ function SubsectionBlock({
   subsection,
   ...deps
 }: { subsection: Tree } & FieldDeps) {
-  const { actions } = deps;
   const fields = subsection.children.filter((n) => n.kind === "field");
   return (
     <div className="space-y-3">
@@ -200,7 +204,7 @@ function SubsectionBlock({
           {...deps}
         />
       ))}
-      <AddAdHocFieldButton parentNodeId={subsection.id} onAdded={actions.invalidate} />
+      <AddAdHocFieldButton parentNodeId={subsection.id} />
     </div>
   );
 }

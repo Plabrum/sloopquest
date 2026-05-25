@@ -352,7 +352,6 @@ export function GalleryPage() {
             <div className="rounded-sm border border-ink/10 bg-card p-4">
               <PhotosRail
                 surveyId={MOCK_SURVEY_DETAIL.id}
-                onUploaded={() => {}}
                 items={MOCK_MEDIA.slice(0, 6)}
                 unassigned={MOCK_MEDIA.slice(6)}
                 sectionLabel="Hull"

@@ -70,11 +70,22 @@ export function useActionExecutor({
     error: null,
   });
 
+  /**
+   * Run an action. `silent` skips state mutations, the success toast, and
+   * post-action navigation/clipboard handling — used for inline writes
+   * (blur saves, drag-drop) where the UI flow would be noise. Error toasts
+   * and query invalidation still run. `objectId` overrides the executor-level
+   * objectId for per-call object actions (e.g. iterating over media items).
+   */
   async function executeAction(
     action: ActionDTO,
     actionBody?: ActionBodyUnion,
+    opts?: { silent?: boolean; objectId?: string },
   ) {
-    setState((prev) => ({ ...prev, isExecuting: true, error: null }));
+    const silent = opts?.silent ?? false;
+    if (!silent) {
+      setState((prev) => ({ ...prev, isExecuting: true, error: null }));
+    }
 
     try {
       let finalBody = actionBody;
@@ -93,42 +104,46 @@ export function useActionExecutor({
       const responsePromise = executeActionApi({
         action,
         actionGroup,
-        objectId,
+        objectId: opts?.objectId ?? objectId,
         actionBody: finalBody,
         executeGroupActionMutation,
         executeObjectActionMutation,
       });
 
-      const clipboardClaimed =
-        preclaimClipboardFromActionResponse(responsePromise);
+      const clipboardClaimed = silent
+        ? false
+        : preclaimClipboardFromActionResponse(responsePromise);
 
       const response = await responsePromise;
 
-      const resultHasOwnToast =
-        response.action_result != null &&
-        "type" in response.action_result &&
-        response.action_result.type === "copy_to_clipboard" &&
-        response.action_result.toast != null;
+      if (!silent) {
+        const resultHasOwnToast =
+          response.action_result != null &&
+          "type" in response.action_result &&
+          response.action_result.type === "copy_to_clipboard" &&
+          response.action_result.toast != null;
 
-      if (!resultHasOwnToast) {
-        toast.success(
-          response.message || `${action.label} completed successfully`,
-        );
+        if (!resultHasOwnToast) {
+          toast.success(
+            response.message || `${action.label} completed successfully`,
+          );
+        }
       }
 
       handleQueryInvalidation(queryClient, response, onInvalidate);
 
       onSuccess?.(action, response);
 
-      handleActionResult(response, navigate, { clipboardClaimed });
-
-      setState({
-        isExecuting: false,
-        pendingAction: null,
-        showConfirmation: false,
-        showForm: false,
-        error: null,
-      });
+      if (!silent) {
+        handleActionResult(response, navigate, { clipboardClaimed });
+        setState({
+          isExecuting: false,
+          pendingAction: null,
+          showConfirmation: false,
+          showForm: false,
+          error: null,
+        });
+      }
 
       return response;
     } catch (err) {
@@ -137,11 +152,13 @@ export function useActionExecutor({
         `Failed to execute ${action.label}`,
       );
 
-      setState((prev) => ({
-        ...prev,
-        isExecuting: false,
-        error: errorMessage,
-      }));
+      if (!silent) {
+        setState((prev) => ({
+          ...prev,
+          isExecuting: false,
+          error: errorMessage,
+        }));
+      }
 
       toast.error(errorMessage);
       onError?.(action, err as Error);

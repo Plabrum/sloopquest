@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useActionExecutor } from "@/hooks/actions/use-action-executor";
+import type { ActionDTO } from "@/lib/actions/types";
 import type { SurveyMediaListItem } from "@/openapi/litestarAPI.schemas";
 import { CapturePhotoButton } from "./capture-photo-button";
-import type { SurveyActions } from "./use-survey-actions";
+
+const ASSIGN_MEDIA: ActionDTO = { action: "survey_media_actions__assign", label: "Assign media" };
 
 type PhotoActionRowProps = {
   nodeId: string;
   surveyId: string;
-  actions: SurveyActions;
   mediaByNode: Map<string, SurveyMediaListItem[]>;
   unassignedMedia: SurveyMediaListItem[];
 };
@@ -16,7 +18,6 @@ type PhotoActionRowProps = {
 export function PhotoActionRow({
   nodeId,
   surveyId,
-  actions,
   mediaByNode,
   unassignedMedia,
 }: PhotoActionRowProps) {
@@ -32,27 +33,21 @@ export function PhotoActionRow({
         mode="camera"
         size="xs"
         label="+ Camera"
-        onUploaded={actions.invalidate}
       />
-      <AttachPhotoButton
-        nodeId={nodeId}
-        actions={actions}
-        unassignedMedia={unassignedMedia}
-      />
+      <AttachPhotoButton nodeId={nodeId} unassignedMedia={unassignedMedia} />
     </div>
   );
 }
 
 function AttachPhotoButton({
   nodeId,
-  actions,
   unassignedMedia,
 }: {
   nodeId: string;
-  actions: SurveyActions;
   unassignedMedia: SurveyMediaListItem[];
 }) {
   const [open, setOpen] = useState(false);
+  const mediaExecutor = useActionExecutor({ actionGroup: "survey_media_actions" });
   const disabled = unassignedMedia.length === 0;
 
   return (
@@ -75,7 +70,11 @@ function AttachPhotoButton({
               key={m.id}
               type="button"
               onClick={async () => {
-                await actions.assignMedia(m.id, nodeId);
+                await mediaExecutor.executeAction(
+                  ASSIGN_MEDIA,
+                  { action: ASSIGN_MEDIA.action, data: { node_id: nodeId } } as never,
+                  { silent: true, objectId: m.id },
+                );
                 setOpen(false);
               }}
               className="aspect-square overflow-hidden rounded border hover:ring-2 hover:ring-primary"

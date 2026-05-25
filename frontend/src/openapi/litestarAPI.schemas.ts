@@ -2305,6 +2305,7 @@ export interface SurveyFormNodeRef {
   condition_visible?: SurveyFormNodeRefConditionVisible;
   attached_media?: SurveyMediaListItem[];
   findings?: SurveyFormNodeRef[];
+  actions?: ActionDTO[];
 }
 
 export interface SurveyListItem {
@@ -3237,6 +3238,8 @@ export interface ThreadsSchemasMessageSchema {
   updated_at: string;
   user?: ThreadsSchemasMessageSchemaUser;
 }
+
+export type HealthHealth200 = {[key: string]: string};
 
 export type SchemaCrudMetadataCrudMetadata200 = { [key: string]: unknown };
 

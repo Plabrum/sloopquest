@@ -1,3 +1,4 @@
+import inspect
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any, Literal, get_type_hints
@@ -112,6 +113,7 @@ def make_crud_controller[ModelT: BaseDBModel, ListT: ActionableList, DetailT: Ac
     list_item_type = hints.get("return", Struct)
     detail_hints = get_type_hints(config.to_detail)
     detail_type = detail_hints.get("return", Struct)
+    _to_detail_wants_action_deps = "action_deps" in inspect.signature(config.to_detail).parameters
 
     # The action group is resolved lazily at request time — at controller-build
     # time the action registry may not yet be populated, since domain routes
@@ -206,7 +208,13 @@ def make_crud_controller[ModelT: BaseDBModel, ListT: ActionableList, DetailT: Ac
         if obj is None:
             raise NotFoundException()
 
-        detail = config.to_detail(obj, user)
+        # `to_detail` may optionally declare an `action_deps` parameter — used by
+        # resources that need to hydrate actions on nested objects (e.g. survey
+        # form nodes). Detected by signature, so existing callers stay (obj, user).
+        if _to_detail_wants_action_deps:
+            detail = config.to_detail(obj, user, action_deps=action_deps)  # type: ignore[call-arg]
+        else:
+            detail = config.to_detail(obj, user)
         if action_deps is not None:
             action_group = ActionRegistry().find_by_model(model)
             if action_group is not None:
