@@ -201,25 +201,26 @@ resource "aws_instance" "app" {
   vpc_security_group_ids = [aws_security_group.app.id]
 
   user_data = base64encode(templatefile("${path.module}/user_data.sh", {
-    compose_content = file("${path.module}/docker-compose.yml")
-    aws_region      = var.aws_region
-    ecr_repo_url    = var.ecr_repository_url
-    image_tag       = var.image_tag
-    domain          = var.domain
-    api_subdomain   = var.api_subdomain
-    db_name         = var.db_name
-    db_user         = var.db_username
-    db_password     = var.db_password
-    secrets_arn     = aws_secretsmanager_secret.app.arn
-    ses_from_email  = "noreply@${var.domain}"
-    ses_reply_to    = "support@${var.domain}"
-    ses_config_set  = aws_ses_configuration_set.main.name
-    s3_media_bucket = module.media.bucket_name
-    frontend_origin = "https://app.${var.domain}"
-    api_base_url    = "https://${var.api_subdomain}.${var.domain}"
-    otlp_host       = var.betterstack_otlp_ingesting_host
-    otlp_token      = var.betterstack_otlp_source_token
-    extra_env       = var.extra_env
+    compose_content   = file("${path.module}/docker-compose.yml")
+    caddyfile_content = file("${path.module}/Caddyfile")
+    aws_region        = var.aws_region
+    ecr_repo_url      = var.ecr_repository_url
+    image_tag         = var.image_tag
+    domain            = var.domain
+    api_subdomain     = var.api_subdomain
+    db_name           = var.db_name
+    db_user           = var.db_username
+    db_password       = var.db_password
+    secrets_arn       = aws_secretsmanager_secret.app.arn
+    ses_from_email    = "noreply@${var.domain}"
+    ses_reply_to      = "support@${var.domain}"
+    ses_config_set    = aws_ses_configuration_set.main.name
+    s3_media_bucket   = module.media.bucket_name
+    frontend_origin   = "https://app.${var.domain}"
+    api_base_url      = "https://${var.api_subdomain}.${var.domain}"
+    otlp_host         = var.betterstack_otlp_ingesting_host
+    otlp_token        = var.betterstack_otlp_source_token
+    extra_env         = var.extra_env
   }))
 
   root_block_device {

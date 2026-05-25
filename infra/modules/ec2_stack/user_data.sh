@@ -4,7 +4,14 @@ exec > >(tee /var/log/user-data.log | logger -t user-data) 2>&1
 
 # ── System packages ───────────────────────────────────────────────────────────
 dnf update -y
-dnf install -y docker docker-compose-plugin python3 curl
+dnf install -y docker python3
+
+# docker compose v2 plugin (not packaged on AL2023; install the binary)
+COMPOSE_VERSION="v2.39.4"
+mkdir -p /usr/local/lib/docker/cli-plugins
+curl -fsSL "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-linux-x86_64" \
+  -o /usr/local/lib/docker/cli-plugins/docker-compose
+chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 
 systemctl enable docker
 systemctl start docker
@@ -20,6 +27,11 @@ cd /opt/sloopquest
 cat > /opt/sloopquest/docker-compose.yml <<'COMPOSE'
 ${compose_content}
 COMPOSE
+
+# Caddyfile - copied verbatim from the repo
+cat > /opt/sloopquest/Caddyfile <<'CADDYFILE'
+${caddyfile_content}
+CADDYFILE
 
 # ── .env — all non-secret config; secrets are merged in by deploy.sh ─────────
 cat > /opt/sloopquest/.env <<'ENV'
