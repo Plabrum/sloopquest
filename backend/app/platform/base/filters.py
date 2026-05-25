@@ -10,7 +10,7 @@ to avoid leaking schema information.
 from __future__ import annotations
 
 from datetime import datetime
-from enum import StrEnum
+from enum import StrEnum, auto
 from typing import Literal
 
 from msgspec import Struct
@@ -21,43 +21,43 @@ from app.utils.sqids import SqidType, sqid_decode
 
 
 class FilterType(StrEnum):
-    text = "text"
-    range = "range"
-    date = "date"
-    boolean = "boolean"
-    enum = "enum"
-    null = "null"
+    TEXT = auto()
+    RANGE = auto()
+    DATE = auto()
+    BOOLEAN = auto()
+    ENUM = auto()
+    NULL = auto()
 
 
-class TextFilter(Struct, tag=FilterType.text.value):
+class TextFilter(Struct, tag=FilterType.TEXT.value):
     column: str
     operation: Literal["contains", "starts_with", "ends_with", "equals"]
     value: str
 
 
-class RangeFilter(Struct, tag=FilterType.range.value):
+class RangeFilter(Struct, tag=FilterType.RANGE.value):
     column: str
     start: int | float | None = None
     finish: int | float | None = None
 
 
-class DateFilter(Struct, tag=FilterType.date.value):
+class DateFilter(Struct, tag=FilterType.DATE.value):
     column: str
     start: datetime | None = None
     finish: datetime | None = None
 
 
-class BooleanFilter(Struct, tag=FilterType.boolean.value):
+class BooleanFilter(Struct, tag=FilterType.BOOLEAN.value):
     column: str
     value: bool
 
 
-class EnumFilter(Struct, tag=FilterType.enum.value):
+class EnumFilter(Struct, tag=FilterType.ENUM.value):
     column: str
     values: list[str]
 
 
-class NullFilter(Struct, tag=FilterType.null.value):
+class NullFilter(Struct, tag=FilterType.NULL.value):
     """Match rows where `column IS NULL` (is_null=True) or `IS NOT NULL` (is_null=False)."""
 
     column: str
@@ -68,8 +68,8 @@ FilterDefinition = TextFilter | RangeFilter | DateFilter | BooleanFilter | EnumF
 
 
 class SortDirection(StrEnum):
-    asc = "asc"
-    desc = "desc"
+    ASC = auto()
+    DESC = auto()
 
 
 class SortDefinition(Struct):
@@ -159,7 +159,7 @@ def apply_sorts(
         col = _resolve_column(model, sort.column, allowed_columns)
         if col is None:
             continue
-        if sort.direction == SortDirection.asc:
+        if sort.direction == SortDirection.ASC:
             query = query.order_by(col.asc())
         else:
             query = query.order_by(col.desc())
