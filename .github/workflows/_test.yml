@@ -59,6 +59,4 @@ jobs:
         run: cd backend && uv run ruff check .
 
       - name: Semgrep
-        uses: semgrep/semgrep-action@v1
-        with:
-          config: semgrep/
+        run: uvx semgrep --config=semgrep/ --error backend/

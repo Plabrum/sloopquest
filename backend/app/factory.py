@@ -42,7 +42,6 @@ from app.domain.users.routes import user_router
 from app.domain.vessels.routes import vessel_router
 from app.platform.actions.routes import action_router
 from app.platform.auth.routes import auth_router
-from app.platform.auth.session import get_dev_demo_user
 from app.platform.base.models import BaseDBModel
 from app.platform.base.schema_routes import schema_router
 from app.platform.base.search_routes import search_router
@@ -127,11 +126,7 @@ def create_app(
     async def retrieve_user_handler(session: dict, conn: ASGIConnection) -> User | None:
         user_id = session.get("user_id")
         if not user_id:
-            demo_user = await get_dev_demo_user(session_factory)
-            if demo_user is not None:
-                conn.set_session({"user_id": int(demo_user.id)})
-            return demo_user
-
+            return None
         async with session_factory() as db:
             return await get_user_by_id(db, user_id)
 

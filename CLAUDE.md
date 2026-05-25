@@ -21,6 +21,7 @@
 ## Backend Hard Rules
 
 - **Inject `transaction`, never `db_session`.** `transaction` wraps with RLS, soft-delete listener, and raiseload safety. `db_session` bypasses all three.
+- **Inject `user: User` directly, don't pull it off `request`.** Litestar's auth flow resolves `User` as a normal dep wherever auth is required — including inside `@dep` providers. Reach for `request.user` or `request.scope.get("user")` only when the code legitimately runs on unauthenticated paths (rare; see `provide_transaction`).
 - **Raiseload blocks lazy loads.** Relationships accessed in CRUD mappers need `lazy="noload"` + explicit `joinedload()` in the CRUD config. `lazy="joined"` on the model is overridden by session-level raiseload → silent 500s.
 - **No field name shadowing in msgspec Structs.** Never name a field the same as its type import (`date: date`, `type: str`). Python 3.14 CI resolves annotations differently from 3.13 local — silent 500s on action endpoints.
 - **Top-level endpoints only.** Never nested list routes. Use parent ID in `filterable_columns`; RLS handles access control.

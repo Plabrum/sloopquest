@@ -7,7 +7,6 @@ from litestar.middleware.rate_limit import RateLimitConfig
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import config
 from app.domain.users.models import User
 from app.platform.auth.guards import requires_session
 from app.platform.auth.service import AuthService
@@ -42,11 +41,14 @@ async def request_magic_link(
     auth_service: AuthService,
     transaction: AsyncSession,
 ) -> dict[str, str]:
-    """Request a magic link. In dev, demo@sloopquest.com addresses log in instantly."""
+    """Request a magic link. Demo addresses (demo@ / demo+*@sloopquest.com) log in instantly."""
     email = data.email.strip().lower()
     local, _, domain = email.partition("@")
 
-    if config.IS_DEV and domain == _DEMO_EMAIL_DOMAIN and local.startswith(_DEMO_EMAIL_PREFIX):
+    is_demo = domain == _DEMO_EMAIL_DOMAIN and (
+        local == _DEMO_EMAIL_PREFIX or local.startswith(f"{_DEMO_EMAIL_PREFIX}+")
+    )
+    if is_demo:
         user = (
             await transaction.execute(select(User).where(User.email == email, User.organization_id == _DEMO_ORG_ID))
         ).scalar_one_or_none()
