@@ -7,21 +7,23 @@ import {
   ClientActionsUpdateForm,
   VesselActionsCreateForm,
   VesselActionsUpdateForm,
-  VesselActionsAddEngineForm,
+  EngineActionsCreateForm,
+  EngineActionsUpdateForm,
   EmailThreadActionsComposeForm,
-  EmailThreadActionsReplyToThreadForm,
+  MessageActionsReplyToThreadForm,
   MessageActionsForwardMessageForm,
   InvoiceActionsCreateForm,
   InvoiceActionsUpdateForm,
-  InvoiceActionsAddLineItemForm,
+  InvoiceLineItemActionsCreateForm,
+  InvoiceLineItemActionsUpdateForm,
   SubscriptionActionsCreateForm,
   SubscriptionActionsUpdateForm,
   PricingGuideActionsCreateForm,
   PricingGuideActionsUpdateForm,
-  PricingGuideActionsAddTierForm,
+  PricingTierActionsCreateForm,
+  PricingTierActionsUpdateForm,
   CalendarEventActionsCreateForm,
   CalendarEventActionsUpdateForm,
-  UserActionsClaimInboxForm,
   ManufacturerActionsCreateForm,
   ManufacturerActionsUpdateForm,
   PartActionsCreateForm,
@@ -31,6 +33,8 @@ import {
   SurveyTemplateActionsCreateForm,
   SurveyTemplateActionsUpdateForm,
   SurveyMediaActionsSetCaptionForm,
+  OnboardingActionsClaimInboxForm,
+  OnboardingActionsConfirmPricingForm,
   ReportActionsCreateForm,
   ReportActionsUpdateForm,
   WidgetActionsCreateForm,
@@ -51,14 +55,17 @@ export const generatedRegistry: Record<string, { render: (params: any) => ReactE
   "vessel_actions__update": {
     render: (params) => <VesselActionsUpdateForm {...params} />,
   },
-  "vessel_actions__add_engine": {
-    render: (params) => <VesselActionsAddEngineForm {...params} />,
+  "engine_actions__create": {
+    render: (params) => <EngineActionsCreateForm {...params} />,
+  },
+  "engine_actions__update": {
+    render: (params) => <EngineActionsUpdateForm {...params} />,
   },
   "email_thread_actions__compose": {
     render: (params) => <EmailThreadActionsComposeForm {...params} />,
   },
-  "email_thread_actions__reply_to_thread": {
-    render: (params) => <EmailThreadActionsReplyToThreadForm {...params} />,
+  "message_actions__reply_to_thread": {
+    render: (params) => <MessageActionsReplyToThreadForm {...params} />,
   },
   "message_actions__forward_message": {
     render: (params) => <MessageActionsForwardMessageForm {...params} />,
@@ -69,8 +76,11 @@ export const generatedRegistry: Record<string, { render: (params: any) => ReactE
   "invoice_actions__update": {
     render: (params) => <InvoiceActionsUpdateForm {...params} />,
   },
-  "invoice_actions__add_line_item": {
-    render: (params) => <InvoiceActionsAddLineItemForm {...params} />,
+  "invoice_line_item_actions__create": {
+    render: (params) => <InvoiceLineItemActionsCreateForm {...params} />,
+  },
+  "invoice_line_item_actions__update": {
+    render: (params) => <InvoiceLineItemActionsUpdateForm {...params} />,
   },
   "subscription_actions__create": {
     render: (params) => <SubscriptionActionsCreateForm {...params} />,
@@ -84,17 +94,17 @@ export const generatedRegistry: Record<string, { render: (params: any) => ReactE
   "pricing_guide_actions__update": {
     render: (params) => <PricingGuideActionsUpdateForm {...params} />,
   },
-  "pricing_guide_actions__add_tier": {
-    render: (params) => <PricingGuideActionsAddTierForm {...params} />,
+  "pricing_tier_actions__create": {
+    render: (params) => <PricingTierActionsCreateForm {...params} />,
+  },
+  "pricing_tier_actions__update": {
+    render: (params) => <PricingTierActionsUpdateForm {...params} />,
   },
   "calendar_event_actions__create": {
     render: (params) => <CalendarEventActionsCreateForm {...params} />,
   },
   "calendar_event_actions__update": {
     render: (params) => <CalendarEventActionsUpdateForm {...params} />,
-  },
-  "user_actions__claim_inbox": {
-    render: (params) => <UserActionsClaimInboxForm {...params} />,
   },
   "manufacturer_actions__create": {
     render: (params) => <ManufacturerActionsCreateForm {...params} />,
@@ -122,6 +132,12 @@ export const generatedRegistry: Record<string, { render: (params: any) => ReactE
   },
   "survey_media_actions__set_caption": {
     render: (params) => <SurveyMediaActionsSetCaptionForm {...params} />,
+  },
+  "onboarding_actions__claim_inbox": {
+    render: (params) => <OnboardingActionsClaimInboxForm {...params} />,
+  },
+  "onboarding_actions__confirm_pricing": {
+    render: (params) => <OnboardingActionsConfirmPricingForm {...params} />,
   },
   "report_actions__create": {
     render: (params) => <ReportActionsCreateForm {...params} />,

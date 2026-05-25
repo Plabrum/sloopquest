@@ -56,7 +56,7 @@ export interface ActionExecutionResponse {
 
 /** Object-level actions — performed on a specific object instance. */
 export interface ObjectActionData {
-  data: { id: string | number; actions?: ActionDTO[] } & Record<string, unknown>;
+  data: { id: string | number; actions?: ActionDTO[] };
   actionGroup: import("@/openapi/litestarAPI.schemas").ActionGroupType;
   onRefetch?: () => void;
   onActionComplete?: (action: ActionDTO, response: unknown) => void;

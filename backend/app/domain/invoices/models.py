@@ -77,7 +77,8 @@ class InvoiceLineItem(OrgScopedMixin, BaseDBModel):
         nullable=False,
         index=True,
     )
-    invoice_id: Mapped[int] = mapped_column(
+    invoice_id: Mapped[Sqid] = mapped_column(
+        SqidType,
         sa.ForeignKey("invoices.id", ondelete="CASCADE"),
         nullable=False,
         index=True,

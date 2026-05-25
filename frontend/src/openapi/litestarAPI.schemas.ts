@@ -72,10 +72,14 @@ export const ActionGroupType = {
   widget_actions: 'widget_actions',
   payment_method_actions: 'payment_method_actions',
   pricing_guide_actions: 'pricing_guide_actions',
+  pricing_tier_actions: 'pricing_tier_actions',
+  invoice_line_item_actions: 'invoice_line_item_actions',
+  engine_actions: 'engine_actions',
   calendar_event_actions: 'calendar_event_actions',
   survey_media_actions: 'survey_media_actions',
   survey_finding_actions: 'survey_finding_actions',
   form_node_actions: 'form_node_actions',
+  onboarding_actions: 'onboarding_actions',
 } as const;
 
 export interface ActionListResponse {
@@ -121,7 +125,7 @@ export interface AddAdHocSectionData {
 
 export interface AddEngineAction {
   data: AddEngineData;
-  action: 'vessel_actions__add_engine';
+  action: 'engine_actions__create';
 }
 
 export type AddEngineDataManufacturerId = string | null;
@@ -141,6 +145,8 @@ export type AddEngineDataEngineType = EngineType | null;
 export type AddEngineDataHoursAtSurvey = number | null;
 
 export interface AddEngineData {
+  /** SQID-encoded identifier */
+  vessel_id: string;
   position: EnginePosition;
   manufacturer_id?: AddEngineDataManufacturerId;
   model?: AddEngineDataModel;
@@ -172,10 +178,12 @@ export interface AddFindingData {
 
 export interface AddLineItemAction {
   data: AddLineItemData;
-  action: 'invoice_actions__add_line_item';
+  action: 'invoice_line_item_actions__create';
 }
 
 export interface AddLineItemData {
+  /** SQID-encoded identifier */
+  invoice_id: string;
   description: string;
   quantity: number;
   unit_price_cents: number;
@@ -184,24 +192,19 @@ export interface AddLineItemData {
 
 export interface AddPricingTierAction {
   data: AddPricingTierData;
-  action: 'pricing_guide_actions__add_tier';
+  action: 'pricing_tier_actions__create';
 }
 
-export type AddPricingTierDataServiceType = string | null;
-
-export type AddPricingTierDataLengthMinFt = number | null;
-
-export type AddPricingTierDataLengthMaxFt = number | null;
+export type AddPricingTierDataLengthUntilFt = number | null;
 
 export type AddPricingTierDataAmountCents = number | null;
 
 export interface AddPricingTierData {
-  service_type?: AddPricingTierDataServiceType;
-  length_min_ft?: AddPricingTierDataLengthMinFt;
-  length_max_ft?: AddPricingTierDataLengthMaxFt;
+  /** SQID-encoded identifier */
+  guide_id: string;
+  length_until_ft?: AddPricingTierDataLengthUntilFt;
   pricing_type: PricingType;
   amount_cents?: AddPricingTierDataAmountCents;
-  sort_order?: number;
 }
 
 export interface AddRepeaterInstanceAction {
@@ -464,7 +467,7 @@ export interface CategoricalTimeSeriesData {
 
 export interface ClaimInboxAction {
   data: ClaimInboxData;
-  action: 'user_actions__claim_inbox';
+  action: 'onboarding_actions__claim_inbox';
 }
 
 export interface ClaimInboxData {
@@ -568,6 +571,16 @@ export interface ComposeNewEmailAction {
 export interface ConfirmCalendarEventAction {
   data: EmptyActionData;
   action: 'calendar_event_actions__confirm';
+}
+
+export interface ConfirmPricingAction {
+  data: ConfirmPricingData;
+  action: 'onboarding_actions__confirm_pricing';
+}
+
+export interface ConfirmPricingData {
+  service_type: ServiceType;
+  tiers: OnboardingPricingTierInput[];
 }
 
 export type ConnectAccountRequirementsResponseFutureRequirements = {[key: string]: unknown};
@@ -796,7 +809,7 @@ export interface CreatePricingGuideAction {
 
 export interface CreatePricingGuideData {
   name: string;
-  is_active?: boolean;
+  service_type: ServiceType;
 }
 
 export interface CreateReportAction {
@@ -1029,6 +1042,74 @@ export interface DownloadFileActionResult {
 
 export interface EmptyActionData { [key: string]: unknown }
 
+export type EngineDetailManufacturerId = string | null;
+
+export type EngineDetailModel = string | null;
+
+export type EngineDetailSerialNumber = string | null;
+
+export type EngineDetailYear = number | null;
+
+export type EngineDetailHorsepower = number | null;
+
+export type EngineDetailFuelType = FuelType | null;
+
+export type EngineDetailEngineType = EngineType | null;
+
+export type EngineDetailHoursAtSurvey = number | null;
+
+export interface EngineDetail {
+  /** SQID-encoded identifier */
+  id: string;
+  /** SQID-encoded identifier */
+  vessel_id: string;
+  position: EnginePosition;
+  manufacturer_id?: EngineDetailManufacturerId;
+  model?: EngineDetailModel;
+  serial_number?: EngineDetailSerialNumber;
+  year?: EngineDetailYear;
+  horsepower?: EngineDetailHorsepower;
+  fuel_type?: EngineDetailFuelType;
+  engine_type?: EngineDetailEngineType;
+  hours_at_survey?: EngineDetailHoursAtSurvey;
+  created_at: string;
+  actions?: ActionDTO[];
+}
+
+export type EngineListItemManufacturerId = string | null;
+
+export type EngineListItemModel = string | null;
+
+export type EngineListItemSerialNumber = string | null;
+
+export type EngineListItemYear = number | null;
+
+export type EngineListItemHorsepower = number | null;
+
+export type EngineListItemFuelType = FuelType | null;
+
+export type EngineListItemEngineType = EngineType | null;
+
+export type EngineListItemHoursAtSurvey = number | null;
+
+export interface EngineListItem {
+  /** SQID-encoded identifier */
+  id: string;
+  /** SQID-encoded identifier */
+  vessel_id: string;
+  position: EnginePosition;
+  manufacturer_id?: EngineListItemManufacturerId;
+  model?: EngineListItemModel;
+  serial_number?: EngineListItemSerialNumber;
+  year?: EngineListItemYear;
+  horsepower?: EngineListItemHorsepower;
+  fuel_type?: EngineListItemFuelType;
+  engine_type?: EngineListItemEngineType;
+  hours_at_survey?: EngineListItemHoursAtSurvey;
+  created_at: string;
+  actions?: ActionDTO[];
+}
+
 export type EnginePosition = typeof EnginePosition[keyof typeof EnginePosition];
 
 
@@ -1041,37 +1122,6 @@ export const EnginePosition = {
   gen_1: 'gen_1',
   gen_2: 'gen_2',
 } as const;
-
-export type EngineSchemaManufacturerId = string | null;
-
-export type EngineSchemaModel = string | null;
-
-export type EngineSchemaSerialNumber = string | null;
-
-export type EngineSchemaYear = number | null;
-
-export type EngineSchemaHorsepower = number | null;
-
-export type EngineSchemaFuelType = FuelType | null;
-
-export type EngineSchemaEngineType = EngineType | null;
-
-export type EngineSchemaHoursAtSurvey = number | null;
-
-export interface EngineSchema {
-  /** SQID-encoded identifier */
-  id: string;
-  position: EnginePosition;
-  manufacturer_id?: EngineSchemaManufacturerId;
-  model?: EngineSchemaModel;
-  serial_number?: EngineSchemaSerialNumber;
-  year?: EngineSchemaYear;
-  horsepower?: EngineSchemaHorsepower;
-  fuel_type?: EngineSchemaFuelType;
-  engine_type?: EngineSchemaEngineType;
-  hours_at_survey?: EngineSchemaHoursAtSurvey;
-  created_at: string;
-}
 
 export type EngineType = typeof EngineType[keyof typeof EngineType];
 
@@ -1260,20 +1310,35 @@ export interface InvoiceDetail {
   stripe_payment_intent_id?: InvoiceDetailStripePaymentIntentId;
   stripe_client_secret?: InvoiceDetailStripeClientSecret;
   access_token?: InvoiceDetailAccessToken;
-  line_items: InvoiceLineItemSchema[];
   created_at: string;
   updated_at: string;
   actions?: ActionDTO[];
 }
 
-export interface InvoiceLineItemSchema {
+export interface InvoiceLineItemDetail {
   /** SQID-encoded identifier */
   id: string;
+  /** SQID-encoded identifier */
+  invoice_id: string;
   description: string;
   quantity: number;
   unit_price_cents: number;
   sort_order: number;
   created_at: string;
+  actions?: ActionDTO[];
+}
+
+export interface InvoiceLineItemListItem {
+  /** SQID-encoded identifier */
+  id: string;
+  /** SQID-encoded identifier */
+  invoice_id: string;
+  description: string;
+  quantity: number;
+  unit_price_cents: number;
+  sort_order: number;
+  created_at: string;
+  actions?: ActionDTO[];
 }
 
 export type InvoiceListItemIdentifier = string | null;
@@ -1398,12 +1463,16 @@ export interface MarkUnreadAction {
   action: 'message_actions__mark_unread';
 }
 
+export type MeResponseOnboardingState = string | null;
+
 export interface MeResponse {
   id: number;
   name: string;
   email: string;
   email_verified: boolean;
   role: string;
+  is_onboarded: boolean;
+  onboarding_state?: MeResponseOnboardingState;
 }
 
 export type MediaResponseSchemaThumbnailUrl = string | null;
@@ -1572,6 +1641,57 @@ export interface NumericalTimeSeriesData {
   type: 'numerical';
 }
 
+export interface OnboardingConfigResponse {
+  inbox_domain: string;
+}
+
+export type OnboardingDetailStartedAt = string | null;
+
+export type OnboardingDetailCompletedAt = string | null;
+
+export interface OnboardingDetail {
+  /** SQID-encoded identifier */
+  id: string;
+  state: OnboardingState;
+  started_at?: OnboardingDetailStartedAt;
+  completed_at?: OnboardingDetailCompletedAt;
+  actions?: ActionDTO[];
+}
+
+export type OnboardingListItemStartedAt = string | null;
+
+export type OnboardingListItemCompletedAt = string | null;
+
+export interface OnboardingListItem {
+  /** SQID-encoded identifier */
+  id: string;
+  state: OnboardingState;
+  started_at?: OnboardingListItemStartedAt;
+  completed_at?: OnboardingListItemCompletedAt;
+  actions?: ActionDTO[];
+}
+
+export type OnboardingPricingTierInputLengthUntilFt = number | null;
+
+export type OnboardingPricingTierInputAmountCents = number | null;
+
+export interface OnboardingPricingTierInput {
+  length_until_ft?: OnboardingPricingTierInputLengthUntilFt;
+  pricing_type: PricingType;
+  amount_cents?: OnboardingPricingTierInputAmountCents;
+}
+
+export type OnboardingState = typeof OnboardingState[keyof typeof OnboardingState];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const OnboardingState = {
+  not_started: 'not_started',
+  inbox: 'inbox',
+  pricing: 'pricing',
+  completed: 'completed',
+} as const;
+
 export interface PagedResponseAppDomainCalendarEventsSchemasCalendarEventListItem {
   items: CalendarEventListItem[];
   total: number;
@@ -1604,6 +1724,14 @@ export interface PagedResponseAppDomainInboxSchemasThreadListItem {
   has_more: boolean;
 }
 
+export interface PagedResponseAppDomainInvoicesSchemasInvoiceLineItemListItem {
+  items: InvoiceLineItemListItem[];
+  total: number;
+  offset: number;
+  limit: number;
+  has_more: boolean;
+}
+
 export interface PagedResponseAppDomainInvoicesSchemasInvoiceListItem {
   items: InvoiceListItem[];
   total: number;
@@ -1614,6 +1742,14 @@ export interface PagedResponseAppDomainInvoicesSchemasInvoiceListItem {
 
 export interface PagedResponseAppDomainManufacturersSchemasManufacturerListItem {
   items: ManufacturerListItem[];
+  total: number;
+  offset: number;
+  limit: number;
+  has_more: boolean;
+}
+
+export interface PagedResponseAppDomainOnboardingSchemasOnboardingListItem {
+  items: OnboardingListItem[];
   total: number;
   offset: number;
   limit: number;
@@ -1638,6 +1774,14 @@ export interface PagedResponseAppDomainPaymentMethodsSchemasPaymentMethodListIte
 
 export interface PagedResponseAppDomainPricingGuidesSchemasPricingGuideListItem {
   items: PricingGuideListItem[];
+  total: number;
+  offset: number;
+  limit: number;
+  has_more: boolean;
+}
+
+export interface PagedResponseAppDomainPricingGuidesSchemasPricingTierListItem {
+  items: PricingTierListItem[];
   total: number;
   offset: number;
   limit: number;
@@ -1686,6 +1830,14 @@ export interface PagedResponseAppDomainSurveysSchemasSurveyTemplateListItem {
 
 export interface PagedResponseAppDomainUsersRoutesUserListItem {
   items: UserListItem[];
+  total: number;
+  offset: number;
+  limit: number;
+  has_more: boolean;
+}
+
+export interface PagedResponseAppDomainVesselsSchemasEngineListItem {
+  items: EngineListItem[];
   total: number;
   offset: number;
   limit: number;
@@ -1822,8 +1974,8 @@ export interface PricingGuideDetail {
   /** SQID-encoded identifier */
   id: string;
   name: string;
+  service_type: ServiceType;
   is_active: boolean;
-  tiers: PricingTierOutput[];
   created_at: string;
   updated_at: string;
   actions?: ActionDTO[];
@@ -1833,28 +1985,40 @@ export interface PricingGuideListItem {
   /** SQID-encoded identifier */
   id: string;
   name: string;
+  service_type: ServiceType;
   is_active: boolean;
   created_at: string;
   actions?: ActionDTO[];
 }
 
-export type PricingTierOutputServiceType = string | null;
+export type PricingTierDetailLengthUntilFt = number | null;
 
-export type PricingTierOutputLengthMinFt = number | null;
+export type PricingTierDetailAmountCents = number | null;
 
-export type PricingTierOutputLengthMaxFt = number | null;
-
-export type PricingTierOutputAmountCents = number | null;
-
-export interface PricingTierOutput {
+export interface PricingTierDetail {
   /** SQID-encoded identifier */
   id: string;
-  service_type?: PricingTierOutputServiceType;
-  length_min_ft?: PricingTierOutputLengthMinFt;
-  length_max_ft?: PricingTierOutputLengthMaxFt;
+  /** SQID-encoded identifier */
+  guide_id: string;
+  length_until_ft?: PricingTierDetailLengthUntilFt;
   pricing_type: PricingType;
-  amount_cents?: PricingTierOutputAmountCents;
-  sort_order: number;
+  amount_cents?: PricingTierDetailAmountCents;
+  actions?: ActionDTO[];
+}
+
+export type PricingTierListItemLengthUntilFt = number | null;
+
+export type PricingTierListItemAmountCents = number | null;
+
+export interface PricingTierListItem {
+  /** SQID-encoded identifier */
+  id: string;
+  /** SQID-encoded identifier */
+  guide_id: string;
+  length_until_ft?: PricingTierListItemLengthUntilFt;
+  pricing_type: PricingType;
+  amount_cents?: PricingTierListItemAmountCents;
+  actions?: ActionDTO[];
 }
 
 export type PricingType = typeof PricingType[keyof typeof PricingType];
@@ -1955,23 +2119,13 @@ export interface ReleaseReportAction {
 }
 
 export interface RemoveEngineAction {
-  data: RemoveEngineData;
-  action: 'vessel_actions__remove_engine';
-}
-
-export interface RemoveEngineData {
-  /** SQID-encoded identifier */
-  engine_id: string;
+  data: EmptyActionData;
+  action: 'engine_actions__remove';
 }
 
 export interface RemoveLineItemAction {
-  data: RemoveLineItemData;
-  action: 'invoice_actions__remove_line_item';
-}
-
-export interface RemoveLineItemData {
-  /** SQID-encoded identifier */
-  line_item_id: string;
+  data: EmptyActionData;
+  action: 'invoice_line_item_actions__remove';
 }
 
 export interface RemovePaymentMethodAction {
@@ -1980,25 +2134,22 @@ export interface RemovePaymentMethodAction {
 }
 
 export interface RemovePricingTierAction {
-  data: RemovePricingTierData;
-  action: 'pricing_guide_actions__remove_tier';
-}
-
-export interface RemovePricingTierData {
-  /** SQID-encoded identifier */
-  tier_id: string;
+  data: EmptyActionData;
+  action: 'pricing_tier_actions__remove';
 }
 
 export type ReplyDataBodyHtml = string | null;
 
 export interface ReplyData {
+  /** SQID-encoded identifier */
+  email_thread_id: string;
   body_text: string;
   body_html?: ReplyDataBodyHtml;
 }
 
 export interface ReplyToThreadAction {
   data: ReplyData;
-  action: 'email_thread_actions__reply_to_thread';
+  action: 'message_actions__reply_to_thread';
 }
 
 export type ReportDetailTitle = string | null;
@@ -2146,6 +2297,25 @@ export interface SendMessageBody {
   content: string;
   timezone?: SendMessageBodyTimezone;
   context?: SendMessageBodyContext;
+}
+
+export type ServiceType = typeof ServiceType[keyof typeof ServiceType];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ServiceType = {
+  pre_purchase: 'pre_purchase',
+  insurance: 'insurance',
+  damage: 'damage',
+  sea_trial: 'sea_trial',
+  delivery: 'delivery',
+  consultation: 'consultation',
+  other: 'other',
+} as const;
+
+export interface SetActivePricingGuideAction {
+  data: EmptyActionData;
+  action: 'pricing_guide_actions__set_active';
 }
 
 export interface SetDefaultPaymentMethodAction {
@@ -2661,7 +2831,7 @@ export interface UpdateConnectAccountData {
 
 export interface UpdateEngineAction {
   data: UpdateEngineData;
-  action: 'vessel_actions__update_engine';
+  action: 'engine_actions__update';
 }
 
 export type UpdateEngineDataManufacturerId = string | null;
@@ -2681,8 +2851,6 @@ export type UpdateEngineDataEngineType = EngineType | null;
 export type UpdateEngineDataHoursAtSurvey = number | null;
 
 export interface UpdateEngineData {
-  /** SQID-encoded identifier */
-  engine_id: string;
   position: EnginePosition;
   manufacturer_id?: UpdateEngineDataManufacturerId;
   model?: UpdateEngineDataModel;
@@ -2717,12 +2885,10 @@ export interface UpdateInvoiceData {
 
 export interface UpdateLineItemAction {
   data: UpdateLineItemData;
-  action: 'invoice_actions__update_line_item';
+  action: 'invoice_line_item_actions__update';
 }
 
 export interface UpdateLineItemData {
-  /** SQID-encoded identifier */
-  line_item_id: string;
   description: string;
   quantity: number;
   unit_price_cents: number;
@@ -2757,31 +2923,22 @@ export interface UpdatePricingGuideAction {
 
 export interface UpdatePricingGuideData {
   name: string;
-  is_active: boolean;
+  service_type: ServiceType;
 }
 
 export interface UpdatePricingTierAction {
   data: UpdatePricingTierData;
-  action: 'pricing_guide_actions__update_tier';
+  action: 'pricing_tier_actions__update';
 }
 
-export type UpdatePricingTierDataServiceType = string | null;
-
-export type UpdatePricingTierDataLengthMinFt = number | null;
-
-export type UpdatePricingTierDataLengthMaxFt = number | null;
+export type UpdatePricingTierDataLengthUntilFt = number | null;
 
 export type UpdatePricingTierDataAmountCents = number | null;
 
 export interface UpdatePricingTierData {
-  /** SQID-encoded identifier */
-  tier_id: string;
-  service_type?: UpdatePricingTierDataServiceType;
-  length_min_ft?: UpdatePricingTierDataLengthMinFt;
-  length_max_ft?: UpdatePricingTierDataLengthMaxFt;
+  length_until_ft?: UpdatePricingTierDataLengthUntilFt;
   pricing_type: PricingType;
   amount_cents?: UpdatePricingTierDataAmountCents;
-  sort_order: number;
 }
 
 export interface UpdateReportAction {
@@ -2972,7 +3129,6 @@ export interface VesselDetail {
   fuel_capacity_gal?: VesselDetailFuelCapacityGal;
   hull_material?: VesselDetailHullMaterial;
   construction_notes?: VesselDetailConstructionNotes;
-  engines: EngineSchema[];
   created_at: string;
   updated_at: string;
   actions?: ActionDTO[];
@@ -3307,7 +3463,7 @@ export type ActionsActionGroupListActions400 = {
   extra?: ActionsActionGroupListActions400Extra;
 };
 
-export type ActionsActionGroupExecuteActionBody = CreateClientAction | UpdateClientAction | DeleteClientAction | CreateVesselAction | UpdateVesselAction | DeleteVesselAction | AddEngineAction | UpdateEngineAction | RemoveEngineAction | ComposeNewEmailAction | ArchiveThreadAction | UnarchiveThreadAction | MarkThreadReadAction | MarkThreadUnreadAction | AttachToClientAction | AttachToSurveyAction | ReplyToThreadAction | MarkReadAction | MarkUnreadAction | ArchiveMessageAction | UnarchiveMessageAction | ResendMessageAction | ForwardMessageAction | CreateInvoiceAction | UpdateInvoiceAction | DeleteInvoiceAction | SendInvoiceAction | CopyPayLinkAction | MarkInvoicePaidAction | VoidInvoiceAction | RefundAction | AddLineItemAction | UpdateLineItemAction | RemoveLineItemAction | CreateSubscriptionAction | UpdateSubscriptionAction | PauseSubscriptionAction | ResumeSubscriptionAction | CancelSubscriptionAction | CreatePricingGuideAction | UpdatePricingGuideAction | DeletePricingGuideAction | AddPricingTierAction | UpdatePricingTierAction | RemovePricingTierAction | CreateCalendarEventAction | UpdateCalendarEventAction | ConfirmCalendarEventAction | CompleteCalendarEventAction | CancelCalendarEventAction | DeleteCalendarEventAction | StartConnectOnboardingAction | ClaimInboxAction | CreateManufacturerAction | UpdateManufacturerAction | DeleteManufacturerAction | CreatePartAction | UpdatePartAction | DeletePartAction | UpdateNodeValueAction | AddRepeaterInstanceAction | AddAdHocFieldAction | AddAdHocSectionAction | DeleteNodeAction | CreateSurveyAction | UpdateSurveyAction | DeleteSurveyAction | StartDraftAction | DeliverSurveyAction | CancelSurveyAction | CreateSurveyTemplateAction | UpdateSurveyTemplateAction | DeleteSurveyTemplateAction | AttachSurveyMediaAction | DetachSurveyMediaAction | SetSurveyMediaCaptionAction | AssignSurveyMediaAction | AddFindingAction | AttachPaymentMethodAction | SetDefaultPaymentMethodAction | RemovePaymentMethodAction | CreateReportAction | UpdateReportAction | DeleteReportAction | SubmitReportForReviewAction | DeliverWatermarkedAction | ReleaseReportAction | CreateWidgetAction | UpdateWidgetAction | DeleteWidgetAction;
+export type ActionsActionGroupExecuteActionBody = CreateClientAction | UpdateClientAction | DeleteClientAction | CreateVesselAction | UpdateVesselAction | DeleteVesselAction | AddEngineAction | UpdateEngineAction | RemoveEngineAction | ComposeNewEmailAction | ArchiveThreadAction | UnarchiveThreadAction | MarkThreadReadAction | MarkThreadUnreadAction | AttachToClientAction | AttachToSurveyAction | ReplyToThreadAction | MarkReadAction | MarkUnreadAction | ArchiveMessageAction | UnarchiveMessageAction | ResendMessageAction | ForwardMessageAction | CreateInvoiceAction | UpdateInvoiceAction | DeleteInvoiceAction | SendInvoiceAction | CopyPayLinkAction | MarkInvoicePaidAction | VoidInvoiceAction | RefundAction | AddLineItemAction | UpdateLineItemAction | RemoveLineItemAction | CreateSubscriptionAction | UpdateSubscriptionAction | PauseSubscriptionAction | ResumeSubscriptionAction | CancelSubscriptionAction | CreatePricingGuideAction | UpdatePricingGuideAction | SetActivePricingGuideAction | DeletePricingGuideAction | AddPricingTierAction | UpdatePricingTierAction | RemovePricingTierAction | CreateCalendarEventAction | UpdateCalendarEventAction | ConfirmCalendarEventAction | CompleteCalendarEventAction | CancelCalendarEventAction | DeleteCalendarEventAction | StartConnectOnboardingAction | CreateManufacturerAction | UpdateManufacturerAction | DeleteManufacturerAction | CreatePartAction | UpdatePartAction | DeletePartAction | UpdateNodeValueAction | AddRepeaterInstanceAction | AddAdHocFieldAction | AddAdHocSectionAction | DeleteNodeAction | CreateSurveyAction | UpdateSurveyAction | DeleteSurveyAction | StartDraftAction | DeliverSurveyAction | CancelSurveyAction | CreateSurveyTemplateAction | UpdateSurveyTemplateAction | DeleteSurveyTemplateAction | AttachSurveyMediaAction | DetachSurveyMediaAction | SetSurveyMediaCaptionAction | AssignSurveyMediaAction | AddFindingAction | AttachPaymentMethodAction | SetDefaultPaymentMethodAction | RemovePaymentMethodAction | ClaimInboxAction | ConfirmPricingAction | CreateReportAction | UpdateReportAction | DeleteReportAction | SubmitReportForReviewAction | DeliverWatermarkedAction | ReleaseReportAction | CreateWidgetAction | UpdateWidgetAction | DeleteWidgetAction;
 
 export type ActionsActionGroupExecuteAction400ExtraAnyOf = {[key: string]: unknown};
 
@@ -3335,7 +3491,7 @@ export type ActionsActionGroupObjectIdListObjectActions400 = {
   extra?: ActionsActionGroupObjectIdListObjectActions400Extra;
 };
 
-export type ActionsActionGroupObjectIdExecuteObjectActionBody = CreateClientAction | UpdateClientAction | DeleteClientAction | CreateVesselAction | UpdateVesselAction | DeleteVesselAction | AddEngineAction | UpdateEngineAction | RemoveEngineAction | ComposeNewEmailAction | ArchiveThreadAction | UnarchiveThreadAction | MarkThreadReadAction | MarkThreadUnreadAction | AttachToClientAction | AttachToSurveyAction | ReplyToThreadAction | MarkReadAction | MarkUnreadAction | ArchiveMessageAction | UnarchiveMessageAction | ResendMessageAction | ForwardMessageAction | CreateInvoiceAction | UpdateInvoiceAction | DeleteInvoiceAction | SendInvoiceAction | CopyPayLinkAction | MarkInvoicePaidAction | VoidInvoiceAction | RefundAction | AddLineItemAction | UpdateLineItemAction | RemoveLineItemAction | CreateSubscriptionAction | UpdateSubscriptionAction | PauseSubscriptionAction | ResumeSubscriptionAction | CancelSubscriptionAction | CreatePricingGuideAction | UpdatePricingGuideAction | DeletePricingGuideAction | AddPricingTierAction | UpdatePricingTierAction | RemovePricingTierAction | CreateCalendarEventAction | UpdateCalendarEventAction | ConfirmCalendarEventAction | CompleteCalendarEventAction | CancelCalendarEventAction | DeleteCalendarEventAction | StartConnectOnboardingAction | ClaimInboxAction | CreateManufacturerAction | UpdateManufacturerAction | DeleteManufacturerAction | CreatePartAction | UpdatePartAction | DeletePartAction | UpdateNodeValueAction | AddRepeaterInstanceAction | AddAdHocFieldAction | AddAdHocSectionAction | DeleteNodeAction | CreateSurveyAction | UpdateSurveyAction | DeleteSurveyAction | StartDraftAction | DeliverSurveyAction | CancelSurveyAction | CreateSurveyTemplateAction | UpdateSurveyTemplateAction | DeleteSurveyTemplateAction | AttachSurveyMediaAction | DetachSurveyMediaAction | SetSurveyMediaCaptionAction | AssignSurveyMediaAction | AddFindingAction | AttachPaymentMethodAction | SetDefaultPaymentMethodAction | RemovePaymentMethodAction | CreateReportAction | UpdateReportAction | DeleteReportAction | SubmitReportForReviewAction | DeliverWatermarkedAction | ReleaseReportAction | CreateWidgetAction | UpdateWidgetAction | DeleteWidgetAction;
+export type ActionsActionGroupObjectIdExecuteObjectActionBody = CreateClientAction | UpdateClientAction | DeleteClientAction | CreateVesselAction | UpdateVesselAction | DeleteVesselAction | AddEngineAction | UpdateEngineAction | RemoveEngineAction | ComposeNewEmailAction | ArchiveThreadAction | UnarchiveThreadAction | MarkThreadReadAction | MarkThreadUnreadAction | AttachToClientAction | AttachToSurveyAction | ReplyToThreadAction | MarkReadAction | MarkUnreadAction | ArchiveMessageAction | UnarchiveMessageAction | ResendMessageAction | ForwardMessageAction | CreateInvoiceAction | UpdateInvoiceAction | DeleteInvoiceAction | SendInvoiceAction | CopyPayLinkAction | MarkInvoicePaidAction | VoidInvoiceAction | RefundAction | AddLineItemAction | UpdateLineItemAction | RemoveLineItemAction | CreateSubscriptionAction | UpdateSubscriptionAction | PauseSubscriptionAction | ResumeSubscriptionAction | CancelSubscriptionAction | CreatePricingGuideAction | UpdatePricingGuideAction | SetActivePricingGuideAction | DeletePricingGuideAction | AddPricingTierAction | UpdatePricingTierAction | RemovePricingTierAction | CreateCalendarEventAction | UpdateCalendarEventAction | ConfirmCalendarEventAction | CompleteCalendarEventAction | CancelCalendarEventAction | DeleteCalendarEventAction | StartConnectOnboardingAction | CreateManufacturerAction | UpdateManufacturerAction | DeleteManufacturerAction | CreatePartAction | UpdatePartAction | DeletePartAction | UpdateNodeValueAction | AddRepeaterInstanceAction | AddAdHocFieldAction | AddAdHocSectionAction | DeleteNodeAction | CreateSurveyAction | UpdateSurveyAction | DeleteSurveyAction | StartDraftAction | DeliverSurveyAction | CancelSurveyAction | CreateSurveyTemplateAction | UpdateSurveyTemplateAction | DeleteSurveyTemplateAction | AttachSurveyMediaAction | DetachSurveyMediaAction | SetSurveyMediaCaptionAction | AssignSurveyMediaAction | AddFindingAction | AttachPaymentMethodAction | SetDefaultPaymentMethodAction | RemovePaymentMethodAction | ClaimInboxAction | ConfirmPricingAction | CreateReportAction | UpdateReportAction | DeleteReportAction | SubmitReportForReviewAction | DeliverWatermarkedAction | ReleaseReportAction | CreateWidgetAction | UpdateWidgetAction | DeleteWidgetAction;
 
 export type ActionsActionGroupObjectIdExecuteObjectAction400ExtraAnyOf = {[key: string]: unknown};
 
@@ -3662,6 +3818,32 @@ export type ListVessel400 = {
   extra?: ListVessel400Extra;
 };
 
+export type EnginesIdDetailHandler400ExtraAnyOf = {[key: string]: unknown};
+
+export type EnginesIdDetailHandler400Extra = null | EnginesIdDetailHandler400ExtraAnyOf | unknown[];
+
+/**
+ * Validation Exception
+ */
+export type EnginesIdDetailHandler400 = {
+  status_code: number;
+  detail: string;
+  extra?: EnginesIdDetailHandler400Extra;
+};
+
+export type ListEngine400ExtraAnyOf = {[key: string]: unknown};
+
+export type ListEngine400Extra = null | ListEngine400ExtraAnyOf | unknown[];
+
+/**
+ * Validation Exception
+ */
+export type ListEngine400 = {
+  status_code: number;
+  detail: string;
+  extra?: ListEngine400Extra;
+};
+
 export type ManufacturersIdDetailHandler400ExtraAnyOf = {[key: string]: unknown};
 
 export type ManufacturersIdDetailHandler400Extra = null | ManufacturersIdDetailHandler400ExtraAnyOf | unknown[];
@@ -3870,6 +4052,32 @@ export type ListInvoice400 = {
   extra?: ListInvoice400Extra;
 };
 
+export type InvoiceLineItemsIdDetailHandler400ExtraAnyOf = {[key: string]: unknown};
+
+export type InvoiceLineItemsIdDetailHandler400Extra = null | InvoiceLineItemsIdDetailHandler400ExtraAnyOf | unknown[];
+
+/**
+ * Validation Exception
+ */
+export type InvoiceLineItemsIdDetailHandler400 = {
+  status_code: number;
+  detail: string;
+  extra?: InvoiceLineItemsIdDetailHandler400Extra;
+};
+
+export type ListInvoiceLineItem400ExtraAnyOf = {[key: string]: unknown};
+
+export type ListInvoiceLineItem400Extra = null | ListInvoiceLineItem400ExtraAnyOf | unknown[];
+
+/**
+ * Validation Exception
+ */
+export type ListInvoiceLineItem400 = {
+  status_code: number;
+  detail: string;
+  extra?: ListInvoiceLineItem400Extra;
+};
+
 export type PublicInvoicesAccessTokenGetPublicInvoice400ExtraAnyOf = {[key: string]: unknown};
 
 export type PublicInvoicesAccessTokenGetPublicInvoice400Extra = null | PublicInvoicesAccessTokenGetPublicInvoice400ExtraAnyOf | unknown[];
@@ -3974,6 +4182,32 @@ export type ListPricingGuide400 = {
   extra?: ListPricingGuide400Extra;
 };
 
+export type PricingTiersIdDetailHandler400ExtraAnyOf = {[key: string]: unknown};
+
+export type PricingTiersIdDetailHandler400Extra = null | PricingTiersIdDetailHandler400ExtraAnyOf | unknown[];
+
+/**
+ * Validation Exception
+ */
+export type PricingTiersIdDetailHandler400 = {
+  status_code: number;
+  detail: string;
+  extra?: PricingTiersIdDetailHandler400Extra;
+};
+
+export type ListPricingTier400ExtraAnyOf = {[key: string]: unknown};
+
+export type ListPricingTier400Extra = null | ListPricingTier400ExtraAnyOf | unknown[];
+
+/**
+ * Validation Exception
+ */
+export type ListPricingTier400 = {
+  status_code: number;
+  detail: string;
+  extra?: ListPricingTier400Extra;
+};
+
 export type DataReport400ExtraAnyOf = {[key: string]: unknown};
 
 export type DataReport400Extra = null | DataReport400ExtraAnyOf | unknown[];
@@ -4067,6 +4301,32 @@ export type CheckInboxLocalPartAvailable400 = {
   status_code: number;
   detail: string;
   extra?: CheckInboxLocalPartAvailable400Extra;
+};
+
+export type OnboardingsIdDetailHandler400ExtraAnyOf = {[key: string]: unknown};
+
+export type OnboardingsIdDetailHandler400Extra = null | OnboardingsIdDetailHandler400ExtraAnyOf | unknown[];
+
+/**
+ * Validation Exception
+ */
+export type OnboardingsIdDetailHandler400 = {
+  status_code: number;
+  detail: string;
+  extra?: OnboardingsIdDetailHandler400Extra;
+};
+
+export type ListOnboarding400ExtraAnyOf = {[key: string]: unknown};
+
+export type ListOnboarding400Extra = null | ListOnboarding400ExtraAnyOf | unknown[];
+
+/**
+ * Validation Exception
+ */
+export type ListOnboarding400 = {
+  status_code: number;
+  detail: string;
+  extra?: ListOnboarding400Extra;
 };
 
 export type BillingConnectAccountUpdateConnectAccount400ExtraAnyOf = {[key: string]: unknown};

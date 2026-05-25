@@ -49,12 +49,26 @@ class Config:
     # ─── PDF templates ────────────────────────────────────────────────────────
     PDF_TEMPLATES_DIR: str = "pdf_templates/out/pdfs"
 
+    # ─── Domain ───────────────────────────────────────────────────────────────
+    # Terraform owns the domain (var.domain); the app owns local-parts and display names.
+    DOMAIN: str = os.getenv("DOMAIN", "sloopquest.local")
+
     # ─── SES ──────────────────────────────────────────────────────────────────
     SES_REGION: str = os.getenv("SES_REGION", os.getenv("AWS_REGION", "us-east-1"))
     SES_CONFIGURATION_SET: str = os.getenv("SES_CONFIGURATION_SET", "")
-    SES_FROM_EMAIL: str = os.getenv("SES_FROM_EMAIL", "no-reply@sloopquest.local")
-    SES_FROM_NAME: str = os.getenv("SES_FROM_NAME", "Sloopquest")
-    SES_REPLY_TO_EMAIL: str = os.getenv("SES_REPLY_TO_EMAIL", "")
+    SES_FROM_NAME: str = "Sloopquest"
+
+    @property
+    def SES_FROM_EMAIL(self) -> str:  # noqa: N802
+        return f"noreply@{self.DOMAIN}"
+
+    @property
+    def SES_REPLY_TO_EMAIL(self) -> str:  # noqa: N802
+        return f"support@{self.DOMAIN}"
+
+    @property
+    def INBOX_DOMAIN(self) -> str:  # noqa: N802
+        return self.DOMAIN
 
     # ─── Stripe ───────────────────────────────────────────────────────────────
     STRIPE_SECRET_KEY: str = os.getenv("STRIPE_SECRET_KEY", "")

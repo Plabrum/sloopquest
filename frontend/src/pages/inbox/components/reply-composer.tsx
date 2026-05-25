@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useActionsActionGroupObjectIdExecuteObjectAction } from "@/openapi/actions/actions";
+import { useActionsActionGroupExecuteAction } from "@/openapi/actions/actions";
 import { getErrorMessage } from "@/lib/error-handler";
 
 interface Props {
@@ -15,7 +15,7 @@ interface Props {
 export function ReplyComposer({ threadId }: Props) {
   const [body, setBody] = useState("");
   const queryClient = useQueryClient();
-  const mutation = useActionsActionGroupObjectIdExecuteObjectAction({
+  const mutation = useActionsActionGroupExecuteAction({
     mutation: {
       onSuccess: () => {
         toast.success("Reply queued");
@@ -31,11 +31,10 @@ export function ReplyComposer({ threadId }: Props) {
     const trimmed = body.trim();
     if (!trimmed) return;
     mutation.mutate({
-      actionGroup: "email_thread_actions",
-      objectId: threadId,
+      actionGroup: "message_actions",
       data: {
-        action: "email_thread_actions__reply_to_thread",
-        data: { body_text: trimmed },
+        action: "message_actions__reply_to_thread",
+        data: { email_thread_id: threadId, body_text: trimmed },
       },
     });
   };

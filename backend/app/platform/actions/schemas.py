@@ -234,6 +234,14 @@ def build_action_metadata(action_registry: "ActionRegistry") -> dict[str, dict]:
                 field_type = "boolean"
             elif base is int or base is float:
                 field_type = "number"
+                # `*_cents` integer/float fields are money. Tag them so the form
+                # codegen emits a dollars-in/cents-out input and a label without
+                # the misleading "Cents" suffix.
+                if fi.name.endswith("_cents"):
+                    field_type = "currency"
+                    if "label" not in entry:
+                        stripped = fi.name.removesuffix("_cents").replace("_", " ").title()
+                        entry["label"] = stripped or "Amount"
             elif base is date:
                 field_type = "date"
             elif base is datetime:

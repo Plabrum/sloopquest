@@ -5,6 +5,7 @@ import type {
   ColumnDisplayType,
   FilterType,
 } from "@/lib/resource-table-types";
+import { formatCents } from "@/lib/format";
 import { humanize } from "@/lib/utils";
 
 export type DisplayType = ColumnDisplayType;
@@ -102,10 +103,7 @@ function defaultRenderer<T>(entry: ColumnEntry<T>): (item: T) => React.ReactNode
       case "currency":
         return (
           <span className="block truncate tabular-nums">
-            {new Intl.NumberFormat("en-US", {
-              style: "currency",
-              currency: "USD",
-            }).format(Number(value))}
+            {formatCents(Number(value))}
           </span>
         );
       case "duration":

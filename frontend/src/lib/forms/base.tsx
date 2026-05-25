@@ -1,6 +1,7 @@
 import * as React from "react";
 import { format, parseISO } from "date-fns";
 import { CalendarIcon } from "lucide-react";
+import { NumericFormat } from "react-number-format";
 import {
   useForm,
   FormProvider,
@@ -281,6 +282,60 @@ export function createTypedForm<TFieldValues extends FieldValues>() {
           } as RegisterOptions<TFieldValues, N>)}
           className="mt-1"
           placeholder={placeholder}
+        />
+        {description ? (
+          <p className="text-muted-foreground mt-1 text-xs">{description}</p>
+        ) : null}
+        <FieldError name={String(name)} />
+      </div>
+    );
+  }
+
+  function FormCurrency<N extends Name<Path<TFieldValues>>>(
+    props: BaseFieldProps<TFieldValues, N>,
+  ) {
+    const { name, label, placeholder, required, className, rules, description, id } = props;
+    const { control } = useFormContext<TFieldValues>();
+    const htmlId = id ?? String(name);
+
+    return (
+      <div className={className}>
+        {label && (
+          <Label htmlFor={htmlId}>
+            {label} {required ? "*" : null}
+          </Label>
+        )}
+        <Controller
+          control={control}
+          name={name}
+          rules={{ required: requiredMessage(required), ...rules } as RegisterOptions<TFieldValues, N>}
+          render={({ field }) => {
+            // Stored value is integer cents; user types dollars.
+            const cents = field.value as number | null | undefined;
+            const dollars = cents == null ? "" : Number(cents) / 100;
+            return (
+              <NumericFormat
+                id={htmlId}
+                getInputRef={field.ref}
+                customInput={Input}
+                className="mt-1"
+                value={dollars}
+                prefix="$"
+                thousandSeparator=","
+                decimalScale={2}
+                fixedDecimalScale
+                allowNegative={false}
+                placeholder={placeholder ?? "$0.00"}
+                onValueChange={(v, src) => {
+                  if (src.source !== "event") return;
+                  field.onChange(
+                    v.floatValue == null ? null : Math.round(v.floatValue * 100),
+                  );
+                }}
+                onBlur={field.onBlur}
+              />
+            );
+          }}
         />
         {description ? (
           <p className="text-muted-foreground mt-1 text-xs">{description}</p>
@@ -955,6 +1010,7 @@ export function createTypedForm<TFieldValues extends FieldValues>() {
     FormString,
     FormEmail,
     FormNumber,
+    FormCurrency,
     FormText,
     FormSelect,
     FormDatetime,

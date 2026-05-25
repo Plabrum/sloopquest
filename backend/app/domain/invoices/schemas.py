@@ -7,8 +7,19 @@ from app.platform.base.schemas import BaseSchema
 from app.utils.sqids import Sqid
 
 
-class InvoiceLineItemSchema(BaseSchema):
+class InvoiceLineItemListItem(ActionableList):
     id: Sqid
+    invoice_id: Sqid
+    description: str
+    quantity: Decimal
+    unit_price_cents: int
+    sort_order: int
+    created_at: datetime
+
+
+class InvoiceLineItemDetail(ActionableDetail):
+    id: Sqid
+    invoice_id: Sqid
     description: str
     quantity: Decimal
     unit_price_cents: int
@@ -44,7 +55,6 @@ class InvoiceDetail(ActionableDetail):
     stripe_payment_intent_id: str | None
     stripe_client_secret: str | None
     access_token: str | None
-    line_items: list[InvoiceLineItemSchema]
     created_at: datetime
     updated_at: datetime
 
@@ -88,6 +98,7 @@ class UpdateInvoiceData(BaseSchema):
 
 
 class AddLineItemData(BaseSchema):
+    invoice_id: Sqid
     description: str
     quantity: Decimal
     unit_price_cents: int
@@ -95,12 +106,7 @@ class AddLineItemData(BaseSchema):
 
 
 class UpdateLineItemData(BaseSchema):
-    line_item_id: Sqid
     description: str
     quantity: Decimal
     unit_price_cents: int
     sort_order: int
-
-
-class RemoveLineItemData(BaseSchema):
-    line_item_id: Sqid

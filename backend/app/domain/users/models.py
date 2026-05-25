@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import sqlalchemy as sa
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import select
+from sqlalchemy.orm import Mapped, column_property, declared_attr, mapped_column, relationship
 
+from app.domain.onboarding.enums import OnboardingState
+from app.domain.onboarding.models import Onboarding
 from app.domain.users.roles import Role
 from app.platform.base.models import BaseDBModel
 from app.platform.base.search import SearchMixin
@@ -64,3 +67,13 @@ class User(SearchMixin, BaseDBModel):
     inbox_local_part: Mapped[str | None] = mapped_column(sa.Text)
 
     organization: Mapped[Organization] = relationship("Organization", foreign_keys="User.organization_id", lazy="raise")
+
+    @declared_attr
+    def is_onboarded(cls) -> Mapped[bool]:  # noqa: N805
+        return column_property(
+            select(Onboarding.state == OnboardingState.COMPLETED.name)
+            .where(Onboarding.user_id == cls.id)
+            .correlate_except(Onboarding)
+            .scalar_subquery(),
+            deferred=True,
+        )

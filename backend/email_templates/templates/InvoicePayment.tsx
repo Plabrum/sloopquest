@@ -24,45 +24,48 @@ export default function InvoicePayment({
       preview={`Invoice${headingSuffix} from ${organization_name}`}
       footerNote="You're receiving this email because an invoice was sent to you."
     >
-      <Text className="font-serif text-[26px] leading-tight text-dark m-0 mb-5">
+      <Text className="font-mono text-[10px] text-brass-deep uppercase tracking-[0.28em] m-0 mb-3">
+        Invoice
+      </Text>
+      <Text className="font-serif text-[26px] leading-tight text-ink m-0 mb-6">
         Invoice{headingSuffix} from {organization_name}
       </Text>
 
-      <Text className="font-sans text-[15px] leading-relaxed text-mid m-0 mb-2">
+      <Text className="font-mono text-[10px] text-ink-muted uppercase tracking-[0.22em] m-0 mb-2">
         Amount due
       </Text>
-      <Text className="font-serif text-[28px] text-dark m-0 mb-6">
+      <Text className="font-serif text-[32px] text-ink m-0 mb-6 leading-none">
         {total_display}
       </Text>
 
       {due_at_display ? (
-        <Text className="font-sans text-[14px] leading-relaxed text-mid m-0 mb-7">
+        <Text className="font-body text-[14px] leading-relaxed text-ink-muted m-0 mb-7">
           Due {due_at_display}
         </Text>
       ) : null}
 
       <Section className="mb-8">
-        <Button href={pay_url}>Pay invoice →</Button>
+        <Button href={pay_url}>Pay invoice</Button>
       </Section>
 
       <Divider />
 
-      <Text className="font-sans text-[12px] font-medium text-footer-muted uppercase tracking-widest m-0 mb-2">
+      <Text className="font-mono text-[10px] text-brass-deep uppercase tracking-[0.22em] m-0 mb-2">
         Or copy this link
       </Text>
-      <div className="bg-sail-light border border-light-border rounded-xl px-4 py-3.5">
-        <Text className="font-mono text-[12px] break-all m-0 leading-normal text-mid">
+      <div className="bg-paper-warm border border-light-border rounded-[2px] px-4 py-3.5">
+        <Text className="font-mono text-[12px] break-all m-0 leading-normal text-ink-muted">
           {pay_url}
         </Text>
       </div>
 
       <Divider />
 
-      <div className="bg-sail-light rounded-xl border border-light-border px-4 py-4">
-        <Text className="font-sans text-sm leading-relaxed text-mid m-0">
-          <strong className="text-dark font-semibold">Questions?</strong>
+      <div className="bg-paper-warm rounded-[2px] border border-light-border px-4 py-4">
+        <Text className="font-body text-[14px] leading-relaxed text-ink-muted m-0">
+          <strong className="text-ink font-semibold">Questions?</strong>
           <br />
-          Reply to this email and we'll get back to you.
+          Reply to this email and we&rsquo;ll get back to you.
         </Text>
       </div>
     </BaseLayout>

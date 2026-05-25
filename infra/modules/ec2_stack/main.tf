@@ -212,8 +212,6 @@ resource "aws_instance" "app" {
     db_user           = var.db_username
     db_password       = var.db_password
     secrets_arn       = aws_secretsmanager_secret.app.arn
-    ses_from_email    = "noreply@${var.domain}"
-    ses_reply_to      = "support@${var.domain}"
     ses_config_set    = aws_ses_configuration_set.main.name
     s3_media_bucket   = module.media.bucket_name
     frontend_origin   = "https://app.${var.domain}"

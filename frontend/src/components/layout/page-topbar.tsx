@@ -1,5 +1,5 @@
-import { Suspense, useEffect } from "react"
-import { Link, useRouterState } from "@tanstack/react-router"
+import { Suspense } from "react"
+import { Link } from "@tanstack/react-router"
 
 import {
   Breadcrumb,
@@ -12,34 +12,23 @@ import {
 import { StatusBadge } from "@/components/status-badge"
 import { PageSkeleton } from "@/components/ui/page-skeleton"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { useBreadcrumbTrail } from "@/stores/breadcrumb-trail"
+import { useBreadcrumbs } from "@/lib/use-breadcrumbs"
 import { usePageSubcrumb } from "@/stores/page-subcrumb"
 
 interface PageTopBarProps {
-  title: string
+  title?: string
   state?: string | null
   actions?: React.ReactNode
   fallback?: React.ReactNode
   children: React.ReactNode
 }
 
-export function PageTopBar({ title, state, actions, fallback, children }: PageTopBarProps) {
-  const pathname = useRouterState({ select: (s) => s.location.pathname })
-  const push = useBreadcrumbTrail((s) => s.push)
-  const trail = useBreadcrumbTrail((s) => s.trail)
+export function PageTopBar({ state, actions, fallback, children }: PageTopBarProps) {
+  const trail = useBreadcrumbs()
   const subcrumb = usePageSubcrumb((s) => s.label)
 
-  useEffect(() => {
-    push({ url: pathname, label: title })
-  }, [pathname, title, push])
-
-  const displayTrail =
-    trail.length > 0 && trail[trail.length - 1].url === pathname
-      ? trail
-      : [...trail, { url: pathname, label: title }]
-
-  const head = displayTrail.slice(0, -1)
-  const current = displayTrail[displayTrail.length - 1]
+  const head = trail.slice(0, -1)
+  const current = trail[trail.length - 1]
 
   return (
     <>
@@ -58,9 +47,11 @@ export function PageTopBar({ title, state, actions, fallback, children }: PageTo
                   <BreadcrumbSeparator>/</BreadcrumbSeparator>
                 </span>
               ))}
-              <BreadcrumbItem>
-                <BreadcrumbPage>{current.label}</BreadcrumbPage>
-              </BreadcrumbItem>
+              {current ? (
+                <BreadcrumbItem>
+                  <BreadcrumbPage>{current.label}</BreadcrumbPage>
+                </BreadcrumbItem>
+              ) : null}
               {subcrumb ? (
                 <>
                   <BreadcrumbSeparator>/</BreadcrumbSeparator>

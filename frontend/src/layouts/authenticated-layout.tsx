@@ -6,6 +6,7 @@ import { useAuthMeMeSuspense } from "@/openapi/auth/auth";
 import { LlmDock } from "@/components/layout/llm-dock";
 import { QueryBoundary } from "@/components/query-boundary";
 import { ShortcutsCheatSheet } from "@/components/shortcuts-cheat-sheet";
+import { OnboardingModal } from "@/components/onboarding/onboarding-modal";
 
 function AuthenticatedLayoutContent() {
   const { data: user } = useAuthMeMeSuspense();
@@ -33,6 +34,7 @@ function AuthenticatedLayoutContent() {
         </div>
         <ShortcutsCheatSheet />
       </SidebarInset>
+      <OnboardingModal />
     </SidebarProvider>
   );
 }

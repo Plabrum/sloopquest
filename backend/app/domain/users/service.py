@@ -1,6 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.domain.onboarding.models import Onboarding
 from app.domain.users.models import User
 from app.domain.users.queries import create_organization, create_user, get_user_by_email, get_user_by_id
 from app.domain.users.roles import Role
@@ -46,6 +47,9 @@ class UserService:
             org = await create_organization(self.db, name=f"{name}'s Organization")
             organization_id = org.id
         user = await create_user(self.db, name=name, email=email, organization_id=organization_id)
+
+        self.db.add(Onboarding(user_id=user.id))
+        await self.db.flush()
 
         if org_was_created:
             user.role = Role.ADMIN  # first user of a new org gets surveyor-level access

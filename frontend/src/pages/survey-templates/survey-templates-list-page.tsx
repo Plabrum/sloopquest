@@ -25,7 +25,7 @@ export function SurveyTemplatesListPage() {
           {...tableProps}
           columns={surveyTemplateColumnDefs}
           onRowClick={(row) =>
-            navigate({ to: "/survey-templates/$templateId", params: { templateId: String(row.id) } })
+            navigate({ to: "/settings/templates/$templateId", params: { templateId: String(row.id) } })
           }
         />
       </div>

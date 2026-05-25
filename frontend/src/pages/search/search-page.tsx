@@ -225,7 +225,7 @@ export function SearchPage() {
               paramPrefix="tmpl"
               onRowClick={(row) =>
                 detailNavigate({
-                  to: "/survey-templates/$templateId",
+                  to: "/settings/templates/$templateId",
                   params: { templateId: String(row.id) },
                 })
               }

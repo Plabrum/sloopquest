@@ -2,24 +2,32 @@ import { Suspense } from "react";
 import { useParams } from "@tanstack/react-router";
 import { PageTopBar } from "@/components/layout/page-topbar";
 import { KeyValueGrid } from "@/components/layout/key-value-grid";
-import { ObjectActions } from "@/components/object-detail/object-actions";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  ChildObjectList,
+  ChildObjectRow,
+} from "@/components/layout";
+import { ObjectActions } from "@/components/object-detail/object-actions";
+import { TopLevelActions } from "@/components/object-list/top-level-actions";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useChildObjectList } from "@/hooks/use-child-object-list";
 import { usePricingGuidesIdDetailHandlerSuspense } from "@/openapi/pricing-guides/pricing-guides";
+import { useListPricingTier } from "@/openapi/pricing-tiers/pricing-tiers";
+import type { PricingTierListItem } from "@/openapi/litestarAPI.schemas";
 import { useActionsActionGroupObjectIdListObjectActions } from "@/openapi/actions/actions";
+import { formatCents } from "@/lib/format";
 
 function PricingGuideDetailContent() {
-  const { guideId } = useParams({ from: "/_authenticated/pricing-guides/$guideId" });
+  const { guideId } = useParams({ from: "/_authenticated/settings/pricing-guides/$guideId" });
   const { data } = usePricingGuidesIdDetailHandlerSuspense(guideId);
   const { data: actionsData, refetch: refetchActions } =
     useActionsActionGroupObjectIdListObjectActions("pricing_guide_actions", guideId);
+
+  const { items: tiers } = useChildObjectList<PricingTierListItem>({
+    listQuery: useListPricingTier,
+    filters: [{ type: "text", column: "guide_id", operation: "equals", value: guideId }],
+    defaultSorts: [{ column: "length_until_ft", direction: "asc" }],
+  });
 
   return (
     <PageTopBar
@@ -36,47 +44,55 @@ function PricingGuideDetailContent() {
         <KeyValueGrid
           items={[
             { label: "Name", value: data.name },
-            { label: "Active", value: data.is_active ? "Yes" : "No" },
+            { label: "Service Type", value: data.service_type },
+            {
+              label: "Status",
+              value: data.is_active ? (
+                <Badge>Active</Badge>
+              ) : (
+                <Badge variant="outline">Inactive</Badge>
+              ),
+            },
             { label: "Created", value: data.created_at },
             { label: "Updated", value: data.updated_at },
           ]}
         />
 
-        <div className="space-y-2">
-          <h3 className="text-sm font-semibold">Tiers</h3>
-          {data.tiers.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No tiers yet. Use Add Tier to create one.</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Service Type</TableHead>
-                  <TableHead>Length Range (ft)</TableHead>
-                  <TableHead>Pricing Type</TableHead>
-                  <TableHead>Amount</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.tiers.map((tier) => (
-                  <TableRow key={String(tier.id)}>
-                    <TableCell>{tier.service_type ?? "—"}</TableCell>
-                    <TableCell>
-                      {tier.length_min_ft != null || tier.length_max_ft != null
-                        ? `${tier.length_min_ft ?? "—"} – ${tier.length_max_ft ?? "—"}`
-                        : "—"}
-                    </TableCell>
-                    <TableCell>{tier.pricing_type}</TableCell>
-                    <TableCell>
-                      {tier.amount_cents != null
-                        ? `$${(tier.amount_cents / 100).toFixed(2)}`
-                        : "—"}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+        <ChildObjectList
+          title="Tiers"
+          badge={tiers.length || undefined}
+          topLevelActions={
+            <Suspense fallback={null}>
+              <TopLevelActions
+                actionGroup="pricing_tier_actions"
+                formContext={{ guide_id: guideId }}
+              />
+            </Suspense>
+          }
+          items={tiers}
+          emptyMessage="No tiers yet. Use Add Tier to create one."
+          renderItem={(tier) => (
+            <ChildObjectRow
+              title={
+                tier.length_until_ft != null
+                  ? `Up to ${tier.length_until_ft} ft`
+                  : "Any length"
+              }
+              subtitle={tier.pricing_type}
+              status={
+                <span className="text-sm font-medium">
+                  {formatCents(tier.amount_cents)}
+                </span>
+              }
+              actions={
+                <ObjectActions
+                  data={tier}
+                  actionGroup="pricing_tier_actions"
+                />
+              }
+            />
           )}
-        </div>
+        />
       </div>
     </PageTopBar>
   );

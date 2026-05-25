@@ -6,6 +6,7 @@ import { ObjectActions } from "@/components/object-detail/object-actions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useReportsIdDetailHandlerSuspense } from "@/openapi/report/report";
 import { useActionsActionGroupObjectIdListObjectActions } from "@/openapi/actions/actions";
+import { formatCents } from "@/lib/format";
 
 function ReportDetailContent() {
   const { reportId } = useParams({ from: "/_authenticated/reports/$reportId" });
@@ -30,18 +31,8 @@ function ReportDetailContent() {
             { label: "Title", value: data.title ?? "—" },
             { label: "State", value: data.state },
             { label: "Survey ID", value: data.survey_id },
-            {
-              label: "Market Value",
-              value: data.market_value_cents != null
-                ? `$${(data.market_value_cents / 100).toFixed(2)}`
-                : "—",
-            },
-            {
-              label: "Replacement Value",
-              value: data.replacement_value_cents != null
-                ? `$${(data.replacement_value_cents / 100).toFixed(2)}`
-                : "—",
-            },
+            { label: "Market Value", value: formatCents(data.market_value_cents) },
+            { label: "Replacement Value", value: formatCents(data.replacement_value_cents) },
             { label: "Released", value: data.released_at ?? "—" },
             { label: "Summary", value: data.summary ?? "—", span: 2 },
           ]}

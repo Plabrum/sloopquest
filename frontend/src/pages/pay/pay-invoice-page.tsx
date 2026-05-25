@@ -7,6 +7,7 @@ import { getStripe } from "@/lib/stripe";
 import { customInstance } from "@/openapi/custom-instance";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatCents } from "@/lib/format";
 
 type PublicInvoiceLineItem = {
   description: string;
@@ -41,10 +42,6 @@ function publicInvoiceQuery(accessToken: string) {
   };
 }
 
-function fmtCents(cents: number) {
-  return `$${(cents / 100).toFixed(2)}`;
-}
-
 function InvoiceSummary({ invoice }: { invoice: PublicInvoiceDetail }) {
   return (
     <div className="rounded-xl border bg-card p-6 mb-6">
@@ -61,22 +58,22 @@ function InvoiceSummary({ invoice }: { invoice: PublicInvoiceDetail }) {
               {li.description}{" "}
               <span className="text-muted-foreground">× {li.quantity}</span>
             </span>
-            <span>{fmtCents(li.unit_price_cents * Number(li.quantity))}</span>
+            <span>{formatCents(li.unit_price_cents * Number(li.quantity))}</span>
           </div>
         ))}
       </div>
       <div className="border-t pt-3 space-y-1">
         <div className="flex justify-between text-sm">
           <span>Subtotal</span>
-          <span>{fmtCents(invoice.subtotal_cents)}</span>
+          <span>{formatCents(invoice.subtotal_cents)}</span>
         </div>
         <div className="flex justify-between text-sm">
           <span>Tax</span>
-          <span>{fmtCents(invoice.tax_cents)}</span>
+          <span>{formatCents(invoice.tax_cents)}</span>
         </div>
         <div className="flex justify-between font-semibold text-base pt-2 border-t">
           <span>Total</span>
-          <span>{fmtCents(invoice.total_cents)}</span>
+          <span>{formatCents(invoice.total_cents)}</span>
         </div>
       </div>
     </div>

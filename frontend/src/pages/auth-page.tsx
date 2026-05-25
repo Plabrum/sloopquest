@@ -22,11 +22,11 @@ function requestMagicLink(email: string) {
 function SessionExpiredNotice() {
   return (
     <div
-      className="mb-6 flex items-start gap-3 rounded-lg border border-[var(--status-warning)]/30 bg-[var(--status-warning)]/10 px-4 py-3 text-sm"
+      className="mb-6 flex items-start gap-3 rounded-[2px] border border-[var(--color-brass-deep)]/40 bg-[var(--color-brass)]/10 px-4 py-3 text-sm"
       role="status"
     >
       <Clock
-        className="mt-0.5 size-4 shrink-0 text-[var(--status-warning)]"
+        className="mt-0.5 size-4 shrink-0 text-[var(--color-brass-deep)]"
         aria-hidden="true"
       />
       <div>
@@ -74,19 +74,20 @@ export function AuthPage() {
 
   return (
     <PublicAuthShell>
-      <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-10 shadow-sm">
+      <div className="w-full max-w-sm rounded-[2px] border border-border bg-card p-10">
         {magicLinkSent ? (
           <MagicLinkSuccess email={email} onTryAgain={handleTryAgain} />
         ) : (
           <>
             {showSessionExpired && <SessionExpiredNotice />}
-            <h1 className="font-display mb-2 text-[22px] font-normal text-foreground">
+            <p className="t-kicker mb-3">Sign in</p>
+            <h1 className="font-display mb-3 text-[26px] leading-tight font-normal text-foreground">
               {showSessionExpired
                 ? "Sign back in"
-                : "Sign in to your account"}
+                : "Welcome back, surveyor"}
             </h1>
-            <p className="mb-7 text-sm leading-relaxed text-muted-foreground">
-              Enter your email and we'll send you a secure magic link.
+            <p className="mb-7 font-serif text-[15px] leading-relaxed text-muted-foreground">
+              Enter your email and we&rsquo;ll send a secure magic link.
             </p>
             <MagicLinkForm
               email={email}

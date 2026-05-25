@@ -4,9 +4,11 @@ from dataclasses import dataclass
 from litestar import Request, Router, get, post
 from litestar.exceptions import PermissionDeniedException
 from litestar.middleware.rate_limit import RateLimitConfig
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import undefer
 
+from app.domain.onboarding.models import Onboarding
 from app.domain.users.models import User
 from app.platform.auth.guards import requires_session
 from app.platform.auth.service import AuthService
@@ -32,6 +34,8 @@ class MeResponse:
     email: str
     email_verified: bool
     role: str
+    is_onboarded: bool
+    onboarding_state: str | None
 
 
 @post("/magic-link/request", tags=["auth"], middleware=[_rate_limit.middleware], exclude_from_auth=True)
@@ -49,9 +53,9 @@ async def request_magic_link(
         local == _DEMO_EMAIL_PREFIX or local.startswith(f"{_DEMO_EMAIL_PREFIX}+")
     )
     if is_demo:
-        user = (
-            await transaction.execute(select(User).where(User.email == email, User.organization_id == _DEMO_ORG_ID))
-        ).scalar_one_or_none()
+        await transaction.execute(text("SET LOCAL app.is_system_mode = 'true'"))
+        user = (await transaction.execute(select(User).where(User.email == email))).scalar_one_or_none()
+        await transaction.execute(text("SET LOCAL app.is_system_mode = 'false'"))
         if user is not None:
             request.set_session({"user_id": int(user.id)})
             logger.info("Demo login for %s", email)
@@ -91,13 +95,19 @@ async def logout(request: Request) -> dict[str, str]:
 
 
 @get("/me", guards=[requires_session], tags=["auth"])
-async def me(user: User) -> MeResponse:
+async def me(user: User, transaction: AsyncSession) -> MeResponse:
+    fresh = (
+        await transaction.execute(select(User).options(undefer(User.is_onboarded)).where(User.id == user.id))
+    ).scalar_one()
+    onboarding_state = await transaction.scalar(select(Onboarding.state).where(Onboarding.user_id == user.id))
     return MeResponse(
-        id=user.id,
-        name=user.name,
-        email=user.email,
-        email_verified=user.email_verified,
-        role=user.role,
+        id=fresh.id,
+        name=fresh.name,
+        email=fresh.email,
+        email_verified=fresh.email_verified,
+        role=fresh.role,
+        is_onboarded=fresh.is_onboarded,
+        onboarding_state=onboarding_state,
     )
 
 

@@ -92,7 +92,8 @@ class Engine(OrgScopedMixin, BaseDBModel):
         nullable=False,
         index=True,
     )
-    vessel_id: Mapped[int] = mapped_column(
+    vessel_id: Mapped[Sqid] = mapped_column(
+        SqidType,
         sa.ForeignKey("vessels.id", ondelete="CASCADE"),
         nullable=False,
         index=True,

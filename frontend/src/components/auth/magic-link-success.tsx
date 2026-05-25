@@ -8,14 +8,15 @@ interface MagicLinkSuccessProps {
 export function MagicLinkSuccess({ email, onTryAgain }: MagicLinkSuccessProps) {
   return (
     <div className="space-y-5 text-center">
-      <div className="mx-auto mb-1 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--status-active)]/10 ring-1 ring-[var(--status-active)]/30 text-xl">
+      <div className="mx-auto mb-1 flex h-12 w-12 items-center justify-center rounded-[2px] border border-[var(--color-brass)]/40 bg-[var(--color-brass)]/10 text-xl text-[var(--color-brass-deep)]">
         ✉
       </div>
+      <p className="t-kicker">Magic link sent</p>
       <div>
-        <p className="font-display mb-2 text-lg font-normal text-foreground">
+        <p className="font-display mb-2 text-[22px] font-normal text-foreground">
           Check your inbox
         </p>
-        <p className="text-sm leading-relaxed text-muted-foreground">
+        <p className="font-serif text-[15px] leading-relaxed text-muted-foreground">
           We sent a magic link to{" "}
           <strong className="text-foreground">{email}</strong>. Click it to sign
           in securely.

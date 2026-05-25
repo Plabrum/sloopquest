@@ -3,15 +3,15 @@
  */
 import { createTypedForm } from "@/lib/forms/base";
 import type { GeneratedFormProps } from "@/lib/forms/types";
-import type { AddEngineData, AddLineItemData, AddPricingTierData, ClaimInboxData, ComposeData, CreateCalendarEventData, CreateClientData, CreateInvoiceData, CreatePricingGuideData, CreateReportData, CreateSubscriptionData, CreateSurveyData, CreateSurveyTemplateData, CreateWidgetData, ForwardData, ManufacturerCreateData, ManufacturerUpdateData, PartCreateData, PartUpdateData, ReplyData, SetSurveyMediaCaptionData, UpdateCalendarEventData, UpdateClientData, UpdateInvoiceData, UpdatePricingGuideData, UpdateReportData, UpdateSubscriptionData, UpdateSurveyData, UpdateSurveyTemplateData, UpdateWidgetData, VesselCreateData, VesselUpdateData } from "@/openapi/litestarAPI.schemas";
-import { ClientType, EnginePosition, EngineType, FuelType, HullMaterial, PartCategory, PricingType, PropulsionType, RiggingType, SubscriptionPlan, VesselType, WidgetType } from "@/openapi/litestarAPI.schemas";
+import type { AddEngineData, AddLineItemData, AddPricingTierData, ClaimInboxData, ComposeData, ConfirmPricingData, CreateCalendarEventData, CreateClientData, CreateInvoiceData, CreatePricingGuideData, CreateReportData, CreateSubscriptionData, CreateSurveyData, CreateSurveyTemplateData, CreateWidgetData, ForwardData, ManufacturerCreateData, ManufacturerUpdateData, PartCreateData, PartUpdateData, ReplyData, SetSurveyMediaCaptionData, UpdateCalendarEventData, UpdateClientData, UpdateEngineData, UpdateInvoiceData, UpdateLineItemData, UpdatePricingGuideData, UpdatePricingTierData, UpdateReportData, UpdateSubscriptionData, UpdateSurveyData, UpdateSurveyTemplateData, UpdateWidgetData, VesselCreateData, VesselUpdateData } from "@/openapi/litestarAPI.schemas";
+import { ClientType, EnginePosition, EngineType, FuelType, HullMaterial, PartCategory, PricingType, PropulsionType, RiggingType, ServiceType, SubscriptionPlan, VesselType, WidgetType } from "@/openapi/litestarAPI.schemas";
 
 // --- client_actions__create ---
 const _client_actions__create = createTypedForm<CreateClientData>();
 
 export function ClientActionsCreateForm(props: GeneratedFormProps<CreateClientData>) {
   return (
-    <_client_actions__create.FormModal
+    <_client_actions__create.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -31,7 +31,7 @@ export function ClientActionsCreateForm(props: GeneratedFormProps<CreateClientDa
       <_client_actions__create.FormString name="license_number" label="License Number" />
       <_client_actions__create.FormEmail name="email" label="Email" />
       <_client_actions__create.FormString name="phone" label="Phone" type="tel" />
-    </_client_actions__create.FormModal>
+    </_client_actions__create.FormSheet>
   );
 }
 
@@ -40,7 +40,7 @@ const _client_actions__update = createTypedForm<UpdateClientData>();
 
 export function ClientActionsUpdateForm(props: GeneratedFormProps<UpdateClientData>) {
   return (
-    <_client_actions__update.FormModal
+    <_client_actions__update.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -60,7 +60,7 @@ export function ClientActionsUpdateForm(props: GeneratedFormProps<UpdateClientDa
       <_client_actions__update.FormString name="brokerage_name" label="Brokerage Name" />
       <_client_actions__update.FormString name="agent_name" label="Agent Name" />
       <_client_actions__update.FormString name="license_number" label="License Number" />
-    </_client_actions__update.FormModal>
+    </_client_actions__update.FormSheet>
   );
 }
 
@@ -69,7 +69,7 @@ const _vessel_actions__create = createTypedForm<VesselCreateData>();
 
 export function VesselActionsCreateForm(props: GeneratedFormProps<VesselCreateData>) {
   return (
-    <_vessel_actions__create.FormModal
+    <_vessel_actions__create.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -93,7 +93,7 @@ export function VesselActionsCreateForm(props: GeneratedFormProps<VesselCreateDa
       <_vessel_actions__create.FormNumber name="fuel_capacity_gal" label="Fuel Capacity Gal" />
       <_vessel_actions__create.FormSelect name="hull_material" label="Hull Material" options={(Object.values(HullMaterial) as string[]).map(v => ({ value: v, label: v.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) }))} />
       <_vessel_actions__create.FormText name="construction_notes" label="Construction Notes" />
-    </_vessel_actions__create.FormModal>
+    </_vessel_actions__create.FormSheet>
   );
 }
 
@@ -102,7 +102,7 @@ const _vessel_actions__update = createTypedForm<VesselUpdateData>();
 
 export function VesselActionsUpdateForm(props: GeneratedFormProps<VesselUpdateData>) {
   return (
-    <_vessel_actions__update.FormModal
+    <_vessel_actions__update.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -126,16 +126,16 @@ export function VesselActionsUpdateForm(props: GeneratedFormProps<VesselUpdateDa
       <_vessel_actions__update.FormNumber name="fuel_capacity_gal" label="Fuel Capacity Gal" />
       <_vessel_actions__update.FormSelect name="hull_material" label="Hull Material" options={(Object.values(HullMaterial) as string[]).map(v => ({ value: v, label: v.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) }))} />
       <_vessel_actions__update.FormText name="construction_notes" label="Construction Notes" />
-    </_vessel_actions__update.FormModal>
+    </_vessel_actions__update.FormSheet>
   );
 }
 
-// --- vessel_actions__add_engine ---
-const _vessel_actions__add_engine = createTypedForm<AddEngineData>();
+// --- engine_actions__create ---
+const _engine_actions__create = createTypedForm<AddEngineData>();
 
-export function VesselActionsAddEngineForm(props: GeneratedFormProps<AddEngineData>) {
+export function EngineActionsCreateForm(props: GeneratedFormProps<AddEngineData>) {
   return (
-    <_vessel_actions__add_engine.FormModal
+    <_engine_actions__create.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -143,15 +143,40 @@ export function VesselActionsAddEngineForm(props: GeneratedFormProps<AddEngineDa
       defaultValues={props.defaultValues}
       isSubmitting={props.isSubmitting}
     >
-      <_vessel_actions__add_engine.FormSelect name="position" label="Position" required options={(Object.values(EnginePosition) as string[]).map(v => ({ value: v, label: v.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) }))} />
-      <_vessel_actions__add_engine.FormString name="model" label="Model" />
-      <_vessel_actions__add_engine.FormString name="serial_number" label="Serial Number" />
-      <_vessel_actions__add_engine.FormNumber name="year" label="Year" />
-      <_vessel_actions__add_engine.FormNumber name="horsepower" label="Horsepower" />
-      <_vessel_actions__add_engine.FormSelect name="fuel_type" label="Fuel Type" options={(Object.values(FuelType) as string[]).map(v => ({ value: v, label: v.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) }))} />
-      <_vessel_actions__add_engine.FormSelect name="engine_type" label="Engine Type" options={(Object.values(EngineType) as string[]).map(v => ({ value: v, label: v.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) }))} />
-      <_vessel_actions__add_engine.FormNumber name="hours_at_survey" label="Hours At Survey" />
-    </_vessel_actions__add_engine.FormModal>
+      <_engine_actions__create.FormSelect name="position" label="Position" required options={(Object.values(EnginePosition) as string[]).map(v => ({ value: v, label: v.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) }))} />
+      <_engine_actions__create.FormString name="model" label="Model" />
+      <_engine_actions__create.FormString name="serial_number" label="Serial Number" />
+      <_engine_actions__create.FormNumber name="year" label="Year" />
+      <_engine_actions__create.FormNumber name="horsepower" label="Horsepower" />
+      <_engine_actions__create.FormSelect name="fuel_type" label="Fuel Type" options={(Object.values(FuelType) as string[]).map(v => ({ value: v, label: v.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) }))} />
+      <_engine_actions__create.FormSelect name="engine_type" label="Engine Type" options={(Object.values(EngineType) as string[]).map(v => ({ value: v, label: v.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) }))} />
+      <_engine_actions__create.FormNumber name="hours_at_survey" label="Hours At Survey" />
+    </_engine_actions__create.FormSheet>
+  );
+}
+
+// --- engine_actions__update ---
+const _engine_actions__update = createTypedForm<UpdateEngineData>();
+
+export function EngineActionsUpdateForm(props: GeneratedFormProps<UpdateEngineData>) {
+  return (
+    <_engine_actions__update.FormSheet
+      isOpen={props.isOpen}
+      onClose={props.onClose}
+      title={props.actionLabel}
+      onSubmit={props.onSubmit}
+      defaultValues={props.defaultValues}
+      isSubmitting={props.isSubmitting}
+    >
+      <_engine_actions__update.FormSelect name="position" label="Position" required options={(Object.values(EnginePosition) as string[]).map(v => ({ value: v, label: v.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) }))} />
+      <_engine_actions__update.FormString name="model" label="Model" />
+      <_engine_actions__update.FormString name="serial_number" label="Serial Number" />
+      <_engine_actions__update.FormNumber name="year" label="Year" />
+      <_engine_actions__update.FormNumber name="horsepower" label="Horsepower" />
+      <_engine_actions__update.FormSelect name="fuel_type" label="Fuel Type" options={(Object.values(FuelType) as string[]).map(v => ({ value: v, label: v.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) }))} />
+      <_engine_actions__update.FormSelect name="engine_type" label="Engine Type" options={(Object.values(EngineType) as string[]).map(v => ({ value: v, label: v.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) }))} />
+      <_engine_actions__update.FormNumber name="hours_at_survey" label="Hours At Survey" />
+    </_engine_actions__update.FormSheet>
   );
 }
 
@@ -160,7 +185,7 @@ const _email_thread_actions__compose = createTypedForm<ComposeData>();
 
 export function EmailThreadActionsComposeForm(props: GeneratedFormProps<ComposeData>) {
   return (
-    <_email_thread_actions__compose.FormModal
+    <_email_thread_actions__compose.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -172,16 +197,16 @@ export function EmailThreadActionsComposeForm(props: GeneratedFormProps<ComposeD
       <_email_thread_actions__compose.FormString name="subject" label="Subject" required />
       <_email_thread_actions__compose.FormString name="body_text" label="Body Text" required />
       <_email_thread_actions__compose.FormString name="body_html" label="Body Html" />
-    </_email_thread_actions__compose.FormModal>
+    </_email_thread_actions__compose.FormSheet>
   );
 }
 
-// --- email_thread_actions__reply_to_thread ---
-const _email_thread_actions__reply_to_thread = createTypedForm<ReplyData>();
+// --- message_actions__reply_to_thread ---
+const _message_actions__reply_to_thread = createTypedForm<ReplyData>();
 
-export function EmailThreadActionsReplyToThreadForm(props: GeneratedFormProps<ReplyData>) {
+export function MessageActionsReplyToThreadForm(props: GeneratedFormProps<ReplyData>) {
   return (
-    <_email_thread_actions__reply_to_thread.FormModal
+    <_message_actions__reply_to_thread.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -189,9 +214,9 @@ export function EmailThreadActionsReplyToThreadForm(props: GeneratedFormProps<Re
       defaultValues={props.defaultValues}
       isSubmitting={props.isSubmitting}
     >
-      <_email_thread_actions__reply_to_thread.FormString name="body_text" label="Body Text" required />
-      <_email_thread_actions__reply_to_thread.FormString name="body_html" label="Body Html" />
-    </_email_thread_actions__reply_to_thread.FormModal>
+      <_message_actions__reply_to_thread.FormString name="body_text" label="Body Text" required />
+      <_message_actions__reply_to_thread.FormString name="body_html" label="Body Html" />
+    </_message_actions__reply_to_thread.FormSheet>
   );
 }
 
@@ -200,7 +225,7 @@ const _message_actions__forward_message = createTypedForm<ForwardData>();
 
 export function MessageActionsForwardMessageForm(props: GeneratedFormProps<ForwardData>) {
   return (
-    <_message_actions__forward_message.FormModal
+    <_message_actions__forward_message.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -211,7 +236,7 @@ export function MessageActionsForwardMessageForm(props: GeneratedFormProps<Forwa
       <_message_actions__forward_message.FormStringList name="to" label="To" required />
       <_message_actions__forward_message.FormString name="body_text" label="Body Text" required />
       <_message_actions__forward_message.FormString name="body_html" label="Body Html" />
-    </_message_actions__forward_message.FormModal>
+    </_message_actions__forward_message.FormSheet>
   );
 }
 
@@ -220,7 +245,7 @@ const _invoice_actions__create = createTypedForm<CreateInvoiceData>();
 
 export function InvoiceActionsCreateForm(props: GeneratedFormProps<CreateInvoiceData>) {
   return (
-    <_invoice_actions__create.FormModal
+    <_invoice_actions__create.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -232,7 +257,7 @@ export function InvoiceActionsCreateForm(props: GeneratedFormProps<CreateInvoice
       <_invoice_actions__create.FormEntityCombobox name="client_id" label="Client" required modelName="Client" />
       <_invoice_actions__create.FormDatetime name="due_at" label="Due" includeTime />
       <_invoice_actions__create.FormText name="notes" label="Notes" />
-    </_invoice_actions__create.FormModal>
+    </_invoice_actions__create.FormSheet>
   );
 }
 
@@ -241,7 +266,7 @@ const _invoice_actions__update = createTypedForm<UpdateInvoiceData>();
 
 export function InvoiceActionsUpdateForm(props: GeneratedFormProps<UpdateInvoiceData>) {
   return (
-    <_invoice_actions__update.FormModal
+    <_invoice_actions__update.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -253,18 +278,18 @@ export function InvoiceActionsUpdateForm(props: GeneratedFormProps<UpdateInvoice
       <_invoice_actions__update.FormDatetime name="issued_at" label="Issued" includeTime />
       <_invoice_actions__update.FormDatetime name="due_at" label="Due" includeTime />
       <_invoice_actions__update.FormString name="currency" label="Currency" required />
-      <_invoice_actions__update.FormNumber name="tax_cents" label="Tax Cents" required />
+      <_invoice_actions__update.FormCurrency name="tax_cents" label="Tax" required />
       <_invoice_actions__update.FormText name="notes" label="Notes" />
-    </_invoice_actions__update.FormModal>
+    </_invoice_actions__update.FormSheet>
   );
 }
 
-// --- invoice_actions__add_line_item ---
-const _invoice_actions__add_line_item = createTypedForm<AddLineItemData>();
+// --- invoice_line_item_actions__create ---
+const _invoice_line_item_actions__create = createTypedForm<AddLineItemData>();
 
-export function InvoiceActionsAddLineItemForm(props: GeneratedFormProps<AddLineItemData>) {
+export function InvoiceLineItemActionsCreateForm(props: GeneratedFormProps<AddLineItemData>) {
   return (
-    <_invoice_actions__add_line_item.FormModal
+    <_invoice_line_item_actions__create.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -272,11 +297,32 @@ export function InvoiceActionsAddLineItemForm(props: GeneratedFormProps<AddLineI
       defaultValues={props.defaultValues}
       isSubmitting={props.isSubmitting}
     >
-      <_invoice_actions__add_line_item.FormText name="description" label="Description" required />
-      <_invoice_actions__add_line_item.FormNumber name="quantity" label="Quantity" required />
-      <_invoice_actions__add_line_item.FormNumber name="unit_price_cents" label="Unit Price Cents" required />
-      <_invoice_actions__add_line_item.FormNumber name="sort_order" label="Sort Order" />
-    </_invoice_actions__add_line_item.FormModal>
+      <_invoice_line_item_actions__create.FormText name="description" label="Description" required />
+      <_invoice_line_item_actions__create.FormNumber name="quantity" label="Quantity" required />
+      <_invoice_line_item_actions__create.FormCurrency name="unit_price_cents" label="Unit Price" required />
+      <_invoice_line_item_actions__create.FormNumber name="sort_order" label="Sort Order" />
+    </_invoice_line_item_actions__create.FormSheet>
+  );
+}
+
+// --- invoice_line_item_actions__update ---
+const _invoice_line_item_actions__update = createTypedForm<UpdateLineItemData>();
+
+export function InvoiceLineItemActionsUpdateForm(props: GeneratedFormProps<UpdateLineItemData>) {
+  return (
+    <_invoice_line_item_actions__update.FormSheet
+      isOpen={props.isOpen}
+      onClose={props.onClose}
+      title={props.actionLabel}
+      onSubmit={props.onSubmit}
+      defaultValues={props.defaultValues}
+      isSubmitting={props.isSubmitting}
+    >
+      <_invoice_line_item_actions__update.FormText name="description" label="Description" required />
+      <_invoice_line_item_actions__update.FormNumber name="quantity" label="Quantity" required />
+      <_invoice_line_item_actions__update.FormCurrency name="unit_price_cents" label="Unit Price" required />
+      <_invoice_line_item_actions__update.FormNumber name="sort_order" label="Sort Order" required />
+    </_invoice_line_item_actions__update.FormSheet>
   );
 }
 
@@ -285,7 +331,7 @@ const _subscription_actions__create = createTypedForm<CreateSubscriptionData>();
 
 export function SubscriptionActionsCreateForm(props: GeneratedFormProps<CreateSubscriptionData>) {
   return (
-    <_subscription_actions__create.FormModal
+    <_subscription_actions__create.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -294,7 +340,7 @@ export function SubscriptionActionsCreateForm(props: GeneratedFormProps<CreateSu
       isSubmitting={props.isSubmitting}
     >
       <_subscription_actions__create.FormSelect name="plan" label="Plan" required options={(Object.values(SubscriptionPlan) as string[]).map(v => ({ value: v, label: v.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) }))} />
-    </_subscription_actions__create.FormModal>
+    </_subscription_actions__create.FormSheet>
   );
 }
 
@@ -303,7 +349,7 @@ const _subscription_actions__update = createTypedForm<UpdateSubscriptionData>();
 
 export function SubscriptionActionsUpdateForm(props: GeneratedFormProps<UpdateSubscriptionData>) {
   return (
-    <_subscription_actions__update.FormModal
+    <_subscription_actions__update.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -312,7 +358,7 @@ export function SubscriptionActionsUpdateForm(props: GeneratedFormProps<UpdateSu
       isSubmitting={props.isSubmitting}
     >
       <_subscription_actions__update.FormSelect name="plan" label="Plan" required options={(Object.values(SubscriptionPlan) as string[]).map(v => ({ value: v, label: v.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) }))} />
-    </_subscription_actions__update.FormModal>
+    </_subscription_actions__update.FormSheet>
   );
 }
 
@@ -321,7 +367,7 @@ const _pricing_guide_actions__create = createTypedForm<CreatePricingGuideData>()
 
 export function PricingGuideActionsCreateForm(props: GeneratedFormProps<CreatePricingGuideData>) {
   return (
-    <_pricing_guide_actions__create.FormModal
+    <_pricing_guide_actions__create.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -330,8 +376,8 @@ export function PricingGuideActionsCreateForm(props: GeneratedFormProps<CreatePr
       isSubmitting={props.isSubmitting}
     >
       <_pricing_guide_actions__create.FormString name="name" label="Name" required />
-      <_pricing_guide_actions__create.FormCheckbox name="is_active" label="Is Active" />
-    </_pricing_guide_actions__create.FormModal>
+      <_pricing_guide_actions__create.FormSelect name="service_type" label="Service Type" required options={(Object.values(ServiceType) as string[]).map(v => ({ value: v, label: v.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) }))} />
+    </_pricing_guide_actions__create.FormSheet>
   );
 }
 
@@ -340,7 +386,7 @@ const _pricing_guide_actions__update = createTypedForm<UpdatePricingGuideData>()
 
 export function PricingGuideActionsUpdateForm(props: GeneratedFormProps<UpdatePricingGuideData>) {
   return (
-    <_pricing_guide_actions__update.FormModal
+    <_pricing_guide_actions__update.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -349,17 +395,17 @@ export function PricingGuideActionsUpdateForm(props: GeneratedFormProps<UpdatePr
       isSubmitting={props.isSubmitting}
     >
       <_pricing_guide_actions__update.FormString name="name" label="Name" required />
-      <_pricing_guide_actions__update.FormCheckbox name="is_active" label="Is Active" required />
-    </_pricing_guide_actions__update.FormModal>
+      <_pricing_guide_actions__update.FormSelect name="service_type" label="Service Type" required options={(Object.values(ServiceType) as string[]).map(v => ({ value: v, label: v.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) }))} />
+    </_pricing_guide_actions__update.FormSheet>
   );
 }
 
-// --- pricing_guide_actions__add_tier ---
-const _pricing_guide_actions__add_tier = createTypedForm<AddPricingTierData>();
+// --- pricing_tier_actions__create ---
+const _pricing_tier_actions__create = createTypedForm<AddPricingTierData>();
 
-export function PricingGuideActionsAddTierForm(props: GeneratedFormProps<AddPricingTierData>) {
+export function PricingTierActionsCreateForm(props: GeneratedFormProps<AddPricingTierData>) {
   return (
-    <_pricing_guide_actions__add_tier.FormModal
+    <_pricing_tier_actions__create.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -367,13 +413,30 @@ export function PricingGuideActionsAddTierForm(props: GeneratedFormProps<AddPric
       defaultValues={props.defaultValues}
       isSubmitting={props.isSubmitting}
     >
-      <_pricing_guide_actions__add_tier.FormString name="service_type" label="Service Type" />
-      <_pricing_guide_actions__add_tier.FormNumber name="length_min_ft" label="Length Min Ft" />
-      <_pricing_guide_actions__add_tier.FormNumber name="length_max_ft" label="Length Max Ft" />
-      <_pricing_guide_actions__add_tier.FormSelect name="pricing_type" label="Pricing Type" required options={(Object.values(PricingType) as string[]).map(v => ({ value: v, label: v.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) }))} />
-      <_pricing_guide_actions__add_tier.FormNumber name="amount_cents" label="Amount Cents" />
-      <_pricing_guide_actions__add_tier.FormNumber name="sort_order" label="Sort Order" />
-    </_pricing_guide_actions__add_tier.FormModal>
+      <_pricing_tier_actions__create.FormNumber name="length_until_ft" label="Length Until Ft" />
+      <_pricing_tier_actions__create.FormSelect name="pricing_type" label="Pricing Type" required options={(Object.values(PricingType) as string[]).map(v => ({ value: v, label: v.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) }))} />
+      <_pricing_tier_actions__create.FormCurrency name="amount_cents" label="Amount" />
+    </_pricing_tier_actions__create.FormSheet>
+  );
+}
+
+// --- pricing_tier_actions__update ---
+const _pricing_tier_actions__update = createTypedForm<UpdatePricingTierData>();
+
+export function PricingTierActionsUpdateForm(props: GeneratedFormProps<UpdatePricingTierData>) {
+  return (
+    <_pricing_tier_actions__update.FormSheet
+      isOpen={props.isOpen}
+      onClose={props.onClose}
+      title={props.actionLabel}
+      onSubmit={props.onSubmit}
+      defaultValues={props.defaultValues}
+      isSubmitting={props.isSubmitting}
+    >
+      <_pricing_tier_actions__update.FormNumber name="length_until_ft" label="Length Until Ft" />
+      <_pricing_tier_actions__update.FormSelect name="pricing_type" label="Pricing Type" required options={(Object.values(PricingType) as string[]).map(v => ({ value: v, label: v.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) }))} />
+      <_pricing_tier_actions__update.FormCurrency name="amount_cents" label="Amount" />
+    </_pricing_tier_actions__update.FormSheet>
   );
 }
 
@@ -382,7 +445,7 @@ const _calendar_event_actions__create = createTypedForm<CreateCalendarEventData>
 
 export function CalendarEventActionsCreateForm(props: GeneratedFormProps<CreateCalendarEventData>) {
   return (
-    <_calendar_event_actions__create.FormModal
+    <_calendar_event_actions__create.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -401,7 +464,7 @@ export function CalendarEventActionsCreateForm(props: GeneratedFormProps<CreateC
       <_calendar_event_actions__create.FormStringList name="attendees" label="Attendees" />
       <_calendar_event_actions__create.FormEntityCombobox name="survey_id" label="Survey" modelName="Survey" />
       <_calendar_event_actions__create.FormEntityCombobox name="client_id" label="Client" modelName="Client" />
-    </_calendar_event_actions__create.FormModal>
+    </_calendar_event_actions__create.FormSheet>
   );
 }
 
@@ -410,7 +473,7 @@ const _calendar_event_actions__update = createTypedForm<UpdateCalendarEventData>
 
 export function CalendarEventActionsUpdateForm(props: GeneratedFormProps<UpdateCalendarEventData>) {
   return (
-    <_calendar_event_actions__update.FormModal
+    <_calendar_event_actions__update.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -429,25 +492,7 @@ export function CalendarEventActionsUpdateForm(props: GeneratedFormProps<UpdateC
       <_calendar_event_actions__update.FormStringList name="attendees" label="Attendees" required />
       <_calendar_event_actions__update.FormEntityCombobox name="survey_id" label="Survey" modelName="Survey" />
       <_calendar_event_actions__update.FormEntityCombobox name="client_id" label="Client" modelName="Client" />
-    </_calendar_event_actions__update.FormModal>
-  );
-}
-
-// --- user_actions__claim_inbox ---
-const _user_actions__claim_inbox = createTypedForm<ClaimInboxData>();
-
-export function UserActionsClaimInboxForm(props: GeneratedFormProps<ClaimInboxData>) {
-  return (
-    <_user_actions__claim_inbox.FormModal
-      isOpen={props.isOpen}
-      onClose={props.onClose}
-      title={props.actionLabel}
-      onSubmit={props.onSubmit}
-      defaultValues={props.defaultValues}
-      isSubmitting={props.isSubmitting}
-    >
-      <_user_actions__claim_inbox.FormString name="local_part" label="Inbox name" required placeholder="phil" />
-    </_user_actions__claim_inbox.FormModal>
+    </_calendar_event_actions__update.FormSheet>
   );
 }
 
@@ -456,7 +501,7 @@ const _manufacturer_actions__create = createTypedForm<ManufacturerCreateData>();
 
 export function ManufacturerActionsCreateForm(props: GeneratedFormProps<ManufacturerCreateData>) {
   return (
-    <_manufacturer_actions__create.FormModal
+    <_manufacturer_actions__create.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -467,7 +512,7 @@ export function ManufacturerActionsCreateForm(props: GeneratedFormProps<Manufact
       <_manufacturer_actions__create.FormString name="name" label="Name" required />
       <_manufacturer_actions__create.FormString name="country" label="Country" />
       <_manufacturer_actions__create.FormString name="website" label="Website" />
-    </_manufacturer_actions__create.FormModal>
+    </_manufacturer_actions__create.FormSheet>
   );
 }
 
@@ -476,7 +521,7 @@ const _manufacturer_actions__update = createTypedForm<ManufacturerUpdateData>();
 
 export function ManufacturerActionsUpdateForm(props: GeneratedFormProps<ManufacturerUpdateData>) {
   return (
-    <_manufacturer_actions__update.FormModal
+    <_manufacturer_actions__update.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -487,7 +532,7 @@ export function ManufacturerActionsUpdateForm(props: GeneratedFormProps<Manufact
       <_manufacturer_actions__update.FormString name="name" label="Name" required />
       <_manufacturer_actions__update.FormString name="country" label="Country" />
       <_manufacturer_actions__update.FormString name="website" label="Website" />
-    </_manufacturer_actions__update.FormModal>
+    </_manufacturer_actions__update.FormSheet>
   );
 }
 
@@ -496,7 +541,7 @@ const _part_actions__create = createTypedForm<PartCreateData>();
 
 export function PartActionsCreateForm(props: GeneratedFormProps<PartCreateData>) {
   return (
-    <_part_actions__create.FormModal
+    <_part_actions__create.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -508,7 +553,7 @@ export function PartActionsCreateForm(props: GeneratedFormProps<PartCreateData>)
       <_part_actions__create.FormString name="part_number" label="Part Number" />
       <_part_actions__create.FormText name="description" label="Description" />
       <_part_actions__create.FormSelect name="category" label="Category" options={(Object.values(PartCategory) as string[]).map(v => ({ value: v, label: v.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) }))} />
-    </_part_actions__create.FormModal>
+    </_part_actions__create.FormSheet>
   );
 }
 
@@ -517,7 +562,7 @@ const _part_actions__update = createTypedForm<PartUpdateData>();
 
 export function PartActionsUpdateForm(props: GeneratedFormProps<PartUpdateData>) {
   return (
-    <_part_actions__update.FormModal
+    <_part_actions__update.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -529,7 +574,7 @@ export function PartActionsUpdateForm(props: GeneratedFormProps<PartUpdateData>)
       <_part_actions__update.FormString name="part_number" label="Part Number" />
       <_part_actions__update.FormText name="description" label="Description" />
       <_part_actions__update.FormSelect name="category" label="Category" options={(Object.values(PartCategory) as string[]).map(v => ({ value: v, label: v.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) }))} />
-    </_part_actions__update.FormModal>
+    </_part_actions__update.FormSheet>
   );
 }
 
@@ -538,7 +583,7 @@ const _survey_actions__create = createTypedForm<CreateSurveyData>();
 
 export function SurveyActionsCreateForm(props: GeneratedFormProps<CreateSurveyData>) {
   return (
-    <_survey_actions__create.FormModal
+    <_survey_actions__create.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -549,7 +594,7 @@ export function SurveyActionsCreateForm(props: GeneratedFormProps<CreateSurveyDa
       <_survey_actions__create.FormEntityCombobox name="vessel_id" label="Vessel" required modelName="Vessel" createAction="vessel_actions__create" />
       <_survey_actions__create.FormEntityCombobox name="assigned_surveyor_id" label="Assigned Surveyor" required modelName="User" />
       <_survey_actions__create.FormEntityCombobox name="template_id" label="Template" modelName="SurveyTemplate" createAction="survey_template_actions__create" />
-    </_survey_actions__create.FormModal>
+    </_survey_actions__create.FormSheet>
   );
 }
 
@@ -558,7 +603,7 @@ const _survey_actions__update = createTypedForm<UpdateSurveyData>();
 
 export function SurveyActionsUpdateForm(props: GeneratedFormProps<UpdateSurveyData>) {
   return (
-    <_survey_actions__update.FormModal
+    <_survey_actions__update.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -568,7 +613,7 @@ export function SurveyActionsUpdateForm(props: GeneratedFormProps<UpdateSurveyDa
     >
       <_survey_actions__update.FormEntityCombobox name="assigned_surveyor_id" label="Assigned Surveyor" required modelName="User" />
       <_survey_actions__update.FormEntityCombobox name="template_id" label="Template" modelName="SurveyTemplate" createAction="survey_template_actions__create" />
-    </_survey_actions__update.FormModal>
+    </_survey_actions__update.FormSheet>
   );
 }
 
@@ -577,7 +622,7 @@ const _survey_template_actions__create = createTypedForm<CreateSurveyTemplateDat
 
 export function SurveyTemplateActionsCreateForm(props: GeneratedFormProps<CreateSurveyTemplateData>) {
   return (
-    <_survey_template_actions__create.FormModal
+    <_survey_template_actions__create.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -588,7 +633,7 @@ export function SurveyTemplateActionsCreateForm(props: GeneratedFormProps<Create
       <_survey_template_actions__create.FormString name="name" label="Name" required />
       <_survey_template_actions__create.FormStringList name="tags" label="Tags" required />
       <_survey_template_actions__create.FormString name="definition" label="Definition" required />
-    </_survey_template_actions__create.FormModal>
+    </_survey_template_actions__create.FormSheet>
   );
 }
 
@@ -597,7 +642,7 @@ const _survey_template_actions__update = createTypedForm<UpdateSurveyTemplateDat
 
 export function SurveyTemplateActionsUpdateForm(props: GeneratedFormProps<UpdateSurveyTemplateData>) {
   return (
-    <_survey_template_actions__update.FormModal
+    <_survey_template_actions__update.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -608,7 +653,7 @@ export function SurveyTemplateActionsUpdateForm(props: GeneratedFormProps<Update
       <_survey_template_actions__update.FormString name="name" label="Name" required />
       <_survey_template_actions__update.FormStringList name="tags" label="Tags" required />
       <_survey_template_actions__update.FormString name="definition" label="Definition" required />
-    </_survey_template_actions__update.FormModal>
+    </_survey_template_actions__update.FormSheet>
   );
 }
 
@@ -617,7 +662,7 @@ const _survey_media_actions__set_caption = createTypedForm<SetSurveyMediaCaption
 
 export function SurveyMediaActionsSetCaptionForm(props: GeneratedFormProps<SetSurveyMediaCaptionData>) {
   return (
-    <_survey_media_actions__set_caption.FormModal
+    <_survey_media_actions__set_caption.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -626,7 +671,44 @@ export function SurveyMediaActionsSetCaptionForm(props: GeneratedFormProps<SetSu
       isSubmitting={props.isSubmitting}
     >
       <_survey_media_actions__set_caption.FormString name="caption" label="Caption" />
-    </_survey_media_actions__set_caption.FormModal>
+    </_survey_media_actions__set_caption.FormSheet>
+  );
+}
+
+// --- onboarding_actions__claim_inbox ---
+const _onboarding_actions__claim_inbox = createTypedForm<ClaimInboxData>();
+
+export function OnboardingActionsClaimInboxForm(props: GeneratedFormProps<ClaimInboxData>) {
+  return (
+    <_onboarding_actions__claim_inbox.FormSheet
+      isOpen={props.isOpen}
+      onClose={props.onClose}
+      title={props.actionLabel}
+      onSubmit={props.onSubmit}
+      defaultValues={props.defaultValues}
+      isSubmitting={props.isSubmitting}
+    >
+      <_onboarding_actions__claim_inbox.FormString name="local_part" label="Inbox name" required placeholder="phil" />
+    </_onboarding_actions__claim_inbox.FormSheet>
+  );
+}
+
+// --- onboarding_actions__confirm_pricing ---
+const _onboarding_actions__confirm_pricing = createTypedForm<ConfirmPricingData>();
+
+export function OnboardingActionsConfirmPricingForm(props: GeneratedFormProps<ConfirmPricingData>) {
+  return (
+    <_onboarding_actions__confirm_pricing.FormSheet
+      isOpen={props.isOpen}
+      onClose={props.onClose}
+      title={props.actionLabel}
+      onSubmit={props.onSubmit}
+      defaultValues={props.defaultValues}
+      isSubmitting={props.isSubmitting}
+    >
+      <_onboarding_actions__confirm_pricing.FormSelect name="service_type" label="Service Type" required options={(Object.values(ServiceType) as string[]).map(v => ({ value: v, label: v.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) }))} />
+      <_onboarding_actions__confirm_pricing.FormStringList name="tiers" label="Tiers" required />
+    </_onboarding_actions__confirm_pricing.FormSheet>
   );
 }
 
@@ -635,7 +717,7 @@ const _report_actions__create = createTypedForm<CreateReportData>();
 
 export function ReportActionsCreateForm(props: GeneratedFormProps<CreateReportData>) {
   return (
-    <_report_actions__create.FormModal
+    <_report_actions__create.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -645,7 +727,7 @@ export function ReportActionsCreateForm(props: GeneratedFormProps<CreateReportDa
     >
       <_report_actions__create.FormEntityCombobox name="survey_id" label="Survey" required modelName="Survey" />
       <_report_actions__create.FormString name="title" label="Title" />
-    </_report_actions__create.FormModal>
+    </_report_actions__create.FormSheet>
   );
 }
 
@@ -654,7 +736,7 @@ const _report_actions__update = createTypedForm<UpdateReportData>();
 
 export function ReportActionsUpdateForm(props: GeneratedFormProps<UpdateReportData>) {
   return (
-    <_report_actions__update.FormModal
+    <_report_actions__update.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -664,9 +746,9 @@ export function ReportActionsUpdateForm(props: GeneratedFormProps<UpdateReportDa
     >
       <_report_actions__update.FormString name="title" label="Title" />
       <_report_actions__update.FormString name="summary" label="Summary" />
-      <_report_actions__update.FormNumber name="market_value_cents" label="Market Value Cents" />
-      <_report_actions__update.FormNumber name="replacement_value_cents" label="Replacement Value Cents" />
-    </_report_actions__update.FormModal>
+      <_report_actions__update.FormCurrency name="market_value_cents" label="Market Value" />
+      <_report_actions__update.FormCurrency name="replacement_value_cents" label="Replacement Value" />
+    </_report_actions__update.FormSheet>
   );
 }
 
@@ -675,7 +757,7 @@ const _widget_actions__create = createTypedForm<CreateWidgetData>();
 
 export function WidgetActionsCreateForm(props: GeneratedFormProps<CreateWidgetData>) {
   return (
-    <_widget_actions__create.FormModal
+    <_widget_actions__create.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -691,7 +773,7 @@ export function WidgetActionsCreateForm(props: GeneratedFormProps<CreateWidgetDa
       <_widget_actions__create.FormNumber name="position_y" label="Position Y" />
       <_widget_actions__create.FormNumber name="size_w" label="Size W" />
       <_widget_actions__create.FormNumber name="size_h" label="Size H" />
-    </_widget_actions__create.FormModal>
+    </_widget_actions__create.FormSheet>
   );
 }
 
@@ -700,7 +782,7 @@ const _widget_actions__update = createTypedForm<UpdateWidgetData>();
 
 export function WidgetActionsUpdateForm(props: GeneratedFormProps<UpdateWidgetData>) {
   return (
-    <_widget_actions__update.FormModal
+    <_widget_actions__update.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -716,6 +798,6 @@ export function WidgetActionsUpdateForm(props: GeneratedFormProps<UpdateWidgetDa
       <_widget_actions__update.FormNumber name="position_y" label="Position Y" />
       <_widget_actions__update.FormNumber name="size_w" label="Size W" />
       <_widget_actions__update.FormNumber name="size_h" label="Size H" />
-    </_widget_actions__update.FormModal>
+    </_widget_actions__update.FormSheet>
   );
 }

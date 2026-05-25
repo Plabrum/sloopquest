@@ -15,8 +15,24 @@ from app.platform.base.schemas import BaseSchema
 from app.utils.sqids import Sqid
 
 
-class EngineSchema(BaseSchema):
+class EngineListItem(ActionableList):
     id: Sqid
+    vessel_id: Sqid
+    position: EnginePosition
+    manufacturer_id: Sqid | None
+    model: str | None
+    serial_number: str | None
+    year: int | None
+    horsepower: int | None
+    fuel_type: FuelType | None
+    engine_type: EngineType | None
+    hours_at_survey: int | None
+    created_at: datetime
+
+
+class EngineDetail(ActionableDetail):
+    id: Sqid
+    vessel_id: Sqid
     position: EnginePosition
     manufacturer_id: Sqid | None
     model: str | None
@@ -58,7 +74,6 @@ class VesselDetail(ActionableDetail):
     fuel_capacity_gal: Decimal | None
     hull_material: HullMaterial | None
     construction_notes: str | None
-    engines: list[EngineSchema]
     created_at: datetime
     updated_at: datetime
 
@@ -104,6 +119,7 @@ class VesselUpdateData(BaseSchema):
 
 
 class AddEngineData(BaseSchema):
+    vessel_id: Sqid
     position: EnginePosition
     manufacturer_id: Sqid | None = None
     model: str | None = None
@@ -116,7 +132,6 @@ class AddEngineData(BaseSchema):
 
 
 class UpdateEngineData(BaseSchema):
-    engine_id: Sqid
     position: EnginePosition
     manufacturer_id: Sqid | None
     model: str | None
@@ -126,7 +141,3 @@ class UpdateEngineData(BaseSchema):
     fuel_type: FuelType | None
     engine_type: EngineType | None
     hours_at_survey: int | None
-
-
-class RemoveEngineData(BaseSchema):
-    engine_id: Sqid

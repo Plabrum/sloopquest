@@ -271,14 +271,27 @@ def make_crud_controller[ModelT: BaseDBModel, ListT: ActionableList, DetailT: Ac
     )
 
     # Register metadata for codegen (GET /schema/crud-metadata)
+    # Auto-mark `*_cents` fields as currency so the frontend never renders raw cents.
+    # Explicit values in CRUDConfig win — only fill in what the caller didn't set.
+    column_types = dict(config.column_types)
+    column_labels = dict(config.column_labels)
+    list_fields = getattr(list_item_type, "__struct_fields__", ())
+    for field_name in list_fields:
+        if field_name.endswith("_cents"):
+            column_types.setdefault(field_name, "currency")
+            column_labels.setdefault(
+                field_name,
+                field_name.removesuffix("_cents").replace("_", " ").title() or "Amount",
+            )
+
     metadata: dict[str, object] = {
         "filterable": sorted(config.filterable_columns or []),
         "sortable": sorted(config.sortable_columns or []),
     }
-    if config.column_types:
-        metadata["column_types"] = config.column_types
-    if config.column_labels:
-        metadata["column_labels"] = config.column_labels
+    if column_types:
+        metadata["column_types"] = column_types
+    if column_labels:
+        metadata["column_labels"] = column_labels
     _crud_metadata[f"list_{model_name}"] = metadata
 
     CRUDRegistry().register(model, CRUDEntry(path=path, config=config))

@@ -42,7 +42,6 @@ class EmailThreadActionKey(StrEnum):
     MARK_THREAD_UNREAD = auto()
     ATTACH_TO_CLIENT = auto()
     ATTACH_TO_SURVEY = auto()
-    REPLY_TO_THREAD = auto()
 
 
 class MessageActionKey(StrEnum):
@@ -52,6 +51,7 @@ class MessageActionKey(StrEnum):
     UNARCHIVE_MESSAGE = auto()
     RESEND_MESSAGE = auto()
     FORWARD_MESSAGE = auto()
+    REPLY_TO_THREAD = auto()
 
 
 email_thread_actions = action_group_factory(
@@ -228,21 +228,26 @@ class AttachToSurvey(BaseObjectAction[EmailThread, AttachSurveyData]):
         return ActionExecutionResponse(message="Attached to survey")
 
 
-@email_thread_actions
-class ReplyToThread(BaseObjectAction[EmailThread, ReplyData]):
-    action_key = EmailThreadActionKey.REPLY_TO_THREAD
+# ── Message actions ──────────────────────────────────────────────────────────
+
+
+@message_actions
+class ReplyToThread(BaseTopLevelAction[ReplyData]):
+    action_key = MessageActionKey.REPLY_TO_THREAD
     label = "Reply"
     icon = ActionIcon.SEND
-    priority = 20
+    priority = 5
 
     @classmethod
-    async def execute(
-        cls, obj: EmailThread, data: ReplyData, transaction: AsyncSession, deps: ActionDeps
-    ) -> ActionExecutionResponse:
+    async def execute(cls, data: ReplyData, transaction: AsyncSession, deps: ActionDeps) -> ActionExecutionResponse:
+        thread = await transaction.get(EmailThread, data.email_thread_id)
+        if thread is None:
+            return ActionExecutionResponse(message="Thread not found")
+
         latest_inbound = await transaction.scalar(
             select(Message)
             .where(
-                Message.email_thread_id == obj.id,
+                Message.email_thread_id == thread.id,
                 Message.direction == MessageDirection.IN,
             )
             .order_by(Message.created_at.desc())
@@ -251,13 +256,13 @@ class ReplyToThread(BaseObjectAction[EmailThread, ReplyData]):
         in_reply_to = latest_inbound.rfc_message_id if latest_inbound else None
         to_emails = [latest_inbound.from_email] if latest_inbound and latest_inbound.from_email else []
 
-        subject = obj.subject or ""
+        subject = thread.subject or ""
         if subject and not subject.lower().startswith("re:"):
             subject = f"Re: {subject}"
 
         message = Message(
             user_id=deps.user.id,
-            email_thread_id=obj.id,
+            email_thread_id=thread.id,
             direction=MessageDirection.OUT,
             state=MessageState.QUEUED,
             subject=subject,
@@ -273,9 +278,6 @@ class ReplyToThread(BaseObjectAction[EmailThread, ReplyData]):
 
         await dispatch_task(transaction, deps.request, TaskName.SEND_EMAIL, message_id=message.id)
         return ActionExecutionResponse(message="Reply queued", created_id=message.id)
-
-
-# ── Message actions ──────────────────────────────────────────────────────────
 
 
 @message_actions

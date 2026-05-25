@@ -27,6 +27,19 @@ function redirectToAuth(reason?: AuthRedirectReason): never {
   });
 }
 
+export async function redirectIfAuthenticated() {
+  try {
+    await queryClient.ensureQueryData(authMeQueryOptions);
+    throw redirect({ to: "/", replace: true });
+  } catch (error) {
+    if (error instanceof AxiosError && error.response?.status === 401) {
+      queryClient.clear();
+      return;
+    }
+    throw error;
+  }
+}
+
 export async function requireAuth() {
   const hadSession = queryClient.getQueryData(authMeQueryKey) != null;
   const reason: AuthRedirectReason | undefined = hadSession

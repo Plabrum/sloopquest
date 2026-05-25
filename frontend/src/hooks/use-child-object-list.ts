@@ -3,19 +3,18 @@ import { keepPreviousData } from "@tanstack/react-query";
 import type {
   FilterDefinition,
   ListRequest,
-  PagedResponse,
   SortDefinition,
 } from "@/lib/resource-table-types";
 
+type ListQuery<T> = (
+  params: ListRequest,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ...args: any[]
+) => { data: { items: T[]; total: number } | undefined; isFetching: boolean };
+
 interface UseChildObjectListOptions<T> {
   /** Orval-generated list query hook. Same signature as useResourceTable's `listQuery`. */
-  listQuery: (
-    params: ListRequest,
-    options?: { query?: { placeholderData?: typeof keepPreviousData } },
-  ) => {
-    data: PagedResponse<T> | undefined;
-    isFetching: boolean;
-  };
+  listQuery: ListQuery<T>;
   /** Pre-applied filters that scope this list. Always sent; not user-removable. */
   filters?: FilterDefinition[];
   /** Default sort. Falls back to `created_at desc`. */

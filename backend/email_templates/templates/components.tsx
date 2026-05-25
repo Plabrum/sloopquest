@@ -12,25 +12,37 @@ import {
 } from '@react-email/components';
 import * as React from 'react';
 
+// Almanac palette — paper + ink + brass. Mirrors the in-app
+// `[data-theme="almanac"]` tokens defined in frontend/src/index.css.
 const tailwindConfig = {
   theme: {
     extend: {
       colors: {
-        sail: '#F6F4EE',
-        'sail-light': '#FBFAF6',
-        navy: '#0F2A3F',
-        'navy-light': '#1F4A6B',
-        teak: '#A26A3A',
-        rope: '#C8B79A',
-        dark: '#0F2A3F',
-        mid: '#4F5F6B',
-        'light-border': '#E1DCD2',
-        'footer-muted': '#8A8378',
-        'footer-subtle': '#B5AFA7',
+        paper: '#f1e8d4',
+        'paper-warm': '#f6eedb',
+        'paper-card': '#faf2de',
+        'paper-deep': '#e6dbc1',
+        ink: '#0d1f2c',
+        'ink-soft': '#1e3344',
+        'ink-muted': '#5b6976',
+        brass: '#b8845c',
+        'brass-deep': '#8b5e3a',
+        rust: '#a85a3a',
+        // Aliases so existing markup keeps rendering:
+        dark: '#0d1f2c',
+        mid: '#5b6976',
+        'light-border': '#d8cdb2',
+        'footer-muted': '#8b7d62',
+        'footer-subtle': '#a89b80',
       },
       fontFamily: {
-        serif: ["Georgia", "'Times New Roman'", "serif"],
-        sans: ["Arial", "Helvetica", "sans-serif"],
+        // Web-safe fallbacks first so most clients render predictably.
+        // Fraunces/Newsreader come through where the client supports
+        // them (most modern Apple/Gmail web clients).
+        serif: ["'Fraunces'", 'Georgia', "'Times New Roman'", 'serif'],
+        body: ["'Newsreader'", 'Georgia', "'Times New Roman'", 'serif'],
+        sans: ['Arial', 'Helvetica', 'sans-serif'],
+        mono: ["'Space Mono'", 'ui-monospace', 'Menlo', 'Consolas', 'monospace'],
       },
     },
   },
@@ -48,35 +60,36 @@ export function BaseLayout({ preview, children, footerNote }: BaseLayoutProps) {
       <Tailwind config={tailwindConfig}>
         <Head />
         <Preview>{preview}</Preview>
-        <Body className="bg-sail m-0 p-0 font-serif">
-          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} className="bg-sail">
+        <Body className="bg-paper m-0 p-0 font-body">
+          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} className="bg-paper">
             <tbody>
               <tr>
                 <td align="center" className="py-10 px-5">
                   <Container className="max-w-[560px] w-full">
 
-                    {/* Logo */}
-                    <Section className="pb-10">
-                      <Text className="font-serif text-[22px] text-navy tracking-wide m-0">
+                    {/* Wordmark */}
+                    <Section className="pb-8 text-center">
+                      <Text className="font-serif text-[28px] text-ink tracking-tight m-0">
                         Sloopquest
                       </Text>
+                      <div className="mx-auto mt-3 h-px w-16 bg-brass" />
                     </Section>
 
                     {/* Main card */}
-                    <Section className="bg-white rounded-2xl border border-light-border px-10 py-12">
+                    <Section className="bg-paper-card rounded-[2px] border border-light-border px-10 py-12">
                       {children}
 
                       {/* Sign-off */}
-                      <Text className="font-serif text-base text-dark mt-8 mb-0">
+                      <Text className="font-body text-[15px] text-ink mt-8 mb-0">
                         Fair winds,<br />
-                        <span className="text-teak">The Sloopquest Team</span>
+                        <span className="text-brass-deep">The Sloopquest Team</span>
                       </Text>
                     </Section>
 
                     {/* Footer */}
                     <Section className="pt-8 text-center">
-                      <Text className="font-sans text-xs text-footer-muted m-0 mb-1">
-                        © 2026 Sloopquest
+                      <Text className="font-mono text-[10px] text-footer-muted uppercase tracking-[0.22em] m-0 mb-1">
+                        &copy; 2026 Sloopquest
                       </Text>
                       <Text className="font-sans text-[11px] text-footer-subtle m-0">
                         {footerNote ?? "You're receiving this because you have a Sloopquest account."}
@@ -103,7 +116,7 @@ export function Button({ href, children }: ButtonProps) {
   return (
     <ReactEmailButton
       href={href}
-      className="bg-navy text-white no-underline rounded-full px-8 py-3.5 font-sans font-medium text-[15px] tracking-wide border-none leading-tight"
+      className="bg-ink text-paper-warm no-underline rounded-[2px] px-8 py-3.5 font-mono font-medium text-[11px] uppercase tracking-[0.18em] border border-ink leading-tight"
     >
       {children}
     </ReactEmailButton>

@@ -320,8 +320,7 @@ async def send_unknown_recipient_bounce_task(
     if not from_email:
         return {"status": "skipped", "reason": "missing_from"}
 
-    domain = config.SES_FROM_EMAIL.rsplit("@", 1)[-1]
-    bounce_from = f"mailer-daemon@{domain}"
+    bounce_from = f"mailer-daemon@{config.INBOX_DOMAIN}"
 
     html_body, text_body = _render_bounce_template(
         original_to=to_email,

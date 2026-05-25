@@ -16,27 +16,30 @@ export default function MagicLink({
       preview="Sign in to your account"
       footerNote="This email was sent because a sign-in was requested for your account."
     >
-      <Text className="font-serif text-[26px] leading-tight text-dark m-0 mb-5">
+      <Text className="font-mono text-[10px] text-brass-deep uppercase tracking-[0.28em] m-0 mb-3">
+        Sign in
+      </Text>
+      <Text className="font-serif text-[26px] leading-tight text-ink m-0 mb-5">
         Sign in to your account
       </Text>
 
-      <Text className="font-sans text-[15px] leading-relaxed text-mid m-0 mb-7">
+      <Text className="font-body text-[15px] leading-relaxed text-ink-muted m-0 mb-7">
         Click the button below to securely sign in to Sloopquest. This link expires in{' '}
         {expiration_minutes} minutes for your security.
       </Text>
 
       <Section className="mb-8">
-        <Button href={magic_link_url}>Continue to Sloopquest →</Button>
+        <Button href={magic_link_url}>Continue to Sloopquest</Button>
       </Section>
 
       <Divider />
 
       {/* Copyable link */}
-      <Text className="font-sans text-[12px] font-medium text-footer-muted uppercase tracking-widest m-0 mb-2">
+      <Text className="font-mono text-[10px] text-brass-deep uppercase tracking-[0.22em] m-0 mb-2">
         Or copy this link
       </Text>
-      <div className="bg-sail-light border border-light-border rounded-xl px-4 py-3.5">
-        <Text className="font-mono text-[12px] break-all m-0 leading-normal text-mid">
+      <div className="bg-paper-warm border border-light-border rounded-[2px] px-4 py-3.5">
+        <Text className="font-mono text-[12px] break-all m-0 leading-normal text-ink-muted">
           {magic_link_url}
         </Text>
       </div>
@@ -44,9 +47,9 @@ export default function MagicLink({
       <Divider />
 
       {/* Security notice */}
-      <div className="bg-sail-light rounded-xl border border-light-border px-4 py-4">
-        <Text className="font-sans text-sm leading-relaxed text-mid m-0">
-          <strong className="text-dark font-semibold">Didn't request this?</strong>
+      <div className="bg-paper-warm rounded-[2px] border border-light-border px-4 py-4">
+        <Text className="font-body text-[14px] leading-relaxed text-ink-muted m-0">
+          <strong className="text-ink font-semibold">Didn&rsquo;t request this?</strong>
           <br />
           You can safely ignore this email. This link can only be used once and expires automatically.
         </Text>

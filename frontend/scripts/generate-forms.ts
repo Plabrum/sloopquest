@@ -64,7 +64,7 @@ type ActionMetadata = Record<string, ActionMeta>;
 
 interface FormFieldInfo {
   name: string;
-  component: string; // FormString, FormEmail, FormNumber, FormText, FormSelect, FormDatetime, FormCheckbox, FormEntityCombobox
+  component: string; // FormString, FormEmail, FormNumber, FormCurrency, FormText, FormSelect, FormDatetime, FormCheckbox, FormEntityCombobox
   label: string;
   required: boolean;
   placeholder?: string;
@@ -214,6 +214,17 @@ function inferFormField(
     };
   }
 
+  // Currency — money input. Stored as integer cents but displayed/entered as dollars.
+  if (fieldMeta?.type === "currency") {
+    return {
+      name: key,
+      component: "FormCurrency",
+      label,
+      required,
+      placeholder,
+    };
+  }
+
   // Number
   if (
     schema.type === "integer" ||
@@ -299,7 +310,7 @@ const ${varPrefix} = createTypedForm<${schemaName}>();
 
 export function ${formName}(props: GeneratedFormProps<${schemaName}>) {
   return (
-    <${varPrefix}.FormModal
+    <${varPrefix}.FormSheet
       isOpen={props.isOpen}
       onClose={props.onClose}
       title={props.actionLabel}
@@ -308,7 +319,7 @@ export function ${formName}(props: GeneratedFormProps<${schemaName}>) {
       isSubmitting={props.isSubmitting}
     >
 ${fieldLines.join("\n")}
-    </${varPrefix}.FormModal>
+    </${varPrefix}.FormSheet>
   );
 }`;
 }

@@ -37,6 +37,26 @@ export function formatRelativeTime(dateString: string): string {
   return date.toLocaleDateString();
 }
 
+const USD = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+});
+
+export function formatCents(cents: number | null | undefined): string {
+  if (cents == null) return "—";
+  return USD.format(cents / 100);
+}
+
+export function centsToDollars(cents: number | null | undefined): number | null {
+  if (cents == null) return null;
+  return cents / 100;
+}
+
+export function dollarsToCents(dollars: number | null | undefined): number | null {
+  if (dollars == null || Number.isNaN(dollars)) return null;
+  return Math.round(dollars * 100);
+}
+
 export function getColorByHash(id: string): { bg: string; text: string } {
   let hash = 0;
   for (let i = 0; i < id.length; i++) {

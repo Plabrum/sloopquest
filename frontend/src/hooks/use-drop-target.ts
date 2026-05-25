@@ -2,7 +2,7 @@ import { useState } from "react";
 
 export function useDropTarget(
   mimeType: string,
-  onDrop: (payload: string) => void | Promise<void>,
+  onDrop: (payload: string) => void | Promise<unknown>,
 ) {
   const [isOver, setIsOver] = useState(false);
   return {

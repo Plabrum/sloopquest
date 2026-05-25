@@ -4,10 +4,11 @@
  */
 import { createColumnBuilder } from "@/lib/column-builder";
 import type { PricingGuideListItem } from "@/openapi/litestarAPI.schemas";
-
+import { ServiceType } from "@/openapi/litestarAPI.schemas";
 
 export const pricingGuideColumnDefs = createColumnBuilder<PricingGuideListItem>()
   .text("name", { header: "Name", sortable: true })
+  .enum("service_type", { header: "Service Type", sortable: true, filterable: true, options: Object.values(ServiceType) })
   .boolean("is_active", { header: "Is Active", filterable: true })
   .datetime("created_at", { header: "Created", sortable: true, filterable: true, hideOnMobile: true })
   .build();
@@ -15,9 +16,11 @@ export const pricingGuideColumnDefs = createColumnBuilder<PricingGuideListItem>(
 export const PricingGuideSortableColumn = {
   created_at: 'created_at',
   name: 'name',
+  service_type: 'service_type',
 } as const;
 
 export const PricingGuideFilterableColumn = {
   created_at: 'created_at',
   is_active: 'is_active',
+  service_type: 'service_type',
 } as const;

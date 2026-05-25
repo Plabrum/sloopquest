@@ -21,10 +21,14 @@ class ActionGroupType(StrEnum):
     WIDGET_ACTIONS = auto()
     PAYMENT_METHOD_ACTIONS = auto()
     PRICING_GUIDE_ACTIONS = auto()
+    PRICING_TIER_ACTIONS = auto()
+    INVOICE_LINE_ITEM_ACTIONS = auto()
+    ENGINE_ACTIONS = auto()
     CALENDAR_EVENT_ACTIONS = auto()
     SURVEY_MEDIA_ACTIONS = auto()
     SURVEY_FINDING_ACTIONS = auto()
     FORM_NODE_ACTIONS = auto()
+    ONBOARDING_ACTIONS = auto()
 
 
 class ActionResultType(StrEnum):

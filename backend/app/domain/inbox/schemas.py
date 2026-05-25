@@ -80,6 +80,7 @@ class ComposeData(BaseSchema):
 
 
 class ReplyData(BaseSchema):
+    email_thread_id: Sqid
     body_text: str
     body_html: str | None = None
 

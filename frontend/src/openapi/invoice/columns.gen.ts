@@ -11,7 +11,7 @@ export const invoiceColumnDefs = createColumnBuilder<InvoiceListItem>()
   .status("state", { header: "State", filterable: true, options: Object.values(InvoiceState) })
   .datetime("issued_at", { header: "Issued", sortable: true, filterable: true, hideOnMobile: true })
   .datetime("due_at", { header: "Due", sortable: true, filterable: true, hideOnMobile: true })
-  .number("total_cents", { header: "Total Cents", sortable: true })
+  .currency("total_cents", { header: "Total", sortable: true })
   .datetime("created_at", { header: "Created", sortable: true, filterable: true, hideOnMobile: true })
   .build();
 

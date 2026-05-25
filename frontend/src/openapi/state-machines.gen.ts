@@ -12,6 +12,7 @@ export const RESOURCE_STATE_MACHINES: Record<string, StateMachineMeta> = {
   "calendar-events": { column: "state", states: ["tentative", "confirmed", "completed", "cancelled"], actionGroup: "calendar_event_actions" },
   "messages": { column: "state", states: ["received", "queued", "sent", "failed"], actionGroup: "message_actions" },
   "invoices": { column: "state", states: ["draft", "sent", "paid", "overdue", "void", "refunded"], actionGroup: "invoice_actions" },
+  "onboardings": { column: "state", states: ["not_started", "inbox", "pricing", "completed"], actionGroup: undefined },
   "reports": { column: "state", states: ["draft", "ready_for_review", "watermarked_delivered", "released"], actionGroup: "report_actions" },
   "subscriptions": { column: "state", states: ["trialing", "active", "past_due", "paused", "cancelled"], actionGroup: "subscription_actions" },
   "surveys": { column: "state", states: ["scheduled", "in_draft", "delivered", "cancelled"], actionGroup: "survey_actions" },

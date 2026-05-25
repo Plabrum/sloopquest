@@ -2,14 +2,11 @@ from __future__ import annotations
 
 from enum import StrEnum, auto
 
-from litestar.exceptions import NotFoundException
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.vessels.models import Engine, Vessel
 from app.domain.vessels.schemas import (
     AddEngineData,
-    RemoveEngineData,
     UpdateEngineData,
     VesselCreateData,
     VesselUpdateData,
@@ -24,15 +21,24 @@ class VesselActionKey(StrEnum):
     CREATE = auto()
     UPDATE = auto()
     DELETE = auto()
-    ADD_ENGINE = auto()
-    UPDATE_ENGINE = auto()
-    REMOVE_ENGINE = auto()
+
+
+class EngineActionKey(StrEnum):
+    CREATE = auto()
+    UPDATE = auto()
+    REMOVE = auto()
 
 
 vessel_actions = action_group_factory(
     group_type=ActionGroupType.VESSEL_ACTIONS,
     default_invalidation="/vessels",
     model_type=Vessel,
+)
+
+engine_actions = action_group_factory(
+    group_type=ActionGroupType.ENGINE_ACTIONS,
+    default_invalidation="/engines",
+    model_type=Engine,
 )
 
 
@@ -120,19 +126,18 @@ class DeleteVessel(BaseObjectAction[Vessel, EmptyActionData]):
         return ActionExecutionResponse(message="Vessel deleted")
 
 
-@vessel_actions
-class AddEngine(BaseObjectAction[Vessel, AddEngineData]):
-    action_key = VesselActionKey.ADD_ENGINE
+@engine_actions
+class AddEngine(BaseTopLevelAction[AddEngineData]):
+    action_key = EngineActionKey.CREATE
     label = "Add Engine"
     icon = ActionIcon.ADD
-    priority = 30
+    priority = 10
 
     @classmethod
-    async def execute(
-        cls, obj: Vessel, data: AddEngineData, transaction: AsyncSession, deps: ActionDeps
-    ) -> ActionExecutionResponse:
+    async def execute(cls, data: AddEngineData, transaction: AsyncSession, deps: ActionDeps) -> ActionExecutionResponse:
         engine = Engine(
-            vessel_id=obj.id,
+            organization_id=deps.user.organization_id,
+            vessel_id=data.vessel_id,
             position=data.position,
             manufacturer_id=data.manufacturer_id,
             model=data.model,
@@ -148,54 +153,40 @@ class AddEngine(BaseObjectAction[Vessel, AddEngineData]):
         return ActionExecutionResponse(message="Engine added", created_id=engine.id)
 
 
-@vessel_actions
-class UpdateEngine(BaseObjectAction[Vessel, UpdateEngineData]):
-    action_key = VesselActionKey.UPDATE_ENGINE
+@engine_actions
+class UpdateEngine(BaseObjectAction[Engine, UpdateEngineData]):
+    action_key = EngineActionKey.UPDATE
     label = "Edit Engine"
     icon = ActionIcon.EDIT
-    priority = 40
-    is_hidden = True
+    priority = 20
 
     @classmethod
     async def execute(
-        cls, obj: Vessel, data: UpdateEngineData, transaction: AsyncSession, deps: ActionDeps
+        cls, obj: Engine, data: UpdateEngineData, transaction: AsyncSession, deps: ActionDeps
     ) -> ActionExecutionResponse:
-        result = await transaction.execute(
-            select(Engine).where(Engine.id == data.engine_id, Engine.vessel_id == obj.id)
-        )
-        engine = result.scalar_one_or_none()
-        if engine is None:
-            raise NotFoundException()
-        engine.position = data.position
-        engine.manufacturer_id = data.manufacturer_id
-        engine.model = data.model
-        engine.serial_number = data.serial_number
-        engine.year = data.year
-        engine.horsepower = data.horsepower
-        engine.fuel_type = data.fuel_type
-        engine.engine_type = data.engine_type
-        engine.hours_at_survey = data.hours_at_survey
+        obj.position = data.position
+        obj.manufacturer_id = data.manufacturer_id
+        obj.model = data.model
+        obj.serial_number = data.serial_number
+        obj.year = data.year
+        obj.horsepower = data.horsepower
+        obj.fuel_type = data.fuel_type
+        obj.engine_type = data.engine_type
+        obj.hours_at_survey = data.hours_at_survey
         return ActionExecutionResponse(message="Engine updated")
 
 
-@vessel_actions
-class RemoveEngine(BaseObjectAction[Vessel, RemoveEngineData]):
-    action_key = VesselActionKey.REMOVE_ENGINE
+@engine_actions
+class RemoveEngine(BaseObjectAction[Engine, EmptyActionData]):
+    action_key = EngineActionKey.REMOVE
     label = "Remove Engine"
     icon = ActionIcon.TRASH
-    priority = 50
-    is_hidden = True
+    priority = 30
     confirmation_message = "Remove this engine?"
 
     @classmethod
     async def execute(
-        cls, obj: Vessel, data: RemoveEngineData, transaction: AsyncSession, deps: ActionDeps
+        cls, obj: Engine, data: EmptyActionData, transaction: AsyncSession, deps: ActionDeps
     ) -> ActionExecutionResponse:
-        result = await transaction.execute(
-            select(Engine).where(Engine.id == data.engine_id, Engine.vessel_id == obj.id)
-        )
-        engine = result.scalar_one_or_none()
-        if engine is None:
-            raise NotFoundException()
-        await transaction.delete(engine)
+        await transaction.delete(obj)
         return ActionExecutionResponse(message="Engine removed")

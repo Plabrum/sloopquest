@@ -15,6 +15,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.clients.enums import ClientType
 from app.domain.invoices.enums import InvoiceState
+from app.domain.onboarding.enums import OnboardingState
+from app.domain.onboarding.models import Onboarding
 from app.domain.reports.enums import ReportState
 from app.domain.subscriptions.enums import SubscriptionPlan, SubscriptionStatus
 from app.domain.surveys.enums import SurveyState
@@ -47,7 +49,7 @@ from tests.factories.invoices import InvoiceFactory, InvoiceLineItemFactory  # n
 from tests.factories.reports import ReportFactory  # noqa: E402
 from tests.factories.subscriptions import SubscriptionFactory  # noqa: E402
 from tests.factories.surveys import SurveyFactory, SurveyTemplateFactory  # noqa: E402
-from tests.factories.users import OrgFactory, UserFactory  # noqa: E402
+from tests.factories.users import UserFactory  # noqa: E402
 from tests.factories.vessels import EngineFactory, VesselFactory  # noqa: E402
 
 # Survey states spread across the pipeline so the demo shows all stages
@@ -71,7 +73,10 @@ async def seed_demo_org(session: AsyncSession) -> Organization:
     now = datetime.now(tz=UTC)
 
     # ── 1. Organization ──────────────────────────────────────────────────────
-    org = OrgFactory.build(id=DEMO_ORG_ID, name=DEMO_ORG_NAME)
+    # Construct directly: polyfactory's `Use(fake.company)` on OrgFactory overrides
+    # explicit `name=`/`id=` kwargs, so the demo org would end up with a random
+    # name and an auto-assigned id instead of the fixed DEMO_ORG_ID sentinel.
+    org = Organization(id=DEMO_ORG_ID, name=DEMO_ORG_NAME)
     session.add(org)
     await session.flush()
     logger.info("Created demo org: %s (id=%s)", org.name, org.id)
@@ -98,6 +103,16 @@ async def seed_demo_org(session: AsyncSession) -> Organization:
         user = UserFactory.build(organization_id=org.id, email_verified=True, **spec)
         session.add(user)
         users.append(user)
+    await session.flush()
+    for u in users:
+        session.add(
+            Onboarding(
+                user_id=u.id,
+                state=OnboardingState.COMPLETED,
+                started_at=now,
+                completed_at=now,
+            )
+        )
     await session.flush()
     admin = users[0]
     surveyor = admin

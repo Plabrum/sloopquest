@@ -14,7 +14,8 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.users.actions import ClaimInbox, ClaimInboxData
+from app.domain.onboarding.actions import ClaimInbox
+from app.domain.onboarding.schemas import ClaimInboxData
 from app.domain.users.models import User
 from app.domain.users.service import (
     InboxAlreadyClaimedError,
@@ -375,12 +376,12 @@ def _action_deps_for(current_user: User) -> ActionDeps:
 
 def test_claim_inbox_available_when_unclaimed_and_self(user) -> None:
     user.inbox_local_part = None
-    assert ClaimInbox.is_available(user, _action_deps_for(user)) is True
+    assert ClaimInbox.is_available(_action_deps_for(user)) is True
 
 
 def test_claim_inbox_unavailable_when_already_claimed(user) -> None:
     user.inbox_local_part = "phil"
-    assert ClaimInbox.is_available(user, _action_deps_for(user)) is False
+    assert ClaimInbox.is_available(_action_deps_for(user)) is False
 
 
 def test_claim_inbox_unavailable_for_other_user(user, org) -> None:
@@ -388,11 +389,11 @@ def test_claim_inbox_unavailable_for_other_user(user, org) -> None:
     other = User(name="other", email="o@example.test", organization_id=org.id)
     other.id = user.id + 1  # type: ignore[assignment]
     # Caller is `other` trying to claim on `user`'s row — must be blocked.
-    assert ClaimInbox.is_available(user, _action_deps_for(other)) is False
+    assert ClaimInbox.is_available(_action_deps_for(other)) is False
 
 
 async def test_claim_inbox_execute_persists_local_part(db_session: AsyncSession, user) -> None:
-    response = await ClaimInbox.execute(user, ClaimInboxData(local_part="Phil"), db_session, _action_deps_for(user))
+    response = await ClaimInbox.execute(ClaimInboxData(local_part="Phil"), db_session, _action_deps_for(user))
     assert "phil@" in response.message
     refreshed = await db_session.get(User, int(user.id))
     assert refreshed is not None and refreshed.inbox_local_part == "phil"

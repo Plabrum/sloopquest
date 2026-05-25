@@ -8,7 +8,7 @@ import { useSurveyTemplatesIdDetailHandlerSuspense } from "@/openapi/survey-temp
 import { useActionsActionGroupObjectIdListObjectActions } from "@/openapi/actions/actions";
 
 function SurveyTemplateDetailContent() {
-  const { templateId } = useParams({ from: "/_authenticated/survey-templates/$templateId" });
+  const { templateId } = useParams({ from: "/_authenticated/settings/templates/$templateId" });
   const { data } = useSurveyTemplatesIdDetailHandlerSuspense(templateId);
   const { data: actionsData, refetch: refetchActions } =
     useActionsActionGroupObjectIdListObjectActions("survey_template_actions", templateId);

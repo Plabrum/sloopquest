@@ -4,7 +4,6 @@ import logging
 import secrets
 from enum import StrEnum, auto
 
-from litestar.exceptions import NotFoundException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,7 +14,6 @@ from app.domain.invoices.models import Invoice, InvoiceLineItem
 from app.domain.invoices.schemas import (
     AddLineItemData,
     CreateInvoiceData,
-    RemoveLineItemData,
     UpdateInvoiceData,
     UpdateLineItemData,
 )
@@ -41,17 +39,26 @@ class InvoiceActionKey(StrEnum):
     SEND = auto()
     MARK_PAID = auto()
     VOID = auto()
-    ADD_LINE_ITEM = auto()
-    UPDATE_LINE_ITEM = auto()
-    REMOVE_LINE_ITEM = auto()
     REFUND = auto()
     COPY_PAY_LINK = auto()
+
+
+class InvoiceLineItemActionKey(StrEnum):
+    CREATE = auto()
+    UPDATE = auto()
+    REMOVE = auto()
 
 
 invoice_actions = action_group_factory(
     group_type=ActionGroupType.INVOICE_ACTIONS,
     default_invalidation="/invoices",
     model_type=Invoice,
+)
+
+invoice_line_item_actions = action_group_factory(
+    group_type=ActionGroupType.INVOICE_LINE_ITEM_ACTIONS,
+    default_invalidation="/invoice-line-items",
+    model_type=InvoiceLineItem,
 )
 
 
@@ -287,23 +294,30 @@ class Refund(BaseObjectAction[Invoice, EmptyActionData]):
         return ActionExecutionResponse(message="Invoice refunded")
 
 
-@invoice_actions
-class AddLineItem(BaseObjectAction[Invoice, AddLineItemData]):
-    action_key = InvoiceActionKey.ADD_LINE_ITEM
+async def _recalculate_invoice_totals_by_id(invoice_id: int, transaction: AsyncSession) -> None:
+    invoice = await transaction.get(Invoice, invoice_id)
+    if invoice is None:
+        return
+    await _recalculate_totals(invoice, transaction)
+
+
+@invoice_line_item_actions
+class AddLineItem(BaseTopLevelAction[AddLineItemData]):
+    action_key = InvoiceLineItemActionKey.CREATE
     label = "Add Line Item"
     icon = ActionIcon.ADD
-    priority = 40
-
-    @classmethod
-    def is_available(cls, obj: Invoice, deps: ActionDeps) -> bool:
-        return obj.state == InvoiceState.draft
+    priority = 10
 
     @classmethod
     async def execute(
-        cls, obj: Invoice, data: AddLineItemData, transaction: AsyncSession, deps: ActionDeps
+        cls, data: AddLineItemData, transaction: AsyncSession, deps: ActionDeps
     ) -> ActionExecutionResponse:
+        invoice = await transaction.get(Invoice, data.invoice_id)
+        if invoice is None or invoice.state != InvoiceState.draft:
+            return ActionExecutionResponse(message="Cannot add line item")
         item = InvoiceLineItem(
-            invoice_id=obj.id,
+            organization_id=deps.user.organization_id,
+            invoice_id=data.invoice_id,
             description=data.description,
             quantity=data.quantity,
             unit_price_cents=data.unit_price_cents,
@@ -311,69 +325,44 @@ class AddLineItem(BaseObjectAction[Invoice, AddLineItemData]):
         )
         transaction.add(item)
         await transaction.flush()
-        await _recalculate_totals(obj, transaction)
+        await _recalculate_totals(invoice, transaction)
         return ActionExecutionResponse(message="Line item added", created_id=item.id)
 
 
-@invoice_actions
-class UpdateLineItem(BaseObjectAction[Invoice, UpdateLineItemData]):
-    action_key = InvoiceActionKey.UPDATE_LINE_ITEM
+@invoice_line_item_actions
+class UpdateLineItem(BaseObjectAction[InvoiceLineItem, UpdateLineItemData]):
+    action_key = InvoiceLineItemActionKey.UPDATE
     label = "Edit Line Item"
     icon = ActionIcon.EDIT
-    priority = 41
-    is_hidden = True
-
-    @classmethod
-    def is_available(cls, obj: Invoice, deps: ActionDeps) -> bool:
-        return obj.state == InvoiceState.draft
+    priority = 20
 
     @classmethod
     async def execute(
-        cls, obj: Invoice, data: UpdateLineItemData, transaction: AsyncSession, deps: ActionDeps
+        cls, obj: InvoiceLineItem, data: UpdateLineItemData, transaction: AsyncSession, deps: ActionDeps
     ) -> ActionExecutionResponse:
-        result = await transaction.execute(
-            select(InvoiceLineItem).where(
-                InvoiceLineItem.id == data.line_item_id,
-                InvoiceLineItem.invoice_id == obj.id,
-            )
-        )
-        item = result.scalar_one_or_none()
-        if item is None:
-            raise NotFoundException()
-        item.description = data.description
-        item.quantity = data.quantity
-        item.unit_price_cents = data.unit_price_cents
-        item.sort_order = data.sort_order
-        await _recalculate_totals(obj, transaction)
+        obj.description = data.description
+        obj.quantity = data.quantity
+        obj.unit_price_cents = data.unit_price_cents
+        obj.sort_order = data.sort_order
+        await transaction.flush()
+        await _recalculate_invoice_totals_by_id(obj.invoice_id, transaction)
         return ActionExecutionResponse(message="Line item updated")
 
 
-@invoice_actions
-class RemoveLineItem(BaseObjectAction[Invoice, RemoveLineItemData]):
-    action_key = InvoiceActionKey.REMOVE_LINE_ITEM
+@invoice_line_item_actions
+class RemoveLineItem(BaseObjectAction[InvoiceLineItem, EmptyActionData]):
+    action_key = InvoiceLineItemActionKey.REMOVE
     label = "Remove Line Item"
     icon = ActionIcon.TRASH
-    priority = 42
-    is_hidden = True
+    priority = 30
     confirmation_message = "Remove this line item?"
 
     @classmethod
-    def is_available(cls, obj: Invoice, deps: ActionDeps) -> bool:
-        return obj.state == InvoiceState.draft
-
-    @classmethod
     async def execute(
-        cls, obj: Invoice, data: RemoveLineItemData, transaction: AsyncSession, deps: ActionDeps
+        cls, obj: InvoiceLineItem, data: EmptyActionData, transaction: AsyncSession, deps: ActionDeps
     ) -> ActionExecutionResponse:
-        result = await transaction.execute(
-            select(InvoiceLineItem).where(
-                InvoiceLineItem.id == data.line_item_id,
-                InvoiceLineItem.invoice_id == obj.id,
-            )
-        )
-        item = result.scalar_one_or_none()
-        if item is None:
-            raise NotFoundException()
-        await transaction.delete(item)
-        await _recalculate_totals(obj, transaction)
+        invoice_id = obj.invoice_id
+        await transaction.delete(obj)
+        await transaction.flush()
+        await _recalculate_invoice_totals_by_id(invoice_id, transaction)
         return ActionExecutionResponse(message="Line item removed")

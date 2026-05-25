@@ -1,10 +1,8 @@
-import { Suspense, useEffect } from "react";
-import { useRouterState } from "@tanstack/react-router";
+import { Suspense } from "react";
 
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useBreadcrumbTrail } from "@/stores/breadcrumb-trail";
 import type { InboxMode } from "@/router/authenticated.routes";
 
 interface InboxTopBarProps {
@@ -24,13 +22,6 @@ export function InboxTopBar({
   fallback,
   children,
 }: InboxTopBarProps) {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const push = useBreadcrumbTrail((s) => s.push);
-
-  useEffect(() => {
-    push({ url: pathname, label: "Inbox" });
-  }, [pathname, push]);
-
   return (
     <>
       <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-4 border-b border-sidebar-border bg-sidebar px-6">

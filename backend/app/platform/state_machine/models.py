@@ -20,7 +20,7 @@ def get_state_machine_meta(model: type[BaseDBModel]) -> dict[str, Any] | None:
         return None
     return {
         "column": "state",
-        "states": [v.value for v in state_col.type.enum_class],
+        "states": [v.value for v in state_col.type.enum_class],  # type: ignore[attr-defined]
     }
 
 

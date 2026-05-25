@@ -94,7 +94,7 @@ export function FieldCard({
   node: SurveyFormNodeRef;
   fieldIndex: number;
   fieldTotal: number;
-  onSave: (value: unknown) => Promise<void> | void;
+  onSave: (value: unknown) => Promise<unknown> | void;
   photoActionRow?: ReactNode;
 }) {
   const def = fieldDef(node);

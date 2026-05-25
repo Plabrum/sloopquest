@@ -1,30 +1,13 @@
 from __future__ import annotations
 
 from litestar import Router
-from sqlalchemy.orm import selectinload
 
 from app.domain.users.models import User
 from app.domain.vessels.models import Engine, Vessel
-from app.domain.vessels.schemas import EngineSchema, VesselDetail, VesselListItem
+from app.domain.vessels.schemas import EngineDetail, EngineListItem, VesselDetail, VesselListItem
 from app.platform.base.crud import CRUDConfig, make_crud_controller
 from app.platform.data.enums import FieldType
 from app.platform.data.service import FieldConfig
-
-
-def _to_engine(engine: Engine) -> EngineSchema:
-    return EngineSchema(
-        id=engine.id,
-        position=engine.position,
-        manufacturer_id=engine.manufacturer_id,
-        model=engine.model,
-        serial_number=engine.serial_number,
-        year=engine.year,
-        horsepower=engine.horsepower,
-        fuel_type=engine.fuel_type,
-        engine_type=engine.engine_type,
-        hours_at_survey=engine.hours_at_survey,
-        created_at=engine.created_at,
-    )
 
 
 def _to_list_item(vessel: Vessel, user: User) -> VesselListItem:
@@ -59,9 +42,42 @@ def _to_detail(vessel: Vessel, user: User) -> VesselDetail:
         fuel_capacity_gal=vessel.fuel_capacity_gal,
         hull_material=vessel.hull_material,
         construction_notes=vessel.construction_notes,
-        engines=[_to_engine(e) for e in vessel.engines],
         created_at=vessel.created_at,
         updated_at=vessel.updated_at,
+    )
+
+
+def _to_engine_list_item(engine: Engine, user: User) -> EngineListItem:
+    return EngineListItem(
+        id=engine.id,
+        vessel_id=engine.vessel_id,
+        position=engine.position,
+        manufacturer_id=engine.manufacturer_id,
+        model=engine.model,
+        serial_number=engine.serial_number,
+        year=engine.year,
+        horsepower=engine.horsepower,
+        fuel_type=engine.fuel_type,
+        engine_type=engine.engine_type,
+        hours_at_survey=engine.hours_at_survey,
+        created_at=engine.created_at,
+    )
+
+
+def _to_engine_detail(engine: Engine, user: User) -> EngineDetail:
+    return EngineDetail(
+        id=engine.id,
+        vessel_id=engine.vessel_id,
+        position=engine.position,
+        manufacturer_id=engine.manufacturer_id,
+        model=engine.model,
+        serial_number=engine.serial_number,
+        year=engine.year,
+        horsepower=engine.horsepower,
+        fuel_type=engine.fuel_type,
+        engine_type=engine.engine_type,
+        hours_at_survey=engine.hours_at_survey,
+        created_at=engine.created_at,
     )
 
 
@@ -69,7 +85,6 @@ _config = CRUDConfig(
     model=Vessel,
     to_list_item=_to_list_item,
     to_detail=_to_detail,
-    detail_load_options=[selectinload(Vessel.engines)],
     filterable_columns={"name", "vessel_type", "propulsion_type", "hull_material", "year_built", "created_at"},
     sortable_columns={"name", "year_built", "created_at"},
     label_field="name",
@@ -85,6 +100,19 @@ _config = CRUDConfig(
     ],
 )
 
-_controller = make_crud_controller("", _config)
+_engine_config = CRUDConfig(
+    model=Engine,
+    to_list_item=_to_engine_list_item,
+    to_detail=_to_engine_detail,
+    filterable_columns={"vessel_id"},
+    sortable_columns={"created_at"},
+    default_sort="created_at",
+)
 
-vessel_router = Router(path="/vessels", route_handlers=[_controller], tags=["vessels"])
+
+vessel_router = Router(path="/vessels", route_handlers=[make_crud_controller("", _config)], tags=["vessels"])
+engines_router = Router(
+    path="/engines",
+    route_handlers=[make_crud_controller("", _engine_config)],
+    tags=["engines"],
+)
