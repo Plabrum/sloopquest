@@ -34,7 +34,7 @@ class MeResponse:
     role: str
 
 
-@post("/magic-link/request", tags=["auth"], middleware=[_rate_limit.middleware])
+@post("/magic-link/request", tags=["auth"], middleware=[_rate_limit.middleware], exclude_from_auth=True)
 async def request_magic_link(
     data: MagicLinkRequestBody,
     request: Request,
@@ -64,7 +64,7 @@ async def request_magic_link(
     return {"message": "If that email exists, a magic link has been sent."}
 
 
-@get("/magic-link/verify", tags=["auth"])
+@get("/magic-link/verify", tags=["auth"], exclude_from_auth=True)
 async def verify_magic_link(
     token: str,
     request: Request,
@@ -83,7 +83,7 @@ async def verify_magic_link(
     raise PermissionDeniedException("Invalid or expired magic link.")
 
 
-@post("/logout", tags=["auth"])
+@post("/logout", tags=["auth"], exclude_from_auth=True)
 async def logout(request: Request) -> dict[str, str]:
     """Clear the current session."""
     request.clear_session()

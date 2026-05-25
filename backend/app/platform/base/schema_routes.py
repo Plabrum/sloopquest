@@ -7,7 +7,7 @@ from app.platform.base.crud import CRUDRegistry, _crud_metadata
 from app.platform.state_machine.models import get_state_machine_meta
 
 
-@get("/crud-metadata", tags=["schema"])
+@get("/crud-metadata", tags=["schema"], exclude_from_auth=True)
 async def crud_metadata() -> dict:
     """Column metadata for frontend codegen.
 
@@ -31,7 +31,7 @@ async def crud_metadata() -> dict:
     return out
 
 
-@get("/action-metadata", tags=["schema"])
+@get("/action-metadata", tags=["schema"], exclude_from_auth=True)
 async def action_metadata() -> dict:
     """Action form metadata for frontend codegen (field types, labels, ordering per action)."""
     return _action_metadata

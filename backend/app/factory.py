@@ -5,7 +5,7 @@ from advanced_alchemy.extensions.litestar import (
     SQLAlchemyAsyncConfig,
     SQLAlchemyPlugin,
 )
-from litestar import Litestar
+from litestar import Litestar, get
 from litestar.channels import ChannelsPlugin
 from litestar.channels.backends.memory import MemoryChannelsBackend
 from litestar.config.cors import CORSConfig
@@ -71,6 +71,11 @@ install_soft_delete_filter()
 install_survey_media_node_detach_listener()
 
 __all__ = ["BaseDBModel", "create_app"]
+
+
+@get("/health", sync_to_thread=False, exclude_from_auth=True)
+def health() -> dict[str, str]:
+    return {"status": "ok"}
 
 
 def create_app(
@@ -146,15 +151,7 @@ def create_app(
             httponly=True,
             max_age=ONE_DAY_IN_SECONDS * 14,
         ),
-        exclude=[
-            "^/health",
-            "^/auth/magic-link/",
-            "^/auth/logout",
-            "^/schema",
-            "^/webhooks/",
-            "^/local-upload/",
-            "^/local-download/",
-        ],
+        exclude=["^/schema"],
     )
 
     default_plugins: list[Any] = [sqlalchemy_plugin, saq_plugin, channels_plugin, SqidSchemaPlugin()]
@@ -168,6 +165,7 @@ def create_app(
 
     return Litestar(
         route_handlers=[
+            health,
             schema_router,
             auth_router,
             demo_router,

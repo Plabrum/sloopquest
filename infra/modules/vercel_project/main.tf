@@ -11,7 +11,7 @@ resource "vercel_project" "main" {
   name           = var.name
   framework      = var.framework
   root_directory = var.root_directory
-  ignore_command = "git diff HEAD^ HEAD --quiet"
+  ignore_command = "git diff --quiet HEAD^ HEAD ./"
 
   git_repository = {
     type              = "github"

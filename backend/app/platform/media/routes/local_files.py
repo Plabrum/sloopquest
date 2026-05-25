@@ -8,7 +8,7 @@ from app.platform.auth.guards import requires_local
 from app.platform.clients.s3 import BaseS3Client
 
 
-@put("/local-upload/{bucket:str}/{key:path}", guards=[requires_local])
+@put("/local-upload/{bucket:str}/{key:path}", guards=[requires_local], exclude_from_auth=True)
 async def local_upload(
     bucket: str,
     key: str,
@@ -21,7 +21,7 @@ async def local_upload(
     return Response(content={"status": "uploaded"}, status_code=201)
 
 
-@get("/local-download/{bucket:str}/{key:path}", guards=[requires_local])
+@get("/local-download/{bucket:str}/{key:path}", guards=[requires_local], exclude_from_auth=True)
 async def local_download(bucket: str, key: str, s3_client: BaseS3Client) -> Response:
     """Serve a file from LocalS3Client storage."""
     key = key.lstrip("/")

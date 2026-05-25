@@ -13,3 +13,6 @@ infra/lambda/*.zip
 .vscode/settings.json
 .playwright-mcp
 backend/uploads/sloopquest-media/media
+
+# Ad-hoc screenshots in repo root
+/*.png
