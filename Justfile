@@ -181,3 +181,9 @@ codegen-landing:
 # Build backend Docker image
 docker-build:
     cd backend && docker build -t sloopquest-api:local .
+
+# ─── Prod ─────────────────────────────────────────────────────────────────────
+
+# Open an SSM shell on the prod EC2 host (pass `-- cmd` to run non-interactively)
+prod-ssh *ARGS:
+    ./scripts/prod-ssh.sh {{ARGS}}

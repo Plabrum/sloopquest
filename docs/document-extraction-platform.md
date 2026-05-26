@@ -146,7 +146,7 @@ Survey-specific code (`SurveyImportPayload`, the three passes, the consumer func
    - **MetadataPass** → date, surveyor, location, scope, overall condition.
    - **TemplatePass** → inferred sections + fields + per-field values, all in one schema.
 6. Reducer assembles `SurveyImportPayload`.
-7. `consume_survey_import` runs: `get_or_create_manufacturer` → `get_or_create_vessel` → `create_survey_template` (always-create for v1; `# TODO(embedding-platform): match-or-create via embeddings`) → `create_survey` (materializes nodes via existing path) → bulk-fill node responses → `StateMachineService.transition(survey, COMPLETED)`.
+7. `consume_survey_import` runs: `get_or_create_manufacturer` → `get_or_create_vessel` → match-or-create template via `platform.embeddings.query.nearest(transaction, SurveyTemplate, inferred_name, min_similarity=…)` (reuse top hit above threshold, else create and let the `EmbeddableMixin` event hook backfill the vector) → `create_survey` (materializes nodes via existing path) → bulk-fill node responses → `StateMachineService.transition(survey, COMPLETED)`.
 8. Platform emits `survey_imported` email with link to the new survey.
 9. Job transitions to `completed`.
 
@@ -154,7 +154,7 @@ If any pass fails, job → `failed`, structured error captured, `extraction_fail
 
 ## Tradeoffs and known soft spots
 
-- **Always-create template.** v1 will produce one new template per import even for near-identical surveys. Acceptable until the embedding platform exists; tracked as `TODO(embedding-platform)` at the create site so the lookup is a single-file change later.
+- **Template match-or-create via embeddings.** The embedding platform (`platform/embeddings/`) is live and `SurveyTemplate` already uses `EmbeddableMixin` (embeds `name`, 1536-dim). The consumer should call `nearest(...)` on the inferred template name and reuse the top hit above a similarity threshold; otherwise create. Threshold needs tuning during dogfooding — start strict (~0.92) to avoid cross-vessel-type collisions and relax based on observed misses.
 - **No image extraction in v1.** Stub `extract_images_from_pdf(pdf_bytes) -> list[ExtractedImage]` lives in `domain/surveys/import.py` with a docstring detailing the eventual v2: PyMuPDF (`fitz`) for raster + bbox + page, upload via existing media platform, second vision call to attribute images to nodes. Not called by v1 consumer.
 - **Schema authoring is code-only.** Non-engineers can't add a document type. Acceptable until we have ≥3 in-code extractors and a real ask.
 - **Routing is a flat first-match list.** Fine for tens of extractors; if we hit hundreds (we won't), revisit.
