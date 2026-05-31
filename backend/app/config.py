@@ -86,6 +86,13 @@ class Config:
     EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
     USE_REAL_EMBEDDINGS: bool = os.getenv("USE_REAL_EMBEDDINGS", "").lower() in {"1", "true", "yes"}
 
+    # ─── Document extraction ──────────────────────────────────────────────────
+    SURVEY_IMPORT_ENABLED: bool = os.getenv("SURVEY_IMPORT_ENABLED", "").lower() in {"1", "true", "yes"}
+    SURVEY_IMPORT_INBOX_LOCAL_PART: str = os.getenv("SURVEY_IMPORT_INBOX_LOCAL_PART", "surveys")
+    TEMPLATE_EMBEDDING_K: int = int(os.getenv("TEMPLATE_EMBEDDING_K", "5"))
+    TEMPLATE_MAX_UNUSED_RATIO: float = float(os.getenv("TEMPLATE_MAX_UNUSED_RATIO", "0.5"))
+    TEMPLATE_FUZZY_DISTANCE: int = int(os.getenv("TEMPLATE_FUZZY_DISTANCE", "2"))
+
     @property
     def IS_DEV(self) -> bool:
         return self.ENV == "development"

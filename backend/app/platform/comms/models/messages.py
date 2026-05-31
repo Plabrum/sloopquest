@@ -67,3 +67,21 @@ class Message(UserScopedMixin, BaseDBModel):
         sa.Index("ix_email_messages_user_archived", "user_id", "archived_at"),
         sa.Index("ix_email_messages_user_thread", "user_id", "email_thread_id"),
     )
+
+    @property
+    def pdf_attachments(self) -> list[dict]:
+        """Inbound PDF attachment metadata entries from `attachments_json`.
+
+        Each entry is the dict written by the inbound-email processor and
+        carries at least `filename`, `content_type`, `size`, and `s3_key`.
+        """
+        raw = self.attachments_json or {}
+        items = raw.get("attachments") if isinstance(raw, dict) else None
+        if not items:
+            return []
+        return [
+            item
+            for item in items
+            if (item.get("content_type") or "").lower() == "application/pdf"
+            or (item.get("filename") or "").lower().endswith(".pdf")
+        ]

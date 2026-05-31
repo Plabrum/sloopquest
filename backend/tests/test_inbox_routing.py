@@ -268,8 +268,10 @@ async def test_process_inbound_routes_reserved_surveys(
     )
 
     assert result["routed"] == "reserved_surveys"
-    queue.enqueue.assert_awaited_once()
-    assert queue.enqueue.await_args.args[0] == str(TaskName.HANDLE_SURVEYS_EMAIL)
+    # surveys@ enqueues both the legacy stub and the new import fan-out task.
+    enqueued = [call.args[0] for call in queue.enqueue.await_args_list]
+    assert str(TaskName.HANDLE_SURVEYS_EMAIL) in enqueued
+    assert str(TaskName.IMPORT_SURVEYS_FROM_EMAIL) in enqueued
 
 
 async def test_process_inbound_routes_to_user_inbox(db_session: AsyncSession, user) -> None:

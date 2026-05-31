@@ -199,6 +199,9 @@ async def process_inbound_email_task(
         # The bounce task creates its own outbound row when needed.
         if routed == "reserved_surveys":
             await queue.enqueue(str(TaskName.HANDLE_SURVEYS_EMAIL), bucket=bucket, s3_key=s3_key)
+            # Run the document-extraction import flow alongside the legacy stub.
+            # The new task is gated internally by SURVEY_IMPORT_ENABLED.
+            await queue.enqueue(str(TaskName.IMPORT_SURVEYS_FROM_EMAIL), bucket=bucket, s3_key=s3_key)
         elif routed == "reserved_support":
             await queue.enqueue(str(TaskName.HANDLE_SUPPORT_EMAIL), bucket=bucket, s3_key=s3_key)
         elif routed == "bounced":

@@ -12,6 +12,8 @@ class TaskName(StrEnum):
     GENERATE_THUMBNAIL = auto()
     EMBED_ROW = auto()
     SWEEP_EMBEDDINGS = auto()
+    IMPORT_SURVEY_FROM_PDF = auto()
+    IMPORT_SURVEYS_FROM_EMAIL = auto()
 
 
 class TaskRoleType(StrEnum):

@@ -10,6 +10,7 @@ from app.domain.reports.builder import build_report_blocks
 from app.domain.reports.models import Report
 from app.domain.surveys.enums import SurveyState
 from app.domain.surveys.models import Survey, SurveyMedia, SurveyTemplate
+from app.domain.surveys.operations import create_survey_template
 from app.domain.surveys.schemas import (
     AddFindingData,
     AssignSurveyMediaData,
@@ -228,14 +229,12 @@ class CreateSurveyTemplate(BaseTopLevelAction[CreateSurveyTemplateData]):
     async def execute(
         cls, data: CreateSurveyTemplateData, transaction: AsyncSession, deps: ActionDeps
     ) -> ActionExecutionResponse:
-        template = SurveyTemplate(
-            organization_id=deps.user.organization_id,
+        template = await create_survey_template(
+            transaction,
             name=data.name,
             tags=data.tags,
-            definition=msgspec.to_builtins(data.definition),
+            definition=data.definition,
         )
-        transaction.add(template)
-        await transaction.flush()
         return ActionExecutionResponse(message="Template created", created_id=template.id)
 
 

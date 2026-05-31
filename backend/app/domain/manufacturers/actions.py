@@ -5,6 +5,7 @@ from enum import StrEnum, auto
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.manufacturers.models import Manufacturer
+from app.domain.manufacturers.operations import create_manufacturer
 from app.domain.manufacturers.schemas import ManufacturerCreateData, ManufacturerUpdateData
 from app.platform.actions.base import BaseObjectAction, BaseTopLevelAction, EmptyActionData, action_group_factory
 from app.platform.actions.deps import ActionDeps
@@ -36,14 +37,12 @@ class CreateManufacturer(BaseTopLevelAction[ManufacturerCreateData]):
     async def execute(
         cls, data: ManufacturerCreateData, transaction: AsyncSession, deps: ActionDeps
     ) -> ActionExecutionResponse:
-        manufacturer = Manufacturer(
-            organization_id=deps.user.organization_id,
+        manufacturer = await create_manufacturer(
+            transaction,
             name=data.name,
             country=data.country,
             website=data.website,
         )
-        transaction.add(manufacturer)
-        await transaction.flush()
         return ActionExecutionResponse(message="Manufacturer created", created_id=manufacturer.id)
 
 

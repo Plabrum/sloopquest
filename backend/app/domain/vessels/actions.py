@@ -5,6 +5,7 @@ from enum import StrEnum, auto
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.vessels.models import Engine, Vessel
+from app.domain.vessels.operations import create_vessel
 from app.domain.vessels.schemas import (
     AddEngineData,
     UpdateEngineData,
@@ -53,8 +54,8 @@ class CreateVessel(BaseTopLevelAction[VesselCreateData]):
     async def execute(
         cls, data: VesselCreateData, transaction: AsyncSession, deps: ActionDeps
     ) -> ActionExecutionResponse:
-        vessel = Vessel(
-            organization_id=deps.user.organization_id,
+        vessel = await create_vessel(
+            transaction,
             name=data.name,
             hin=data.hin,
             uscg_official_number=data.uscg_official_number,
@@ -73,8 +74,6 @@ class CreateVessel(BaseTopLevelAction[VesselCreateData]):
             hull_material=data.hull_material,
             construction_notes=data.construction_notes,
         )
-        transaction.add(vessel)
-        await transaction.flush()
         return ActionExecutionResponse(message="Vessel created", created_id=vessel.id)
 
 

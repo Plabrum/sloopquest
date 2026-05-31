@@ -6,7 +6,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.domain.surveys.enums import SurveyState
+from app.domain.surveys.enums import SurveySource, SurveyState
 from app.domain.vessels.models import Vessel
 from app.platform.base.models import BaseDBModel
 from app.platform.base.rls_mixins import OrgScopedMixin
@@ -18,6 +18,7 @@ from app.platform.sequences.enums import SequenceType
 from app.platform.sequences.mixins import SequenceMixin
 from app.platform.state_machine.models import StateMachineMixin
 from app.utils.sqids import Sqid, SqidType
+from app.utils.textenum import TextEnum
 
 
 class SurveyTemplate(OrgScopedMixin, SearchMixin, EmbeddableMixin, BaseDBModel):
@@ -38,6 +39,14 @@ class SurveyTemplate(OrgScopedMixin, SearchMixin, EmbeddableMixin, BaseDBModel):
     name: Mapped[str] = mapped_column(sa.Text)
     tags: Mapped[list[Any]] = mapped_column(JSONB)
     definition: Mapped[dict[str, Any]] = mapped_column(JSONB)
+
+    def embedding_content(self) -> str:
+        section_titles: list[str] = []
+        for section in (self.definition or {}).get("sections") or []:
+            title = section.get("title") if isinstance(section, dict) else None
+            if title:
+                section_titles.append(str(title))
+        return "\n".join([self.name, *section_titles])
 
 
 class Survey(
@@ -72,6 +81,18 @@ class Survey(
         SqidType, sa.ForeignKey("survey_templates.id", ondelete="SET NULL"), index=True
     )
     template_version: Mapped[int | None] = mapped_column(sa.Integer, nullable=True)
+    source: Mapped[SurveySource] = mapped_column(
+        TextEnum(SurveySource),
+        nullable=False,
+        server_default=SurveySource.MANUAL.name,
+    )
+    source_message_id: Mapped[Sqid | None] = mapped_column(
+        SqidType,
+        sa.ForeignKey("email_messages.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    source_attachment_index: Mapped[int | None] = mapped_column(sa.Integer, nullable=True)
 
     vessel: Mapped[Vessel] = relationship("Vessel", foreign_keys=[vessel_id], lazy="raise")
     assigned_surveyor: Mapped[Any] = relationship("User", foreign_keys=[assigned_surveyor_id], lazy="raise")
